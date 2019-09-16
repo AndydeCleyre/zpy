@@ -1,5 +1,5 @@
 ================================================
-zpy: ZSH helpers for Python venvs with pip-tools
+zpy: Zsh helpers for Python venvs with pip-tools
 ================================================
 
 These functions aim to help with your workflows, without being restrictive.
@@ -12,7 +12,7 @@ Installation
 
 - Put ``python.zshrc`` somewhere, like ``~/.python.zshrc``, or just clone this small repo.
 - Source it in your main ``~/.zshrc``, like ``. /path/to/python.zshrc``.
-- If you'd like some handy venv-python script launchers accessible outside your ZSH environment, put the ``vpy`` and ``vpyfrom`` scripts somewhere in your ``PATH`` (e.g. ``~/bin``, ``~/.local/bin``, ``/usr/local/bin``).
+- If you'd like some handy venv-python script launchers accessible outside your Zsh environment, put the ``vpy`` and ``vpyfrom`` scripts somewhere in your ``PATH`` (e.g. ``~/bin``, ``~/.local/bin``, ``/usr/local/bin``).
 
 
 Guiding Ideas
