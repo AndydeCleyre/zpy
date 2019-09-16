@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+venvs_path () {
+    ([[ $(command -v md5sum) ]] && echo "$HOME/.local/share/venvs/$(printf "${${1:-$(pwd)}:P}" | md5sum | cut -d ' ' -f 1)") ||
+                                   echo "$HOME/.local/share/venvs/$(md5 -qs "${${1:-$(pwd)}:P}")"
+}
+exec $(venvs_path ${1:P:h})/venv/bin/python $@
