@@ -96,7 +96,7 @@ pipu () {  # [req...]
     for reqsin in *requirements.in; do
         print -P "%F{cyan}> upgrading ${reqsin:r}.txt from $reqsin . . .%f"
         if [[ "$#" -gt 0 ]]; then
-            pip-compile --no-header "-P ${^@}" $reqsin 2>&1 | hpype
+            pip-compile --no-header "-P "${^@} $reqsin 2>&1 | hpype
         else
             pip-compile --no-header -U $reqsin 2>&1 | hpype
         fi
@@ -107,7 +107,7 @@ pipuh () {  # [req...]
     for reqsin in *requirements.in; do
         print -P "%F{cyan}> upgrading ${reqsin:r}.txt from $reqsin . . .%f"
         if [[ "$#" -gt 0 ]]; then
-            pip-compile --no-header --generate-hashes "-P ${^@}" $reqsin 2>&1 | hpype
+            pip-compile --no-header --generate-hashes "-P "${^@} $reqsin 2>&1 | hpype
         else
             pip-compile --no-header -U --generate-hashes $reqsin 2>&1 | hpype
         fi
