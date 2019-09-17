@@ -36,7 +36,7 @@ pipch () {  # [reqs-in...]
 # install packages according to all found or specified requirements.txt files (sync)
 pips () {  # [reqs-txt...]
     if [[ $(echo ${@:-*requirements.txt(N)}) ]]; then
-        print -P "%F{cyan}> syncing env to" ${@:-*requirements.txt(N)} ". . .%f"
+        print -P "%F{cyan}> syncing env ->" ${@:-*requirements.txt(N)} ". . .%f"
         pip-sync ${@:-*requirements.txt(N)}
         for reqstxt in ${@:-*requirements.txt}; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 gets implemented
             pip install -qr $reqstxt                #
@@ -59,7 +59,7 @@ pipchs () {  # [reqs-in...]
 _pipa () {  # <category> <req> [req...]
     local reqsin="requirements.in"
     [[ $1 ]] && reqsin="$1-requirements.in"
-    print -P "%F{cyan}> appending to $reqsin . . .%f"
+    print -P "%F{cyan}> appending -> $reqsin . . .%f"
     printf "%s\n" "${@:2}" >> "$reqsin"
     hpype < "$reqsin"
 }
@@ -95,7 +95,7 @@ pipachs () {  # <req> [req...]
 pipu () {  # [req...]
     local reqs=($@)
     for reqsin in *requirements.in; do
-        print -P "%F{cyan}> upgrading ${reqsin:r}.txt from $reqsin . . .%f"
+        print -P "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
         if [[ "$#" -gt 0 ]]; then
             pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
         else
@@ -107,7 +107,7 @@ pipu () {  # [req...]
 pipuh () {  # [req...]
     local reqs=($@)
     for reqsin in *requirements.in; do
-        print -P "%F{cyan}> upgrading ${reqsin:r}.txt from $reqsin . . .%f"
+        print -P "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
         if [[ "$#" -gt 0 ]]; then
             pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
         else
@@ -130,7 +130,7 @@ pipuhs () {  # [req...]
 _envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
     local vpath="$(venvs_path)"
     local venv="$vpath/$1"
-    print -P "%F{cyan}> entering venv at $venv . . .%f"
+    print -P "%F{cyan}> entering venv @ $venv . . .%f"
     [[ -d $venv ]] || eval $2 $venv
     ln -sfn "$(pwd)" "$vpath/project"
     . $venv/bin/activate
