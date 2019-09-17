@@ -1,5 +1,5 @@
 ================================================
-zpy: ZSH helpers for Python venvs with pip-tools
+zpy: Zsh helpers for Python venvs with pip-tools
 ================================================
 
 These functions aim to help with your workflows, without being restrictive.
@@ -12,7 +12,7 @@ Installation
 
 - Put ``python.zshrc`` somewhere, like ``~/.python.zshrc``, or just clone this small repo.
 - Source it in your main ``~/.zshrc``, like ``. /path/to/python.zshrc``.
-- If you'd like some handy venv-python script launchers accessible outside your ZSH environment, put the ``vpy`` and ``vpyfrom`` scripts somewhere in your ``PATH`` (e.g. ``~/bin``, ``~/.local/bin``, ``/usr/local/bin``).
+- If you'd like some handy venv-python script launchers accessible outside your Zsh environment, put the ``vpy`` and ``vpyfrom`` scripts somewhere in your ``PATH`` (e.g. ``~/bin``, ``~/.local/bin``, ``/usr/local/bin``).
 
 
 Guiding Ideas
@@ -104,13 +104,13 @@ Functions & Aliases
   vpy2  # <script> [script-arg...]
   vpypy  # <script> [script-arg...]
   
-  # prepend a script with a shebang for its folder's associated venv python
+  # prepend each script with a shebang for its folder's associated venv python
   # if vpy exists in the PATH, #!/path/to/vpy will be used instead
   # also ensure the script is executable
-  _vpyshebang  # <venv-name> <script>
-  vpyshebang  # <script>
-  vpy2shebang  # <script>
-  vpypyshebang  # <script>
+  _vpyshebang  # <venv-name> <script> [script...]
+  vpyshebang  # <script> [script...]
+  vpy2shebang  # <script> [script...]
+  vpypyshebang  # <script> [script...]
   
   # run script from a given project folder's associated venv's bin folder
   _vpyfrom  # <venv-name> <proj-dir> <script-name> [script-arg...]
