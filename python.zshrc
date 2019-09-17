@@ -160,19 +160,21 @@ alias vpy="_vpy venv"  # <script> [script-arg...]
 alias vpy2="_vpy venv2"  # <script> [script-arg...]
 alias vpypy="_vpy venvPyPy"  # <script> [script-arg...]
 
-# prepend a script with a shebang for its folder's associated venv python
+# prepend each script with a shebang for its folder's associated venv python
 # if vpy exists in the PATH, #!/path/to/vpy will be used instead
 # also ensure the script is executable
-_vpyshebang () {  # <venv-name> <script>
-    chmod +x $2
+_vpyshebang () {  # <venv-name> <script> [script...]
     local vpybin
-    vpybin=$(whence -p vpy) || vpybin="$(_whichpy $1 $2)"
-    sed -i'' "1i\
-#!${vpybin}" $2
+    for script in ${@:2}; do
+        chmod +x $script
+        vpybin=$(whence -p vpy) || vpybin="$(_whichpy $1 $script)"
+        sed -i'' "1i\
+#!${vpybin}" $script
+    done
 }
-alias vpyshebang="_vpyshebang venv"  # <script>
-alias vpy2shebang="_vpyshebang venv2"  # <script>
-alias vpypyshebang="_vpyshebang venvPyPy"  # <script>
+alias vpyshebang="_vpyshebang venv"  # <script> [script...]
+alias vpy2shebang="_vpyshebang venv2"  # <script> [script...]
+alias vpypyshebang="_vpyshebang venvPyPy"  # <script> [script...]
 
 # run script from a given project folder's associated venv's bin folder
 _vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
