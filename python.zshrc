@@ -1,6 +1,6 @@
 # get path of folder containing all venvs for the current folder or specified project path
 venvs_path () {  # [proj-dir]
-    local venvs_world=${XDG_DATA_HOME:-$HOME/.local/share}/venvs
+    local venvs_world=${XDG_DATA_HOME:-~/.local/share}/venvs
     ([[ $(command -v md5sum) ]] && echo "$venvs_world/$(printf "${${1:-$(pwd)}:P}" | md5sum | cut -d ' ' -f 1)") ||
                                    echo "$venvs_world/$(md5 -qs "${${1:-$(pwd)}:P}")"
 }
@@ -193,7 +193,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
         print -P "%F{cyan}$3 exists%f"
         return 1
     else
-        printf '%s\n' "#!/bin/zsh" "exec $(venvs_path $1)/venv/bin/$2 \$@" > $3
+        printf '%s\n' "#!/usr/bin/env zsh" "exec $(venvs_path $1)/venv/bin/$2 \$@" > $3
         chmod +x $3
     fi
 }
