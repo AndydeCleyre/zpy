@@ -185,6 +185,19 @@ alias vpyfrom="_vpyfrom venv"  # <proj-dir> <script-name> [script-arg...]
 alias vpy2from="_vpyfrom venv2"  # <proj-dir> <script-name> [script-arg...]
 alias vpypyfrom="_vpyfrom venvPyPy"  # <proj-dir> <script-name> [script-arg...]
 
+# generate an external launcher for a script in a given project folder's associated venv's bin folder
+vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
+    if [[ -d $3 ]]; then
+        vpylauncherfrom $1 $2 $3/$2
+    elif [[ -e $3 ]]; then
+        print -P "%F{cyan}$3 exists%f"
+        return 1
+    else
+        printf '%s\n' "#!/bin/zsh" "exec $(venvs_path $1)/venv/bin/$2 \$@" > $3
+        chmod +x $3
+    fi
+}
+
 # inject loose requirements.in dependencies into pyproject.toml
 # run either from the folder housing pyproject.toml, or one below
 # to categorize, name files <category>-requirements.in
