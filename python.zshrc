@@ -144,7 +144,12 @@ alias envin2="_envin venv2 virtualenv2"  # [reqs-txt...]
 alias envinpypy="_envin venvPyPy 'pypy3 -m venv'"  # [reqs-txt...]
 
 # activate without installing anything
-activate () { . $(venvs_path)/venv/bin/activate }
+activate () {  # [proj-dir]
+    . $(venvs_path ${1:-$(pwd)})/venv/bin/activate
+}
+activatefzf () {
+    activate $(printf '%s\n' ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P) | fzf --reverse)
+}
 # deactivate
 envout () { deactivate }
 
