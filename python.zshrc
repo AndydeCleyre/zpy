@@ -1,7 +1,8 @@
 # get path of folder containing all venvs for the current folder or specified project path
 venvs_path () {  # [proj-dir]
-    ([[ $(command -v md5sum) ]] && echo "$HOME/.local/share/venvs/$(printf "${${1:-$(pwd)}:P}" | md5sum | cut -d ' ' -f 1)") ||
-                                   echo "$HOME/.local/share/venvs/$(md5 -qs "${${1:-$(pwd)}:P}")"
+    local venvs_world=${XDG_DATA_HOME:-$HOME/.local/share}/venvs
+    ([[ $(command -v md5sum) ]] && echo "$venvs_world/$(printf "${${1:-$(pwd)}:P}" | md5sum | cut -d ' ' -f 1)") ||
+                                   echo "$venvs_world/$(md5 -qs "${${1:-$(pwd)}:P}")"
 }
 
 # pipe pythonish syntax through this to make it colorful
