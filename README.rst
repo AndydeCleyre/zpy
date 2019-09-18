@@ -118,6 +118,9 @@ Functions & Aliases
   vpy2from  # <proj-dir> <script-name> [script-arg...]
   vpypyfrom  # <proj-dir> <script-name> [script-arg...]
   
+  # generate an external launcher for a script in a given project folder's associated venv's bin folder
+  vpylauncherfrom  # <proj-dir> <script-name> <launcher-dest>
+  
   # inject loose requirements.in dependencies into pyproject.toml
   # run either from the folder housing pyproject.toml, or one below
   # to categorize, name files <category>-requirements.in
