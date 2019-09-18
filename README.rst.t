@@ -20,6 +20,7 @@ Guiding Ideas
 
 - You should not have to manually specify the requirements anywhere other than ``*requirements.in`` files.
 - Folks who want to use your code shouldn't have to install any new-fangled less-standard tools (pipenv, poetry, zpy, etc.). ``pip install -r requirements.txt`` ought to be sufficient.
+- Your workflow should be transparent and personal. Run ``which <function>`` to see what it does. Modify it. Add your own.
 - Any project folder may be associated with an external venvs folder, deterministically generated from the project path.
 - Within each venvs folder we have:
 
