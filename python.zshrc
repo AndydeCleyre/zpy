@@ -154,13 +154,14 @@ activatefzf () {
 envout () { deactivate }
 
 # get path of python for the given script's folder's associated venv
-whichvpy () {  # <venv-name> <script>
+_whichvpy () {  # <venv-name> <script>
     echo "$(venvs_path ${2:P:h})/$1/bin/python"
 }
+alias whichvpy="_whichvpy venv"  # <script>
 
 # run script with its folder's associated venv
 _vpy () {  # <venv-name> <script> [script-arg...]
-    $(whichvpy $1 $2) ${@:2}
+    $(_whichvpy $1 $2) ${@:2}
 }
 alias vpy="_vpy venv"  # <script> [script-arg...]
 alias vpy2="_vpy venv2"  # <script> [script-arg...]
@@ -173,7 +174,7 @@ _vpyshebang () {  # <venv-name> <script> [script...]
     local vpybin
     for script in ${@:2}; do
         chmod +x $script
-        vpybin=$(whence -p vpy) || vpybin="$(whichvpy $1 $script)"
+        vpybin=$(whence -p vpy) || vpybin="$(_whichvpy $1 $script)"
         sed -i'' "1i\
 #!${vpybin}" $script
     done
