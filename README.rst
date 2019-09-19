@@ -20,6 +20,7 @@ Guiding Ideas
 
 - You should not have to manually specify the requirements anywhere other than ``*requirements.in`` files.
 - Folks who want to use your code shouldn't have to install any new-fangled less-standard tools (pipenv, poetry, zpy, etc.). ``pip install -r requirements.txt`` ought to be sufficient.
+- Your workflow should be transparent and personal. Run ``which <function>`` to see what it does. Modify it. Add your own.
 - Any project folder may be associated with an external venvs folder, deterministically generated from the project path.
 - Within each venvs folder we have:
 
@@ -91,12 +92,14 @@ Functions & Aliases
   envinpypy  # [reqs-txt...]
   
   # activate without installing anything
-  activate
+  activate  # [proj-dir]
+  activatefzf
   # deactivate
   envout
   
   # get path of python for the given script's folder's associated venv
-  _whichpy  # <venv-name> <script>
+  _whichvpy  # <venv-name> <script>
+  whichvpy  # <script>
   
   # run script with its folder's associated venv
   _vpy  # <venv-name> <script> [script-arg...]
@@ -120,6 +123,9 @@ Functions & Aliases
   
   # generate an external launcher for a script in a given project folder's associated venv's bin folder
   vpylauncherfrom  # <proj-dir> <script-name> <launcher-dest>
+  
+  # delete venvs for project folders which no longer exist
+  prunevenvs
   
   # inject loose requirements.in dependencies into pyproject.toml
   # run either from the folder housing pyproject.toml, or one below
