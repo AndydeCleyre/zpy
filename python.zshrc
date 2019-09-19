@@ -204,6 +204,20 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
     fi
 }
 
+# delete venvs for project folders which no longer exist
+prunevenvs () {
+    local orphaned_venv
+    for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
+        if [[ ! -d $proj ]]; then
+            orphaned_venv=$(venvs_path $proj)
+            printf "%s\n" "Missing: $proj" "Orphan: $(du -hs $orphaned_venv)"
+            read -q "?Delete orphan [yN]? "
+            [[ $REPLY = 'y' ]] && rm -r $orphaned_venv
+            printf "%s\n" '' ''
+        fi
+    done
+}
+
 # inject loose requirements.in dependencies into pyproject.toml
 # run either from the folder housing pyproject.toml, or one below
 # to categorize, name files <category>-requirements.in
