@@ -258,17 +258,15 @@ if pyproject.is_file():
 
 # get a new or existing sublime text project file for the working folder
 _get_sublp () {
-    python -c "
-from pathlib import Path
-
-cwd = Path().absolute()
-try:
-    spfile = next(cwd.glob('*.sublime-project'))
-except StopIteration:
-    spfile = cwd / f'{cwd.name}.sublime-project'
-    spfile.write_text('{}')
-print(spfile, end='')
-    "
+	local spfile
+	spfile="$(ls *.sublime-project(N:P) | head -1)"
+	local folder
+	folder=$(pwd)
+	if [[ ! $spfile ]]; then
+		spfile="${folder}/${folder:t}.sublime-project"
+		printf '{}' > $spfile
+	fi
+	printf $spfile
 }
 
 # specify the venv interpreter in a new or existing sublime text project file
