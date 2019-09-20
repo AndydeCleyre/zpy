@@ -288,5 +288,5 @@ spfile.write_text(dumps(sp))
 # launch a new or existing sublime text project, setting venv interpreter
 sublp () {  # [subl-arg...]
     vpysublp
-    subl --project "$(_get_sublp)" . $@
+    subl --project "$(_get_sublp)" $@
 }
