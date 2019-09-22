@@ -177,8 +177,8 @@ With zpy:
 
     vpyfrom /path/to/project script
 
-Generate launcher script that runs venv-installed scripts (bin folder) from outside the venv
-````````````````````````````````````````````````````````````````````````````````````````````
+Generate launcher script that runs a venv-installed script (bin folder) from outside the venv
+`````````````````````````````````````````````````````````````````````````````````````````````
 
 Without zpy:
 
