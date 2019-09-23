@@ -99,6 +99,7 @@ pipu () {  # [req...]
         print -P "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
         if [[ "$#" -gt 0 ]]; then
             pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
+            pipc $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
         else
             pip-compile --no-header -U $reqsin 2>&1 | hpype
         fi
@@ -111,6 +112,7 @@ pipuh () {  # [req...]
         print -P "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
         if [[ "$#" -gt 0 ]]; then
             pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
+            pipch $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
         else
             pip-compile --no-header -U --generate-hashes $reqsin 2>&1 | hpype
         fi
