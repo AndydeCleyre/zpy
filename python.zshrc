@@ -37,7 +37,7 @@ pipch () {  # [reqs-in...]
 # install packages according to all found or specified requirements.txt files (sync)
 pips () {  # [reqs-txt...]
     if [[ $(echo ${@:-*requirements.txt(N)}) ]]; then
-        print -P "%F{cyan}> syncing env ->" ${@:-*requirements.txt(N)} ". . .%f"
+        print -P "%F{cyan}> syncing env <-" ${@:-*requirements.txt(N)} ". . .%f"
         pip-sync ${@:-*requirements.txt(N)}
         for reqstxt in ${@:-*requirements.txt}; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 gets implemented
             pip install -qr $reqstxt                #
