@@ -95,7 +95,7 @@ pipachs () {  # <req> [req...]
 # recompile *requirements.txt with upgraded versions of all or specified packages (upgrade)
 pipu () {  # [req...]
     local reqs=($@)
-    for reqsin in *requirements.in; do
+    for reqsin in *requirements.in(N); do
         print -P "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
         if [[ "$#" -gt 0 ]]; then
             pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
@@ -108,7 +108,7 @@ pipu () {  # [req...]
 # upgrade with hashes
 pipuh () {  # [req...]
     local reqs=($@)
-    for reqsin in *requirements.in; do
+    for reqsin in *requirements.in(N); do
         print -P "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
         if [[ "$#" -gt 0 ]]; then
             pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
