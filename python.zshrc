@@ -169,6 +169,11 @@ alias vpy="_vpy venv"  # <script> [script-arg...]
 alias vpy2="_vpy venv2"  # <script> [script-arg...]
 alias vpypy="_vpy venvPyPy"  # <script> [script-arg...]
 
+# get path of project for the activated venv
+whichpyproj () {
+	echo ${"$(which python)":h:h:h}/project(N:P)
+}
+
 # prepend each script with a shebang for its folder's associated venv python
 # if vpy exists in the PATH, #!/path/to/vpy will be used instead
 # also ensure the script is executable
