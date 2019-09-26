@@ -225,6 +225,30 @@ prunevenvs () {
     done
 }
 
+# pip list -o for all projects
+pipcheckold () {
+	for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
+        if [[ -d $proj ]]; then
+			print -P "%F{cyan}> checking $proj . . .%f"
+			vpyfrom $proj pip list -o --format freeze | grep -v "^setuptools=" | hpype
+        fi
+    done
+}
+
+# pipus for all projects
+pipusall () {
+	for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
+        if [[ -d $proj ]]; then
+			print -P "%F{cyan}> visiting $proj . . .%f"
+			cd $proj
+			activate
+			pipus
+			deactivate
+			cd -
+        fi
+    done
+}
+
 # inject loose requirements.in dependencies into pyproject.toml
 # run either from the folder housing pyproject.toml, or one below
 # to categorize, name files <category>-requirements.in
