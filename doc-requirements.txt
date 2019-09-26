@@ -1,2 +1,1 @@
-pyratemp==0.3.2 \
-    --hash=sha256:c45ed656ada482a02fe780495f37a695e7671accb04f918f7e7f18abf877bc71
+pyratemp==0.3.2
