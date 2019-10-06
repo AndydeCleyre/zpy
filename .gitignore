@@ -1,0 +1,5 @@
+help.sh
+vars.json
+*.sublime-project
+*.sublime-workspace
+demo
