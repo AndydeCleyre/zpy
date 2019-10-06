@@ -4,214 +4,128 @@ zpy: Zsh helpers for Python venvs with pip-tools
 
 These functions aim to help with your workflows, without being restrictive.
 
-.. image:: https://asciinema.org/a/hixMbnxd3fxi4kJxXe5OnBs4n.svg
-   :target: https://asciinema.org/a/hixMbnxd3fxi4kJxXe5OnBs4n
-
-Installation
-------------
-
-- Put ``python.zshrc`` somewhere, like ``~/.python.zshrc``, or just clone this small repo.
-- Source it in your main ``~/.zshrc``, like ``. /path/to/python.zshrc``.
-- If you'd like some handy venv-python script launchers accessible outside your Zsh environment, put the ``vpy`` and ``vpyfrom`` scripts somewhere in your ``PATH`` (e.g. ``~/bin``, ``~/.local/bin``, ``/usr/local/bin``).
+.. image:: https://s3.gifyu.com/images/previewee81b820d6596f2f.gif
 
 Guiding Ideas
 -------------
 
 - You should not have to manually specify the requirements anywhere other than ``*requirements.in`` files.
 - Folks who want to use your code shouldn't have to install any new-fangled less-standard tools (pipenv, poetry, pip-tools, zpy, etc.). ``pip install -r requirements.txt`` ought to be sufficient.
-- Your workflow should be transparent and personal. Run ``which <function>`` to see what it does. Modify it. Add your own.
-- Any project folder may be associated with an external venvs folder, deterministically generated from the project path.
-- Within each venvs folder we have:
+- Your workflow should be transparent and personal. Run ``zpy <function>`` to see what it does. Modify it. Add your own.
+- Each project folder is associated with an external ``venvs`` folder (``$XDG_DATA_HOME/venvs/<project path hash>`` or ``~/.local/share/venvs/<project path hash>``).
+- Within each ``venvs`` folder we have:
 
-  + one or more named venv folders based on the desired Python (i.e. 'venv', 'venv2', 'venvPyPy')
+  + one or more named venv folders (``venv``, ``venv2``, ``venvPyPy``) based on the desired Python
   + a symlink back to the project folder
 
-Usage Examples
---------------
+Basic Operations
+----------------
 
-For full, concise list of functions and their descriptions and arguments, see `Functions & Aliases`_.
+In and Out
+``````````
 
-Create venv; activate venv; install appropriate packages; uninstall inappropriate packages
-``````````````````````````````````````````````````````````````````````````````````````````
+The commands for managing whether you're inside or outside a venv are ``envin``, ``activate``, ``activatefzf``, and ``envout``.
 
-Without zpy:
+``envin`` will:
 
-.. code-block:: bash
+- create a new venv for the current folder, if it doesn't already exist
+- activate the venv
+- ensure pip-tools__ is installed in the venv
+- install and uninstall packages as necessary to exactly match those specified in all ``*requirements.txt`` files in the folder ("sync")
 
-     python -m venv /path/to/project_venv  # if venv not created yet
-     . /path/to/project_venv/bin/activate
-     pip install -U pip pip-tools
-     pip-sync *requirements.txt  # if present
-     pip install -r requirements.txt  # if present
-     pip install -r dev-requirements.txt  # if present
-     pip install -r test-requirements.txt  # if present (etc.)
+__ https://github.com/jazzband/pip-tools
 
-With zpy:
+.. image:: https://i.imgur.com/4vz8huE.png
 
-.. code-block:: bash
+You may also pass as many specific ``*requirements.txt`` files as you want to ``envin``, in which case it will ensure your environment matches those and only those.
 
-    envin
+If you know your environment is already in a good state, and just want to activate it without all that installing and uninstalling, you can save a second by running ``activate`` instead.
 
-Add regular requirements; generate lockfile; install and uninstall to match regular requirements
-````````````````````````````````````````````````````````````````````````````````````````````````
+You may also pass a project folder to ``activate``, in order to activate a specific venv regardless of your current folder.
 
-Without zpy:
+If you have ``fzf`` installed, you can use ``activatefzf`` to interactively select the project whose venv you wish to activate.
 
-.. code-block:: bash
+.. image:: https://i.imgur.com/0VPQWtF.png
 
-    echo 'requests>=2.22.0' >> requirements.in
-    echo structlog >> requirements.in
-    pip-compile --no-header requirements.in
-    pip-sync requirements.txt
+``envout`` is a totally unnecessary equivalent of ``deactivate``, and you can use either one to deactivate a venv.
 
-With zpy:
+Add, Compile, Sync
+``````````````````
 
-.. code-block:: bash
+The basic operations are *add*, *compile*, and *sync* (``pipa``, ``pipc``, ``pips``).
 
-    pipacs 'requests>=2.22.0' structlog
+Adding a requirement is simply putting a new ``requirements.txt``-syntax__ line into ``requirements.in``, or a categorized ``<category>-requirements.in``.
 
-Add categorized requirements; generate lockfiles; install and uninstall to match all categories of requirements
-```````````````````````````````````````````````````````````````````````````````````````````````````````````````
+You may pass one or more requirements to ``pipa`` to add lines to your ``requirements.in``. Helpers that work the same way are provided for some categorized ``*-requirements.in`` files as well: ``pipabuild``, ``pipadev``, ``pipadoc``, ``pipapublish``, and ``pipatest``. You can also add special constraints__ for layered requirements workflows, or add "include" lines like ``-r prod-requirements.in``.
 
-Without zpy:
+__ https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format
 
-.. code-block:: bash
+__ https://github.com/jazzband/pip-tools#workflow-for-layered-requirements
 
-    echo pytest >> test-requirements.in
-    echo ipython >> dev-requirements.in
-    pip-compile --no-header test-requirements.in
-    pip-compile --no-header dev-requirements.in
-    pip-sync *requirements.in
+``pipc`` will generate version-locked ``*requirements.txt`` files including all dependencies from the information in each found ``*requirements.in`` in the current folder. You may also pass one or more specific in-files instead. If you want hashes included in the output, use ``pipch``.
 
-With zpy:
+``pipu`` and ``pipuh`` are similar, but ensure dependencies are upgraded as far as they can be while matching the specifications in the in-files. These commands accept specific packages as arguments, if you wish to only upgrade those.
 
-.. code-block:: bash
+``pips`` will "sync" your environment to match your ``*requirements.txt`` files, installing and uninstalling packages as necessary. You may also pass specific ``*requirements.txt`` files as arguments to match only those.
 
-    pipatest pytest
-    pipadev ipython
-    pipcs
+Often, you'll want to do a few of these things at a time. You can do so with ``pipac``, ``pipach``, ``pipacs``, ``pipachs``, ``pipus``, and ``pipuhs``.
 
-Add and remove categorized loose requirements in a flit-generated ``pyproject.toml`` file to match your project
-```````````````````````````````````````````````````````````````````````````````````````````````````````````````
+.. image:: https://i.imgur.com/GcWPIFA.png
 
-Without zpy:
+You can always see exactly what a command will do, with explanations and accepted arguments, by running ``zpy <command>``. Running ``zpy`` alone will show all descriptions and arguments, while omitting implementation details.
 
-- read all the requirements.in files manually,
-- look up the appropriate ``pyproject.toml`` syntax,
-- which varies a bit depending on whether the reqs are categorized,
-- edit the ``pyproject.toml`` file by hand with all the reqs you find,
-- and make sure to remove ones you don't find
+For a full, concise list of functions and their descriptions and arguments, see `Functions & Aliases`_.
 
-With zpy:
+Bonus Operations
+----------------
 
-.. code-block:: bash
+Welcome to the bonus round!
 
-    pypc
+If you use flit__ to package your code for PyPI, and I recommend you do, you can automatically update your ``pyproject.toml``'s categorized dependencies from the information in your ``*requirements.in`` files with ``pypc``.
 
-Update locked requirements to latest available, but constrained by any specs in ``*requirements.in`` files
-``````````````````````````````````````````````````````````````````````````````````````````````````````````
+__ https://flit.readthedocs.io/en/latest/
 
-Without zpy:
+Launch a Python script using its project's venv, from outside the venv, with ``vpy <script.py>``.
+
+Alter a Python script so that it's always launched using its project's venv, from outside the venv, with ``vpyshebang <script.py>``.
+
+Launch a Python script that's installed in its project's venv's ``bin`` folder, from outside the venv, with ``vpyfrom </path/to/project> <script>``.
+
+Generate a launcher script that runs a venv-installed script (in the ``bin`` folder) from outside the venv, with ``vpylauncherfrom </path/to/project> <script> .``.
+
+But wait, there's more! Find it all down at `Functions & Aliases`_.
+
+Installation
+------------
+
+- Put ``python.zshrc`` somewhere, like ``~/.python.zshrc``, or just clone this repo.
+- Source it in your main ``~/.zshrc``, like ``. /path/to/python.zshrc``.
+
+Or if you use a fancy Zsh plugin tool, you can install with a command like one of these:
 
 .. code-block:: bash
 
-    pip-compile --no-header -U requirements.in  # if updating ALL requirements
-    pip-compile --no-header -U dev-requirements.in  # if present, if updating ALL requirements
-    pip-compile --no-header -U test-requirements.in  # if present, if updating ALL requirements (etc.)
+    antigen bundle andydecleyre/zpy python.zshrc
+    antibody bundle andydecleyre/zpy path:python.zshrc
 
-    pip-compile --no-header -P requests -P structlog requirements.in  # if updating specific requirements
-    pip-compile --no-header -P ipython dev-requirements.in  # if present, if updating specific requirements
-    pip-compile --no-header -P pytest test-requirements.in  # if present, if updating specific requirements (etc.)
-
-With zpy:
-
-.. code-block:: bash
-
-    pipu  # if updating ALL requirements
-    pipu requests structlog ipython pytest  # if updating specific requirements
-
-Launch Python script using its project's venv, from outside the venv
-````````````````````````````````````````````````````````````````````
-
-Without zpy:
-
-.. code-block:: bash
-
-    /path/to/project_venv/bin/python script.py
-
-With zpy:
-
-.. code-block:: bash
-
-    vpy script.py
-
-Alter Python script so that it's always launched using its project's venv, from outside the venv
-`````````````````````````````````````````````````````````````````````````````````````````````````
-
-Without zpy:
-
-- manually prepend ``#!/path/to/project_venv/bin/python`` to ``script.py``
-
-.. code-block:: bash
-
-    chmod +x script.py
-
-With zpy:
-
-.. code-block:: bash
-
-    vpyshebang script.py
-
-Launch Python script that's installed in the project's venv's bin folder, from outside the venv
-```````````````````````````````````````````````````````````````````````````````````````````````
-
-Without zpy:
-
-.. code-block:: bash
-
-    /path/to/project_venv/bin/script
-
-With zpy:
-
-.. code-block:: bash
-
-    vpyfrom /path/to/project script
-
-Generate launcher script that runs a venv-installed script (bin folder) from outside the venv
-`````````````````````````````````````````````````````````````````````````````````````````````
-
-Without zpy:
-
-- create file ``script``
-- manually write into it:
-
-.. code-block:: bash
-
-    #!/bin/sh
-    exec /path/to/project_venv/bin/script "$@"
-
-- then
-
-.. code-block:: bash
-
-    chmod +x script
-
-With zpy:
-
-.. code-block:: bash
-
-    vpylauncherfrom /path/to/project script .
+If you'd like some handy venv-python script launchers accessible outside your Zsh environment, put the ``vpy`` and ``vpyfrom`` scripts somewhere in your ``PATH`` (e.g. ``~/bin``, ``~/.local/bin``, ``/usr/local/bin``).
 
 Functions & Aliases
 -------------------
 
 .. code-block:: bash
 
+  # syntax highlighter, reading stdin
+  _hlt  # <syntax>
+  # pipe pythonish syntax through this to make it colorful
+  alias hpype="_hlt py"
+  
+  # print a function's description, arguments, and content
+  # without arguments, print all function names, descriptions, and arguments, without content
+  zpy  # [zpy-function [python.zshrc]]
+  
   # get path of folder containing all venvs for the current folder or specified project path
   venvs_path  # [proj-dir]
-  
-  # pipe pythonish syntax through this to make it colorful
-  hpype
   
   # start REPL
   alias i="ipython"
@@ -270,7 +184,7 @@ Functions & Aliases
   activate  # [proj-dir]
   activatefzf
   # deactivate
-  envout
+  alias envout="deactivate"
   
   # get path of python for the given script's folder's associated venv
   _whichvpy  # <venv-name> <script>
@@ -281,6 +195,9 @@ Functions & Aliases
   vpy  # <script> [script-arg...]
   vpy2  # <script> [script-arg...]
   vpypy  # <script> [script-arg...]
+  
+  # get path of project for the activated venv
+  whichpyproj
   
   # prepend each script with a shebang for its folder's associated venv python
   # if vpy exists in the PATH, #!/path/to/vpy will be used instead
@@ -301,6 +218,12 @@ Functions & Aliases
   
   # delete venvs for project folders which no longer exist
   prunevenvs
+  
+  # pip list -o for all projects
+  pipcheckold
+  
+  # pipus for all projects
+  pipusall
   
   # inject loose requirements.in dependencies into pyproject.toml
   # run either from the folder housing pyproject.toml, or one below
