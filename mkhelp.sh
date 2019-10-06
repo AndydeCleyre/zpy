@@ -1,9 +1,9 @@
 #!/bin/sh
 grep -P \
-    '(^#[^!])|(^alias)|(^$)|(^\S+ \(\) {(.*})?(  # .+)?$)' \
+    '(^#[^!])|(^(alias|local))|(^$)|(^\S+ \(\) {(.*})?(  # .+)?$)' \
     "${1:-$(dirname "$0")/python.zshrc}" | \
     uniq | \
-    sed -E 's/(.+) \(\) \{([^\}]*\})?(.*)/\1\3/g' | \
+    sed -E 's/(local )?(.+) \(\) \{([^\}]*\})?(.*)/\2\4/g' | \
     sed -E 's/^alias ([^=]+).+(  # .+)/\1\2/g'
 
 # select leading comments, aliases & function openers, and empty lines
