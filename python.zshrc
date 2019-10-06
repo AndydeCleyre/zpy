@@ -1,15 +1,37 @@
+# syntax highlighter, reading stdin
+local _hlt () {  # <syntax>
+    ([[ $(command -v highlight) ]] && highlight -O truecolor -s moria -S $1) ||
+    ([[ $(command -v bat)       ]] && bat -l $1 -p)                          ||
+                                      cat -
+}
+# pipe pythonish syntax through this to make it colorful
+alias hpype="_hlt py"
+
+# print a function's description, arguments, and content
+# without arguments, print all function names, descriptions, and arguments, without content
+zpy () {  # [zpy-function [python.zshrc]]
+    local zpyzshrc="${2:-$HOME/.python.zshrc}"
+    if [[ "$#" -gt 0 ]]; then
+        awk -F '\n' -v RS= -v re="^((alias|local) )?$1( |=)" '{
+            for (f=1; f<=NF; f++) {
+                if ($f ~ re) { print; next; }
+            }
+        }' $zpyzshrc | _hlt zsh
+    else
+        # TODO: don't rely on -P, it ain't portable
+        grep -P '(^#[^!])|(^(alias|local))|(^$)|(^\S+ \(\) {(.*})?(  # .+)?$)' $zpyzshrc \
+        | uniq \
+        | sed -E 's/(local )?(.+) \(\) \{([^\}]*\})?(.*)/\2\4/g' \
+        | sed -E 's/^alias ([^=]+).+(  # .+)/\1\2/g' \
+        | _hlt zsh
+    fi
+}
+
 # get path of folder containing all venvs for the current folder or specified project path
 venvs_path () {  # [proj-dir]
     local venvs_world=${XDG_DATA_HOME:-~/.local/share}/venvs
     ([[ $(command -v md5sum) ]] && echo "$venvs_world/$(printf ${${1:-"$(pwd)"}:P} | md5sum | cut -d ' ' -f 1)") ||
                                    echo "$venvs_world/$(md5 -qs ${${1:-"$(pwd)"}:P})"
-}
-
-# pipe pythonish syntax through this to make it colorful
-hpype () {
-    ([[ $(command -v highlight) ]] && highlight -O truecolor -s moria -S py) ||
-    ([[ $(command -v bat)       ]] && bat -l py -p)                          ||
-                                      cat -
 }
 
 # start REPL
@@ -57,7 +79,7 @@ pipchs () {  # [reqs-in...]
 }
 
 # add loose requirements to [<category>-]requirements.in (add)
-_pipa () {  # <category> <req> [req...]
+local _pipa () {  # <category> <req> [req...]
     local reqsin="requirements.in"
     [[ $1 ]] && reqsin="$1-requirements.in"
     print -P "%F{cyan}> appending -> $reqsin . . .%f"
@@ -130,7 +152,7 @@ pipuhs () {  # [req...]
 }
 
 # activate venv for the current folder and install requirements, creating venv if necessary
-_envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
+local _envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
     local vpath="$(venvs_path)"
     local venv="$vpath/$1"
     print -P "%F{cyan}> entering venv @ $venv . . .%f"
@@ -153,16 +175,16 @@ activatefzf () {
     activate "$(printf "%s\n" ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P) | fzf --reverse)"
 }
 # deactivate
-envout () { deactivate }
+alias envout="deactivate"
 
 # get path of python for the given script's folder's associated venv
-_whichvpy () {  # <venv-name> <script>
+local _whichvpy () {  # <venv-name> <script>
     echo "$(venvs_path ${2:P:h})/$1/bin/python"
 }
 alias whichvpy="_whichvpy venv"  # <script>
 
 # run script with its folder's associated venv
-_vpy () {  # <venv-name> <script> [script-arg...]
+local _vpy () {  # <venv-name> <script> [script-arg...]
     $(_whichvpy $1 $2) ${@:2}
 }
 alias vpy="_vpy venv"  # <script> [script-arg...]
@@ -171,13 +193,13 @@ alias vpypy="_vpy venvPyPy"  # <script> [script-arg...]
 
 # get path of project for the activated venv
 whichpyproj () {
-	echo ${"$(which python)":h:h:h}/project(N:P)
+    echo ${"$(which python)":h:h:h}/project(N:P)
 }
 
 # prepend each script with a shebang for its folder's associated venv python
 # if vpy exists in the PATH, #!/path/to/vpy will be used instead
 # also ensure the script is executable
-_vpyshebang () {  # <venv-name> <script> [script...]
+local _vpyshebang () {  # <venv-name> <script> [script...]
     local vpybin
     for script in ${@:2}; do
         chmod +x $script
@@ -191,7 +213,7 @@ alias vpy2shebang="_vpyshebang venv2"  # <script> [script...]
 alias vpypyshebang="_vpyshebang venvPyPy"  # <script> [script...]
 
 # run script from a given project folder's associated venv's bin folder
-_vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
+local _vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
     $(venvs_path $2)/$1/bin/$3 ${@:4}
 }
 alias vpyfrom="_vpyfrom venv"  # <proj-dir> <script-name> [script-arg...]
@@ -227,24 +249,24 @@ prunevenvs () {
 
 # pip list -o for all projects
 pipcheckold () {
-	for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
+    for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
         if [[ -d $proj ]]; then
-			print -P "%F{cyan}> checking $proj . . .%f"
-			vpyfrom $proj pip list -o --format freeze | grep -v "^setuptools=" | hpype
+            print -P "%F{cyan}> checking $proj . . .%f"
+            vpyfrom $proj pip list -o --format freeze | grep -v "^setuptools=" | hpype
         fi
     done
 }
 
 # pipus for all projects
 pipusall () {
-	for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
+    for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
         if [[ -d $proj ]]; then
-			print -P "%F{cyan}> visiting $proj . . .%f"
-			cd $proj
-			activate
-			pipus
-			deactivate
-			cd -
+            print -P "%F{cyan}> visiting $proj . . .%f"
+            cd $proj
+            activate
+            pipus
+            deactivate
+            cd -
         fi
     done
 }
@@ -256,10 +278,7 @@ pypc () {
     pip install -qU tomlkit || print -P "%F{cyan}> You probably want to activate a venv with 'envin', first%f"
     python -c "
 from pathlib import Path
-
 import tomlkit
-
-
 suffix = 'requirements.in'
 cwd = Path().absolute()
 pyproject = cwd / 'pyproject.toml'
@@ -288,7 +307,7 @@ if pyproject.is_file():
 }
 
 # get a new or existing sublime text project file for the working folder
-_get_sublp () {
+local _get_sublp () {
     local spfile
     spfile="$(ls *.sublime-project(:P) | head -1)" 2> /dev/null
     local folder
@@ -305,7 +324,6 @@ vpysublp () {
     python -c "
 from pathlib import Path
 from json import loads, dumps
-
 spfile = Path('''$(_get_sublp)''')
 sp = loads(spfile.read_text())
 sp.setdefault('settings', {})
