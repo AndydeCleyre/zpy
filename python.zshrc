@@ -257,16 +257,16 @@ pipcheckold () {
     done
 }
 
-# pipus for all projects
-pipusall () {
-    for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
+# pipus for all or specified projects
+pipusall () {  # [proj-dir...]
+    for proj in ${@:-${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P)}; do
         if [[ -d $proj ]]; then
-            print -P "%F{cyan}> visiting $proj . . .%f"
+            print -P "\n%F{cyan}> visiting $proj . . .%f"
             cd $proj
             activate
             pipus
             deactivate
-            cd -
+            cd - 1> /dev/null
         fi
     done
 }
