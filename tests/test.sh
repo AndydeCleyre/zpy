@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 username="zpyuser"
-ctnr=`buildah from alpine:edge`
+ctnr=$(buildah from alpine:edge)
 alias bldr="buildah run $ctnr --"
 alias bldru="buildah run -t --user $username $ctnr --"
 
