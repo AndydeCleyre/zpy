@@ -61,9 +61,9 @@ pips () {  # [reqs-txt...]
     if [[ $(echo ${@:-*requirements.txt(N)}) ]]; then
         print -P "%F{cyan}> syncing env <-" ${@:-*requirements.txt(N)} ". . .%f"
         pip-sync ${@:-*requirements.txt(N)}
-        for reqstxt in ${@:-*requirements.txt}; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 gets implemented
-            pip install -qr $reqstxt                #
-        done                                        #
+        for reqstxt in ${@:-*requirements.txt}; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
+            pip install -qr $reqstxt                # AND
+        done                                        # https://github.com/jazzband/pip-tools/issues/925 is resolved (by merging https://github.com/jazzband/pip-tools/pull/927)
     fi
 }
 
