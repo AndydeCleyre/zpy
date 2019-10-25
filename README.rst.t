@@ -91,7 +91,7 @@ Alter a Python script so that it's always launched using its project's venv, fro
 
 Launch a Python script that's installed in its project's venv's ``bin`` folder, from outside the venv, with ``vpyfrom </path/to/project> <script>``.
 
-Generate a launcher script that runs a venv-installed script (in the ``bin`` folder) from outside the venv, with ``vpylauncherfrom </path/to/project> <script> .``.
+Generate a launcher script that runs a venv-installed script (in the ``bin`` folder) from outside the venv, with ``vpylauncherfrom </path/to/project> <script-name> <destination>``.
 
 But wait, there's more! Find it all down at `Functions & Aliases`_.
 
