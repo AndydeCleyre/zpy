@@ -1,5 +1,5 @@
 # syntax highlighter, reading stdin
-local _hlt () {  # <syntax>
+_hlt () {  # <syntax>
     ([[ $(command -v highlight) ]] && highlight -O truecolor -s moria -S $1) ||
     ([[ $(command -v bat)       ]] && bat -l $1 -p)                          ||
                                       cat -
@@ -12,16 +12,16 @@ alias hpype="_hlt py"
 zpy () {  # [zpy-function [python.zshrc]]
     local zpyzshrc="${2:-$HOME/.python.zshrc}"
     if [[ "$#" -gt 0 ]]; then
-        awk -F '\n' -v RS= -v re="^((alias|local) )?$1( |=)" '{
+        awk -F '\n' -v RS= -v re="^(alias )?$1( |=)" '{
             for (f=1; f<=NF; f++) {
                 if ($f ~ re) { print; next; }
             }
         }' $zpyzshrc | _hlt zsh
     else
         # TODO: don't rely on -P, it ain't portable
-        grep -P '(^#[^!])|(^(alias|local))|(^$)|(^\S+ \(\) {(.*})?(  # .+)?$)' $zpyzshrc \
+        grep -P '(^#[^!])|(^alias)|(^$)|(^\S+ \(\) {(.*})?(  # .+)?$)' $zpyzshrc \
         | uniq \
-        | sed -E 's/(local )?(.+) \(\) \{([^\}]*\})?(.*)/\2\4/g' \
+        | sed -E 's/(.+) \(\) \{([^\}]*\})?(.*)/\1\3/g' \
         | sed -E 's/^alias ([^=]+).+(  # .+)/\1\2/g' \
         | _hlt zsh
     fi
@@ -79,7 +79,7 @@ pipchs () {  # [reqs-in...]
 }
 
 # add loose requirements to [<category>-]requirements.in (add)
-local _pipa () {  # <category> <req> [req...]
+_pipa () {  # <category> <req> [req...]
     local reqsin="requirements.in"
     [[ $1 ]] && reqsin="$1-requirements.in"
     print -P "%F{cyan}> appending -> $reqsin . . .%f"
@@ -152,7 +152,7 @@ pipuhs () {  # [req...]
 }
 
 # activate venv for the current folder and install requirements, creating venv if necessary
-local _envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
+_envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
     local vpath="$(venvs_path)"
     local venv="$vpath/$1"
     print -P "%F{cyan}> entering venv @ $venv . . .%f"
@@ -178,13 +178,13 @@ activatefzf () {
 alias envout="deactivate"
 
 # get path of python for the given script's folder's associated venv
-local _whichvpy () {  # <venv-name> <script>
+_whichvpy () {  # <venv-name> <script>
     echo "$(venvs_path ${2:P:h})/$1/bin/python"
 }
 alias whichvpy="_whichvpy venv"  # <script>
 
 # run script with its folder's associated venv
-local _vpy () {  # <venv-name> <script> [script-arg...]
+_vpy () {  # <venv-name> <script> [script-arg...]
     $(_whichvpy $1 $2) ${@:2}
 }
 alias vpy="_vpy venv"  # <script> [script-arg...]
@@ -199,7 +199,7 @@ whichpyproj () {
 # prepend each script with a shebang for its folder's associated venv python
 # if vpy exists in the PATH, #!/path/to/vpy will be used instead
 # also ensure the script is executable
-local _vpyshebang () {  # <venv-name> <script> [script...]
+_vpyshebang () {  # <venv-name> <script> [script...]
     local vpybin
     for script in ${@:2}; do
         chmod +x $script
@@ -213,7 +213,7 @@ alias vpy2shebang="_vpyshebang venv2"  # <script> [script...]
 alias vpypyshebang="_vpyshebang venvPyPy"  # <script> [script...]
 
 # run script from a given project folder's associated venv's bin folder
-local _vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
+_vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
     $(venvs_path $2)/$1/bin/$3 ${@:4}
 }
 alias vpyfrom="_vpyfrom venv"  # <proj-dir> <script-name> [script-arg...]
@@ -307,7 +307,7 @@ if pyproject.is_file():
 }
 
 # get a new or existing sublime text project file for the working folder
-local _get_sublp () {
+_get_sublp () {
     local spfile
     spfile="$(ls *.sublime-project(:P) | head -1)" 2> /dev/null
     local folder
