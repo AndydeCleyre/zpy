@@ -328,7 +328,7 @@ spfile = Path('''$(_get_sublp)''')
 sp = loads(spfile.read_text())
 sp.setdefault('settings', {})
 sp['settings']['python_interpreter'] = '''$(venvs_path)/venv/bin/python'''
-spfile.write_text(dumps(sp))
+spfile.write_text(dumps(sp, indent=4))
     "
 }
 
