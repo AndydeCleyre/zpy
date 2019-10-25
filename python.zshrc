@@ -228,7 +228,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
         print -P "%F{cyan}$3 exists%f"
         return 1
     else
-        printf "%s\n" "#!/usr/bin/env zsh" "exec $(venvs_path $1)/venv/bin/$2 \$@" > $3
+        printf "%s\n" "#!/bin/sh" "exec $(venvs_path $1)/venv/bin/$2 \$@" > $3
         chmod +x $3
     fi
 }
