@@ -1,5 +1,6 @@
 # syntax highlighter, reading stdin
 _hlt () {  # <syntax>
+    # recommended themes: aiseered, base16/flat, moria, oxygenated
     ([[ $(command -v highlight) ]] && highlight -O truecolor -s moria -S $1) ||
     ([[ $(command -v bat)       ]] && bat -l $1 -p)                          ||
                                       cat -
@@ -275,7 +276,7 @@ pipusall () {  # [proj-dir...]
 # run either from the folder housing pyproject.toml, or one below
 # to categorize, name files <category>-requirements.in
 pypc () {
-    pip install -qU tomlkit || print -P "%F{cyan}> You probably want to activate a venv with 'envin', first%f"
+    pip install -qU tomlkit || print -P "%F{yellow}> You probably want to activate a venv with 'envin', first%f"
     python -c "
 from pathlib import Path
 import tomlkit
@@ -321,10 +322,13 @@ _get_sublp () {
 
 # specify the venv interpreter in a new or existing sublime text project file
 vpysublp () {
+    local stp=$(_get_sublp)
+    local pypath=$(venvs_path)/venv/bin/python
+    print -P "%F{cyan}> writing interpreter ${pypath/#$HOME/~} -> ${stp/#$HOME/~} . . .%f"
     python -c "
 from pathlib import Path
 from json import loads, dumps
-spfile = Path('''$(_get_sublp)''')
+spfile = Path('''${stp}''')
 sp = loads(spfile.read_text())
 sp.setdefault('settings', {})
 sp['settings']['python_interpreter'] = '''$(venvs_path)/venv/bin/python'''
