@@ -155,7 +155,7 @@ pipuhs () {  # [req...]
 _envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
     local vpath="$(venvs_path)"
     local venv="$vpath/$1"
-    print -P "%F{cyan}> entering venv @ $venv . . .%f"
+    print -P "%F{cyan}> entering venv @ ${venv/#$HOME/~} . . .%f"
     [[ -d $venv ]] || eval $2 $venv
     ln -sfn "$(pwd)" "$vpath/project"
     . $venv/bin/activate
@@ -225,7 +225,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
     if [[ -d $3 ]]; then
         vpylauncherfrom $1 $2 $3/$2
     elif [[ -e $3 ]]; then
-        print -P "%F{cyan}$3 exists%f"
+        print -P "%F{red}> ${3/#$HOME/~} exists%f"
         return 1
     else
         printf "%s\n" "#!/bin/sh" "exec $(venvs_path $1)/venv/bin/$2 \"\$@\"" > $3
@@ -239,7 +239,7 @@ prunevenvs () {
     for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
         if [[ ! -d $proj ]]; then
             orphaned_venv=$(venvs_path $proj)
-            printf "%s\n" "Missing: $proj" "Orphan: $(du -hs $orphaned_venv)"
+            printf "%s\n" "Missing: ${proj/#$HOME/~}" "Orphan: $(du -hs $orphaned_venv)"
             read -q "?Delete orphan [yN]? "
             [[ $REPLY = 'y' ]] && rm -r $orphaned_venv
             printf "%s\n" '' ''
@@ -251,7 +251,7 @@ prunevenvs () {
 pipcheckold () {
     for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
         if [[ -d $proj ]]; then
-            print -P "%F{cyan}> checking $proj . . .%f"
+            print -P "\n%F{cyan}> checking ${proj/#$HOME/~} . . .%f"
             vpyfrom $proj pip list -o --format freeze | grep -v "^setuptools=" | hpype
         fi
     done
@@ -261,7 +261,7 @@ pipcheckold () {
 pipusall () {  # [proj-dir...]
     for proj in ${@:-${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P)}; do
         if [[ -d $proj ]]; then
-            print -P "\n%F{cyan}> visiting $proj . . .%f"
+            print -P "\n%F{cyan}> visiting ${proj/#$HOME/~} . . .%f"
             cd $proj
             activate
             pipus
