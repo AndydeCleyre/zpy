@@ -175,7 +175,7 @@ alias envinpypy="_envin venvPyPy 'pypy3 -m venv'"  # [reqs-txt...]
 
 # activate without installing anything
 activate () {  # [proj-dir]
-    . $(venvs_path ${1:-"$(pwd)"})/venv/bin/activate
+    . "$(venvs_path ${1:-"$PWD"})/venv/bin/activate"
 }
 activatefzf () {
     local projects=("${VENVS_WORLD}/"*"/project"(:P))
@@ -192,7 +192,7 @@ alias whichvpy="_whichvpy venv"  # <script>
 
 # run script with its folder's associated venv
 _vpy () {  # <venv-name> <script> [script-arg...]
-    $(_whichvpy $1 $2) ${@:2}
+    "$(_whichvpy $1 $2)" ${@:2}
 }
 alias vpy="_vpy venv"  # <script> [script-arg...]
 alias vpy2="_vpy venv2"  # <script> [script-arg...]
@@ -210,7 +210,7 @@ _vpyshebang () {  # <venv-name> <script> [script...]
     local vpybin
     for script in ${@:2}; do
         chmod +x $script
-        vpybin=$(whence -p vpy) || vpybin="$(_whichvpy $1 $script)"
+        vpybin="$(whence -p vpy)" || vpybin="$(_whichvpy $1 $script)"
         sed -i'' "1i\
 #!${vpybin}" $script
     done
@@ -221,7 +221,7 @@ alias vpypyshebang="_vpyshebang venvPyPy"  # <script> [script...]
 
 # run script from a given project folder's associated venv's bin folder
 _vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
-    $(venvs_path $2)/$1/bin/$3 ${@:4}
+    "$(venvs_path $2)/$1/bin/$3" ${@:4}
 }
 alias vpyfrom="_vpyfrom venv"  # <proj-dir> <script-name> [script-arg...]
 alias vpy2from="_vpyfrom venv2"  # <proj-dir> <script-name> [script-arg...]
@@ -328,8 +328,8 @@ _get_sublp () {
 
 # specify the venv interpreter in a new or existing sublime text project file
 vpysublp () {
-    local stp=$(_get_sublp)
-    local pypath=$(venvs_path)/venv/bin/python
+    local stp="$(_get_sublp)"
+    local pypath="$(venvs_path)/venv/bin/python"
     print -P "%F{cyan}> writing interpreter ${pypath/#$HOME/~} -> ${stp/#$HOME/~} . . .%f"
     python -c "
 from pathlib import Path
