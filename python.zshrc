@@ -50,15 +50,15 @@ alias pipi="pip install -U"  # <req> [req...]
 # compile requirements.txt files from all found or specified requirements.in files (compile)
 pipc () {  # [reqs-in...]
     for reqsin in ${@:-*requirements.in(N)}; do
-        print -P "%F{cyan}> compiling $reqsin -> ${reqsin:r}.txt . . .%f"
-        pip-compile --no-header "$reqsin" 2>&1 | hpype
+        print -rP "%F{cyan}> compiling $reqsin -> ${reqsin:r}.txt . . .%f"
+        pip-compile --no-header $reqsin 2>&1 | hpype
     done
 }
 # compile with hashes
 pipch () {  # [reqs-in...]
     for reqsin in ${@:-*requirements.in(N)}; do
-        print -P "%F{cyan}> compiling $reqsin -> ${reqsin:r}.txt . . .%f"
-        pip-compile --no-header --generate-hashes "$reqsin" 2>&1 | hpype
+        print -rP "%F{cyan}> compiling $reqsin -> ${reqsin:r}.txt . . .%f"
+        pip-compile --no-header --generate-hashes $reqsin 2>&1 | hpype
     done
 }
 
@@ -66,7 +66,7 @@ pipch () {  # [reqs-in...]
 pips () {  # [reqs-txt...]
     local reqstxts=(${@:-*requirements.txt(N)})
     if [[ $reqstxts ]]; then
-        print -P "%F{cyan}> syncing env <- $reqstxts . . .%f"
+        print -rP "%F{cyan}> syncing env <- $reqstxts . . .%f"
         pip-sync $reqstxts
         for reqstxt in $reqstxts; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
             pip install -qr $reqstxt  # AND
@@ -87,11 +87,10 @@ pipchs () {  # [reqs-in...]
 
 # add loose requirements to [<category>-]requirements.in (add)
 _pipa () {  # <category> <req> [req...]
-    local reqsin="requirements.in"
-    [[ $1 ]] && reqsin="$1-requirements.in"
-    print -P "%F{cyan}> appending -> $reqsin . . .%f"
-    print -l "${@:2}" >> "$reqsin"
-    hpype < "$reqsin"
+    local reqsin=${1:+${1}-}requirements.in
+    print -rP "%F{cyan}> appending -> $reqsin . . .%f"
+    print -rl ${@:2} >> $reqsin
+    hpype < $reqsin
 }
 alias pipa="_pipa ''"  # <req> [req...]
 alias pipabuild="_pipa build"  # <req> [req...]
@@ -125,8 +124,8 @@ pipachs () {  # <req> [req...]
 pipu () {  # [req...]
     local reqs=($@)
     for reqsin in *requirements.in(N); do
-        print -P "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
-        if [[ "$#" -gt 0 ]]; then
+        print -rP "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
+        if [[ $# -gt 0 ]]; then
             pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
             pipc $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
         else
@@ -138,8 +137,8 @@ pipu () {  # [req...]
 pipuh () {  # [req...]
     local reqs=($@)
     for reqsin in *requirements.in(N); do
-        print -P "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
-        if [[ "$#" -gt 0 ]]; then
+        print -rP "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
+        if [[ $# -gt 0 ]]; then
             pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
             pipch $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
         else
@@ -160,15 +159,15 @@ pipuhs () {  # [req...]
 
 # activate venv for the current folder and install requirements, creating venv if necessary
 _envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
-    local vpath="$(venvs_path)"
-    local venv="$vpath/$1"
-    print -P "%F{cyan}> entering venv @ ${venv/#$HOME/~} . . .%f"
-    [[ -d $venv ]] || eval $2 $venv
-    ln -sfn "$PWD" "$vpath/project"
+    local vpath=$(venvs_path)
+    local venv=${vpath}/${1}
+    print -rP "%F{cyan}> entering venv @ ${venv/#$HOME/~} . . .%f"
+    [[ -d $venv ]] || eval $2 ${(q-)venv}
+    ln -sfn $PWD ${vpath}/project
     . $venv/bin/activate
     pip install -qU pip pip-tools
     rehash
-    pips "${@:3}"
+    pips ${@:3}
 }
 alias envin="_envin venv 'python3 -m venv'"  # [reqs-txt...]
 alias envin2="_envin venv2 virtualenv2"  # [reqs-txt...]
@@ -176,18 +175,18 @@ alias envinpypy="_envin venvPyPy 'pypy3 -m venv'"  # [reqs-txt...]
 
 # activate without installing anything
 activate () {  # [proj-dir]
-    . "$(venvs_path ${1:-"$PWD"})/venv/bin/activate"
+    . "$(venvs_path ${1:-${PWD}})/venv/bin/activate"
 }
 activatefzf () {
-    local projects=("${VENVS_WORLD}/"*"/project"(:P))
-    activate "$(print -l $projects | fzf --reverse -0 -1)"
+    local projects=(${VENVS_WORLD}/*/project(N:P))
+    activate "$(print -rl $projects | fzf --reverse -0 -1)"
 }
 # deactivate
 alias envout="deactivate"
 
 # get path of python for the given script's folder's associated venv
 _whichvpy () {  # <venv-name> <script>
-    print -r "$(venvs_path ${2:P:h})/$1/bin/python"
+    print -rn "$(venvs_path ${2:P:h})/$1/bin/python"
 }
 alias whichvpy="_whichvpy venv"  # <script>
 
@@ -201,7 +200,7 @@ alias vpypy="_vpy venvPyPy"  # <script> [script-arg...]
 
 # get path of project for the activated venv
 whichpyproj () {
-    echo ${"$(which python)":h:h:h}/project(N:P)
+    print -rn ${"$(which python)":h:h:h}/project(N:P)
 }
 
 # prepend each script with a shebang for its folder's associated venv python
@@ -211,9 +210,8 @@ _vpyshebang () {  # <venv-name> <script> [script...]
     local vpybin
     for script in ${@:2}; do
         chmod +x $script
-        vpybin="$(whence -p vpy)" || vpybin="$(_whichvpy $1 $script)"
-        sed -i'' "1i\
-#!${vpybin}" $script
+        vpybin=$(whence -p vpy) || vpybin=$(_whichvpy $1 $script)
+        print -rl "#\!${vpybin}" "$(<${script})" > $script
     done
 }
 alias vpyshebang="_vpyshebang venv"  # <script> [script...]
@@ -233,7 +231,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
     if [[ -d $3 ]]; then
         vpylauncherfrom $1 $2 $3/$2
     elif [[ -e $3 ]]; then
-        print -P "%F{red}> ${3/#$HOME/~} exists%f"
+        print -rP "%F{red}> ${3/#$HOME/~} exists%f"
         return 1
     else
         ln -s "$(venvs_path $1)/venv/bin/$2" $3
@@ -243,10 +241,10 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
 # delete venvs for project folders which no longer exist
 prunevenvs () {
     local orphaned_venv
-    for proj in "${VENVS_WORLD}/"*"/project"(:P); do
+    for proj in ${VENVS_WORLD}/*/project(N:P); do
         if [[ ! -d $proj ]]; then
-            orphaned_venv="$(venvs_path $proj)"
-            print -l "Missing: ${proj/#$HOME/~}" "Orphan: $(du -hs $orphaned_venv)"
+            orphaned_venv=$(venvs_path $proj)
+            print -rl "Missing: ${proj/#$HOME/~}" "Orphan: $(du -hs $orphaned_venv)"
             read -q "?Delete orphan [yN]? "
             [[ $REPLY = 'y' ]] && rm -r $orphaned_venv
             print '\n'
@@ -256,9 +254,9 @@ prunevenvs () {
 
 # pip list -o for all projects
 pipcheckold () {
-    for proj in "${VENVS_WORLD}/"*"/project"(:P); do
+    for proj in ${VENVS_WORLD}/*/project(N:P); do
         if [[ -d $proj ]]; then
-            print -P "\n%F{cyan}> checking ${proj/#$HOME/~} . . .%f"
+            print -rlP '' "%F{cyan}> checking ${proj/#$HOME/~} . . .%f"
             vpyfrom $proj pip list -o --format freeze | grep -v "^setuptools=" | hpype
         fi
     done
@@ -282,7 +280,7 @@ pipusall () {  # [proj-dir...]
 # run either from the folder housing pyproject.toml, or one below
 # to categorize, name files <category>-requirements.in
 pypc () {
-    pip install -qU tomlkit || print -P "%F{yellow}> You probably want to activate a venv with 'envin', first%f"
+    pip install -qU tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first%f"
     python -c "
 from pathlib import Path
 import tomlkit
@@ -318,19 +316,19 @@ _get_sublp () {
     local spfile
     local spfiles=(*.sublime-project(N))
     if [[ ! $spfiles ]]; then
-        spfile="${PWD:t}.sublime-project"
+        spfile=${PWD:t}.sublime-project
         print '{}' > $spfile
     else
         spfile=$spfiles[1]
     fi
-    print $spfile
+    print -rn $spfile
 }
 
-# specify the venv interpreter in a new or existing sublime text project file
+# specify the venv interpreter in a new or existing sublime text project file for the working folder
 vpysublp () {
-    local stp="$(_get_sublp)"
-    local pypath="$(venvs_path)/venv/bin/python"
-    print -P "%F{cyan}> writing interpreter ${pypath/#$HOME/~} -> ${stp/#$HOME/~} . . .%f"
+    local stp=$(_get_sublp)
+    local pypath=$(venvs_path)/venv/bin/python
+    print -rP "%F{cyan}> writing interpreter ${pypath/#$HOME/~} -> ${stp/#$HOME/~} . . .%f"
     python -c "
 from pathlib import Path
 from json import loads, dumps
