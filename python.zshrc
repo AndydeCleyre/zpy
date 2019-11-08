@@ -13,22 +13,22 @@ _hlt () {  # <syntax>
 # pipe pythonish syntax through this to make it colorful
 alias hpype="_hlt py"
 
-# print a function's description, arguments, and content
-# without arguments, print all function names, descriptions, and arguments, without content
+# print description and arguments for all or specified functions
+# to see actual function contents, use `which <funcname>`
 zpy () {  # [zpy-function [python.zshrc]]
     local zpyzshrc="${2:-$HOME/.python.zshrc}"
     if [[ "$#" -gt 0 ]]; then
-        awk -F '\n' -v RS= -v re="^(alias )?$1( |=)" '{
-            for (f=1; f<=NF; f++) {
-                if ($f ~ re) { print; next; }
-            }
-        }' $zpyzshrc | _hlt zsh
-    else
-        # TODO: don't rely on -P, it ain't portable
-        grep -P '(^#[^!])|(^alias)|(^$)|(^\S+ \(\) {(.*})?(  # .+)?$)' $zpyzshrc \
+        pcregrep -Mh '(^[^\n]+\n?)*^(alias '$1'=|('$1' \(\)))\n?([^\n]+\n?)*' $zpyzshrc \
+        | grep -Ev '^ |}' \
         | uniq \
-        | sed -E 's/(.+) \(\) \{([^\}]*\})?(.*)/\1\3/g' \
-        | sed -E 's/^alias ([^=]+).+(  # .+)/\1\2/g' \
+        | sed -E 's/([^ \n]+) \(\) \{([^\}]*\})?(.*)/\1\3/g' \
+        | sed -E 's/^alias ([^=]+).+(  # .+)?/\1\2/g' \
+        | _hlt zsh
+    else
+        pcregrep '^(alias|([^ \n]+ \(\))|#|$)' $zpyzshrc \
+        | uniq \
+        | sed -E 's/([^ \n]+) \(\) \{([^\}]*\})?(.*)/\1\3/g' \
+        | sed -E 's/^alias ([^=]+).+(  # .+)?/\1\2/g' \
         | _hlt zsh
     fi
 }
