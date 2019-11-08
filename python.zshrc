@@ -264,14 +264,14 @@ pipcheckold () {
 
 # pipus for all or specified projects
 pipusall () {  # [proj-dir...]
-    for proj in ${@:-"${VENVS_WORLD}/"*"/project"(:P)}; do
+    trap "cd $PWD" EXIT
+    for proj in ${@:-${VENVS_WORLD}/*/project(N:P)}; do
         if [[ -d $proj ]]; then
-            print -P "\n%F{cyan}> visiting ${proj/#$HOME/~} . . .%f"
+            print -rlP '' "%F{cyan}> visiting ${proj/#$HOME/~} . . .%f"
             cd $proj
             activate
             pipus
             deactivate
-            cd - 1> /dev/null
         fi
     done
 }
