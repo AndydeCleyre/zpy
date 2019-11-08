@@ -34,10 +34,11 @@ zpy () {  # [zpy-function [python.zshrc]]
 }
 
 # get path of folder containing all venvs for the current folder or specified project path
-venvs_path () {  # [proj-dir]
-    ((( $+commands[md5sum] )) && print "${VENVS_WORLD}/${$(print -n ${${1:-${PWD}}:P} | md5sum)%% *}") ||
-                                 print "${VENVS_WORLD}/$(md5 -qs ${${1:-${PWD}}:P})"
-}
+ if (( $+commands[md5sum] )); then
+venvs_path () { print -rn "${VENVS_WORLD}/${$(print -rn ${${1:-${PWD}}:P} | md5sum)%% *}" }  # [proj-dir]
+ else
+     venvs_path () { print -rn "${VENVS_WORLD}/$(md5 -qs ${${1:-${PWD}}:P})" }  # [proj-dir]
+ fi
 
 # start REPL
 alias i="ipython"
