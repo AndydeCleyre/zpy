@@ -345,3 +345,114 @@ sublp () {  # [subl-arg...]
     vpysublp
     subl --project "$(_get_sublp)" $@
 }
+
+# a basic pipx clone
+# supported commands:
+# pipz install <pkg> [pkg...]
+# pipz uninstall <pkg> [pkg...]
+# pipz upgrade <pkg> [pkg...]
+# pipz upgrade-all
+# pipz list
+# pipz uninstall-all
+# pipz reinstall-all
+# pipz inject <pkg> <extra-pkg> [extra-pkg...]
+# pipz runpip <pkg> <pip-arg...>
+# pipz runfrom <pkg> <cmd> [cmd-arg...]
+# not implemented: run (use runfrom); ensurepath; completions
+pipz () {
+    trap "cd $PWD" EXIT
+    local projects_home=${XDG_DATA_HOME:-~/.local/share}/python
+    local bins_home=${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin
+    case $1 in
+    'install')
+        local bins
+        for app in ${@:2}; do
+            mkdir -p $bins_home $projects_home/$app
+            cd $projects_home/$app
+            envin
+            rm -f requirements.{in,txt}
+            pipacs $app
+            envout
+            bins=("$(venvs_path)/venv/bin/"*(:t))
+            bins=(${bins:#(activate(|.csh|.fish)|easy_install(|-<->*)|pip(|<->*|-compile|-sync)|python(|<->*))})
+            bins=(${(f)"$(print -rl $bins | fzf --reverse -m -0 -1 --prompt='['$app'] Which scripts should be added to the path? Select more than one with <tab>.')"})
+            for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
+        done
+    ;;
+    'uninstall')
+        for app in ${@:2}; do
+            rm -rf $projects_home/$app
+            rm -rf "$(venvs_path $projects_home/$app)"
+            for bin in $bins_home/*(N); do
+                if [[ ${bin:P} =~ "^$(venvs_path $projects_home/$app)/" ]]; then
+                    rm $bin
+                fi
+            done
+        done
+    ;;
+    'upgrade')
+        pipusall $projects_home/${^@:2}
+    ;;
+    'upgrade-all')
+        pipusall $projects_home/*
+    ;;
+    'list')
+        print -rP "projects are in %F{cyan}${projects_home/#$HOME/~}%f"
+        print -rP "venvs are in %F{cyan}${${VENVS_WORLD}/#$HOME/~}%f"
+        print -rP "apps are exposed at %F{cyan}${bins_home/#$HOME/~}%f"
+        local plink
+        local pdir
+        local rows=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
+        for bin in $bins_home/*(N); do
+            plink=${bin:P:h:h:h}/project
+            pdir=${plink:P}
+            if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
+                rows+=(${bin:t} "$(vpyfrom $pdir pip list | grep -E "^${pdir:t} " | tr -s ' ')" "$(vpyfrom $pdir python -V)")
+            fi
+        done
+        print -rPaC 3 $rows
+    ;;
+    'reinstall-all')
+        for app in ${@:2}; do
+            pipz uninstall $app
+            pipz install $app
+        done
+    ;;
+    'uninstall-all')
+        for app in ${@:2}; do pipz uninstall $app; done
+    ;;
+    'inject')
+        cd $projects_home/$2 || return 1
+        local blacklist=("$(venvs_path)/venv/bin/"*(:t))
+        envin
+        pipacs ${@:3}
+        envout
+        local bins=("$(venvs_path)/venv/bin/"*(:t))
+        bins=(${bins:|blacklist})
+        bins=(${(f)"$(print -rl $bins | fzf --reverse -m -0 -1 --prompt='['$app'] Which scripts should be added to the path? Select more than one with <tab>.')"})
+        for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
+    ;;
+    'runpip')
+        vpyfrom $projects_home/$2 pip ${@:3}
+    ;;
+    'runfrom')
+        local app=$2
+        local cmd=(${@:3})
+        local projdir=${TMPPREFIX}_pipz_${app}
+        local bin=$(venvs_path $projdir)/venv/bin/$cmd[1]
+        if [[ ! -f $bin || ! -x $bin ]]; then
+            mkdir -p $projdir
+            cd $projdir
+            envin
+            rm -f requirements.{in,txt}
+            pipacs $app
+            envout
+            cd - 1> /dev/null
+        fi
+        vpyfrom $projdir $cmd
+    ;;
+    *)
+        zpy pipz
+    ;;
+    esac
+}
