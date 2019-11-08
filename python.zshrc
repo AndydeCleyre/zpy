@@ -235,8 +235,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
         print -P "%F{red}> ${3/#$HOME/~} exists%f"
         return 1
     else
-        printf "%s\n" "#!/bin/sh" "exec $(venvs_path $1)/venv/bin/$2 \"\$@\"" > $3
-        chmod +x $3
+        ln -s "$(venvs_path $1)/venv/bin/$2" $3
     fi
 }
 
