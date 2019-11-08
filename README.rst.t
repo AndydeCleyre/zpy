@@ -4,19 +4,33 @@ zpy: Zsh helpers for Python venvs with pip-tools
 
 These functions aim to help with your workflows, without being restrictive.
 
-.. image:: https://s3.gifyu.com/images/previewee81b820d6596f2f.gif
+They can generally replace usage of pipenv, poetry [#]_, pipx, virtualenvwrapper, etc.
+
+.. [#] when used with flit__
+
+__ https://flit.readthedocs.io/en/latest/
+
+.. code-block:: bash
+
+    envin
+    pipacs requests pendulum
 
 Guiding Ideas
 -------------
 
 - You should not have to manually specify the requirements anywhere other than ``*requirements.in`` files.
 - Folks who want to use your code shouldn't have to install any new-fangled less-standard tools (pipenv, poetry, pip-tools, zpy, etc.). ``pip install -r requirements.txt`` ought to be sufficient.
-- Your workflow should be transparent and personal. Run ``zpy <function>`` to see what it does. Modify it. Add your own.
+- Your workflow should be transparent and personal. Run ``zpy <function>`` to see its documentation, and ``which <function>`` to see its entire content. Modify it. Add your own.
 - Each project folder is associated with an external ``venvs`` folder (``$XDG_DATA_HOME/venvs/<project path hash>`` or ``~/.local/share/venvs/<project path hash>``).
 - Within each ``venvs`` folder we have:
 
   + one or more named venv folders (``venv``, ``venv2``, ``venvPyPy``) based on the desired Python
   + a symlink back to the project folder
+
+Preview
+-------
+
+.. image:: https://s3.gifyu.com/images/previewee81b820d6596f2f.gif
 
 Basic Operations
 ----------------
@@ -72,7 +86,7 @@ Often, you'll want to do a few of these things at a time. You can do so with ``p
 
 .. image:: https://i.imgur.com/GcWPIFA.png
 
-You can always see exactly what a command will do, with explanations and accepted arguments, by running ``zpy <command>``. Running ``zpy`` alone will show all descriptions and arguments, while omitting implementation details.
+You can see exactly what a command will do with ``which <command>``, and get explanations and accepted arguments with ``zpy <command>``. Running ``zpy`` alone will show all descriptions and arguments.
 
 For a full, concise list of functions and their descriptions and arguments, see `Functions & Aliases`_.
 
@@ -93,6 +107,8 @@ Launch a Python script that's installed in its project's venv's ``bin`` folder, 
 
 Generate a launcher script that runs a venv-installed script (in the ``bin`` folder) from outside the venv, with ``vpylauncherfrom </path/to/project> <script-name> <destination>``.
 
+Oh, and there's a mini pipx clone, ``pipz``.
+
 But wait, there's more! Find it all down at `Functions & Aliases`_.
 
 Installation
@@ -108,7 +124,21 @@ Or if you use a fancy Zsh plugin tool, you can install with a command like one o
     antigen bundle andydecleyre/zpy python.zshrc
     antibody bundle andydecleyre/zpy path:python.zshrc
 
-If you'd like some handy venv-python script launchers accessible outside your Zsh environment, put the ``vpy`` and ``vpyfrom`` scripts somewhere in your ``PATH`` (e.g. ``~/bin``, ``~/.local/bin``, ``/usr/local/bin``).
+If you'd like some handy venv-python script launchers accessible outside your interactive Zsh environment, put the included ``vpy`` and ``vpyfrom`` scripts somewhere in your ``PATH`` (e.g. ``~/bin``, ``~/.local/bin``, ``/usr/local/bin``).
+
+Some functions (``activatefzf`` and ``pipz``) require fzf__.
+
+__ https://github.com/junegunn/fzf
+
+The ``zpy`` function currently uses ``pcregrep`` [#]_, which is a dependency of ``zsh`` on some distributions, but not others. If you don't like this dependency, please submit an issue.
+
+.. [#] provided by: ``pcregrep`` on Debian; ``pcre-tools`` on Alpine/Fedora/OpenSUSE
+
+You can optionally enable pretty syntax highlighting by installing either highlight__ or bat__.
+
+__ http://www.andre-simon.de/doku/highlight/highlight.html
+
+__ https://github.com/sharkdp/bat
 
 Functions & Aliases
 -------------------
@@ -116,7 +146,7 @@ Functions & Aliases
 .. code-block:: bash
 
 <!--(for line in help.splitlines())-->
-  $! line !$
+    $! line !$
 <!--(end)-->
 
 Feedback welcome! Submit an issue here or reach me on Telegram__.
