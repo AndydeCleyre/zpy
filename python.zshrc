@@ -89,7 +89,7 @@ _pipa () {  # <category> <req> [req...]
     local reqsin="requirements.in"
     [[ $1 ]] && reqsin="$1-requirements.in"
     print -P "%F{cyan}> appending -> $reqsin . . .%f"
-    printf "%s\n" "${@:2}" >> "$reqsin"
+    print -l "${@:2}" >> "$reqsin"
     hpype < "$reqsin"
 }
 alias pipa="_pipa ''"  # <req> [req...]
@@ -178,14 +178,15 @@ activate () {  # [proj-dir]
     . $(venvs_path ${1:-"$(pwd)"})/venv/bin/activate
 }
 activatefzf () {
-    activate "$(printf "%s\n" ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P) | fzf --reverse)"
+    local projects=("${VENVS_WORLD}/"*"/project"(:P))
+    activate "$(print -l $projects | fzf --reverse -0 -1)"
 }
 # deactivate
 alias envout="deactivate"
 
 # get path of python for the given script's folder's associated venv
 _whichvpy () {  # <venv-name> <script>
-    echo "$(venvs_path ${2:P:h})/$1/bin/python"
+    print -r "$(venvs_path ${2:P:h})/$1/bin/python"
 }
 alias whichvpy="_whichvpy venv"  # <script>
 
@@ -244,11 +245,11 @@ prunevenvs () {
     local orphaned_venv
     for proj in "${VENVS_WORLD}/"*"/project"(:P); do
         if [[ ! -d $proj ]]; then
-            orphaned_venv=$(venvs_path $proj)
-            printf "%s\n" "Missing: ${proj/#$HOME/~}" "Orphan: $(du -hs $orphaned_venv)"
+            orphaned_venv="$(venvs_path $proj)"
+            print -l "Missing: ${proj/#$HOME/~}" "Orphan: $(du -hs $orphaned_venv)"
             read -q "?Delete orphan [yN]? "
             [[ $REPLY = 'y' ]] && rm -r $orphaned_venv
-            printf "%s\n" '' ''
+            print '\n'
         fi
     done
 }
@@ -322,7 +323,7 @@ _get_sublp () {
     else
         spfile=$spfiles[1]
     fi
-    printf $spfile
+    print $spfile
 }
 
 # specify the venv interpreter in a new or existing sublime text project file
