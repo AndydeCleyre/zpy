@@ -1,9 +1,14 @@
+# path of folder containing all project-venvs (venvs_path) folders
+# each project is linked to one or more of:
+# <VENVS_WORLD>/<`venvs_path proj-dir`>/{venv,venv2,venvPyPy}
+VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
+
 # syntax highlighter, reading stdin
 _hlt () {  # <syntax>
     # recommended themes: aiseered, base16/flat, moria, oxygenated
-    ([[ $(command -v highlight) ]] && highlight -O truecolor -s moria -S $1) ||
-    ([[ $(command -v bat)       ]] && bat -l $1 -p)                          ||
-                                      cat -
+    ((( $+commands[highlight] )) && highlight -O truecolor -s moria -S $1) ||
+    ((( $+commands[bat]       )) && bat -l $1 -p)                          ||
+                                    cat -
 }
 # pipe pythonish syntax through this to make it colorful
 alias hpype="_hlt py"
@@ -30,9 +35,8 @@ zpy () {  # [zpy-function [python.zshrc]]
 
 # get path of folder containing all venvs for the current folder or specified project path
 venvs_path () {  # [proj-dir]
-    local venvs_world=${XDG_DATA_HOME:-~/.local/share}/venvs
-    ([[ $(command -v md5sum) ]] && echo "$venvs_world/$(printf ${${1:-"$(pwd)"}:P} | md5sum | cut -d ' ' -f 1)") ||
-                                   echo "$venvs_world/$(md5 -qs ${${1:-"$(pwd)"}:P})"
+    ((( $+commands[md5sum] )) && print "${VENVS_WORLD}/${$(print -n ${${1:-${PWD}}:P} | md5sum)%% *}") ||
+                                 print "${VENVS_WORLD}/$(md5 -qs ${${1:-${PWD}}:P})"
 }
 
 # start REPL
@@ -59,12 +63,13 @@ pipch () {  # [reqs-in...]
 
 # install packages according to all found or specified requirements.txt files (sync)
 pips () {  # [reqs-txt...]
-    if [[ $(echo ${@:-*requirements.txt(N)}) ]]; then
-        print -P "%F{cyan}> syncing env <-" ${@:-*requirements.txt(N)} ". . .%f"
-        pip-sync ${@:-*requirements.txt(N)}
-        for reqstxt in ${@:-*requirements.txt}; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
-            pip install -qr $reqstxt                # AND
-        done                                        # https://github.com/jazzband/pip-tools/issues/925 is resolved (by merging https://github.com/jazzband/pip-tools/pull/927)
+    local reqstxts=(${@:-*requirements.txt(N)})
+    if [[ $reqstxts ]]; then
+        print -P "%F{cyan}> syncing env <- $reqstxts . . .%f"
+        pip-sync $reqstxts
+        for reqstxt in $reqstxts; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
+            pip install -qr $reqstxt  # AND
+        done                          # https://github.com/jazzband/pip-tools/issues/925 is resolved (by merging https://github.com/jazzband/pip-tools/pull/927)
     fi
 }
 
@@ -158,7 +163,7 @@ _envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
     local venv="$vpath/$1"
     print -P "%F{cyan}> entering venv @ ${venv/#$HOME/~} . . .%f"
     [[ -d $venv ]] || eval $2 $venv
-    ln -sfn "$(pwd)" "$vpath/project"
+    ln -sfn "$PWD" "$vpath/project"
     . $venv/bin/activate
     pip install -qU pip pip-tools
     rehash
@@ -237,7 +242,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
 # delete venvs for project folders which no longer exist
 prunevenvs () {
     local orphaned_venv
-    for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
+    for proj in "${VENVS_WORLD}/"*"/project"(:P); do
         if [[ ! -d $proj ]]; then
             orphaned_venv=$(venvs_path $proj)
             printf "%s\n" "Missing: ${proj/#$HOME/~}" "Orphan: $(du -hs $orphaned_venv)"
@@ -250,7 +255,7 @@ prunevenvs () {
 
 # pip list -o for all projects
 pipcheckold () {
-    for proj in ${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P); do
+    for proj in "${VENVS_WORLD}/"*"/project"(:P); do
         if [[ -d $proj ]]; then
             print -P "\n%F{cyan}> checking ${proj/#$HOME/~} . . .%f"
             vpyfrom $proj pip list -o --format freeze | grep -v "^setuptools=" | hpype
@@ -260,7 +265,7 @@ pipcheckold () {
 
 # pipus for all or specified projects
 pipusall () {  # [proj-dir...]
-    for proj in ${@:-${XDG_DATA_HOME:-~/.local/share}/venvs/*/project(:P)}; do
+    for proj in ${@:-"${VENVS_WORLD}/"*"/project"(:P)}; do
         if [[ -d $proj ]]; then
             print -P "\n%F{cyan}> visiting ${proj/#$HOME/~} . . .%f"
             cd $proj
@@ -289,7 +294,7 @@ reqsins = [*pyproject.parent.glob(f'*/*{suffix}')] + [*pyproject.parent.glob(f'*
 if pyproject.is_file():
     toml_data = tomlkit.parse(pyproject.read_text())
     for reqsin in reqsins:
-        print(f'\033[96m> injecting {reqsin} -> {pyproject} . . .\033[00m')
+        print(f'\033[96m> injecting {reqsin} -> {pyproject} . . .\033[0m')
         pyproject_reqs = [
             line
             for line in reqsin.read_text().splitlines()
@@ -310,12 +315,12 @@ if pyproject.is_file():
 # get a new or existing sublime text project file for the working folder
 _get_sublp () {
     local spfile
-    spfile="$(ls *.sublime-project(:P) | head -1)" 2> /dev/null
-    local folder
-    folder="$(pwd)"
-    if [[ ! $spfile ]]; then
-        spfile="${folder}/${folder:t}.sublime-project"
-        printf '{}' > $spfile
+    local spfiles=(*.sublime-project(N))
+    if [[ ! $spfiles ]]; then
+        spfile="${PWD:t}.sublime-project"
+        print '{}' > $spfile
+    else
+        spfile=$spfiles[1]
     fi
     printf $spfile
 }
