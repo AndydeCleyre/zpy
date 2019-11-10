@@ -357,8 +357,7 @@ sublp () {  # [subl-arg...]
 # pipz reinstall-all
 # pipz inject <pkg> <extra-pkg> [extra-pkg...]
 # pipz runpip <pkg> <pip-arg...>
-# pipz runfrom <pkg> <cmd> [cmd-arg...]
-# not implemented: run (use runfrom); ensurepath; completions
+# pipz runpkg <pkg> <cmd> [cmd-arg...]
 pipz () {
     trap "cd $PWD" EXIT
     local projects_home=${XDG_DATA_HOME:-~/.local/share}/python
@@ -403,11 +402,13 @@ pipz () {
         local plink
         local pdir
         local rows=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
+        local piplistline
         for bin in $bins_home/*(N); do
             plink=${bin:P:h:h:h}/project
             pdir=${plink:P}
             if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
-                rows+=(${bin:t} "$(vpyfrom $pdir pip list | grep -E "^${pdir:t} " | tr -s ' ')" "$(vpyfrom $pdir python -V)")
+                piplistline=($(vpyfrom $pdir pip list | grep -E "^${pdir:t} " | tr -s ' '))
+                rows+=(${bin:t} "$piplistline[1,2]" "$(vpyfrom $pdir python -V)")
             fi
         done
         print -rPaC 3 $rows
@@ -435,7 +436,7 @@ pipz () {
     'runpip')
         vpyfrom $projects_home/$2 pip ${@:3}
     ;;
-    'runfrom')
+    'runpkg')
         local app=$2
         local cmd=(${@:3})
         local projdir=${TMPPREFIX}_pipz_${app}
