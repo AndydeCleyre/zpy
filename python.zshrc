@@ -1,3 +1,6 @@
+ autoload -Uz zargs
+ PROCS="${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}"
+
 # path of folder containing all project-venvs (venvs_path) folders
 # each project is linked to one or more of:
 # <VENVS_WORLD>/<`venvs_path proj-dir`>/{venv,venv2,venvPyPy}
@@ -35,9 +38,13 @@ zpy () {  # [zpy-function [python.zshrc]]
 
 # get path of folder containing all venvs for the current folder or specified project path
  if (( $+commands[md5sum] )); then
-venvs_path () { print -rn "${VENVS_WORLD}/${$(print -rn ${${1:-${PWD}}:P} | md5sum)%% *}" }  # [proj-dir]
+venvs_path () {  # [proj-dir]
+    print -rn "${VENVS_WORLD}/${$(print -rn ${${1:-${PWD}}:P} | md5sum)%% *}"
+}
  else
-     venvs_path () { print -rn "${VENVS_WORLD}/$(md5 -qs ${${1:-${PWD}}:P})" }  # [proj-dir]
+     venvs_path () {  # [proj-dir]
+         print -rn "${VENVS_WORLD}/$(md5 -qs ${${1:-${PWD}}:P})"
+     }
  fi
 
 # start REPL
@@ -45,29 +52,28 @@ alias i="ipython"
 alias i2="ipython2"
 
 # install packages
-alias pipi="pip install -U"  # <req> [req...]
+alias pipi="pip --disable-pip-version-check install -U"  # <req> [req...]
+
+ __pipc () {  # <reqs-in> [pip-compile option...]
+     print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${PWD:P}/#$HOME/~}%f"
+     pip-compile --no-header ${@:2} $1 2>&1 | hpype
+ }
 
 # compile requirements.txt files from all found or specified requirements.in files (compile)
 pipc () {  # [reqs-in...]
-    for reqsin in ${@:-*requirements.in(N)}; do
-        print -rP "%F{cyan}> compiling $reqsin -> ${reqsin:r}.txt . . .%f"
-        pip-compile --no-header $reqsin 2>&1 | hpype
-    done
+    zargs -rl -P $PROCS -- ${@:-*requirements.in(N)} -- __pipc
 }
 # compile with hashes
 pipch () {  # [reqs-in...]
-    for reqsin in ${@:-*requirements.in(N)}; do
-        print -rP "%F{cyan}> compiling $reqsin -> ${reqsin:r}.txt . . .%f"
-        pip-compile --no-header --generate-hashes $reqsin 2>&1 | hpype
-    done
+    zargs -ri___ -P $PROCS -- ${@:-*requirements.in(N)} -- __pipc ___ --generate-hashes
 }
 
 # install packages according to all found or specified requirements.txt files (sync)
 pips () {  # [reqs-txt...]
     local reqstxts=(${@:-*requirements.txt(N)})
     if [[ $reqstxts ]]; then
-        print -rP "%F{cyan}> syncing env <- $reqstxts . . .%f"
-        pip-sync $reqstxts
+        print -rP "%F{cyan}> %F{blue}syncing%F{cyan} env %B<-%b $reqstxts %B::%b ${${PWD:P}/#$HOME/~}%f"
+        pip-sync -q $reqstxts
         for reqstxt in $reqstxts; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
             pip install -qr $reqstxt  # AND
         done                          # https://github.com/jazzband/pip-tools/issues/925 is resolved (by merging https://github.com/jazzband/pip-tools/pull/927)
@@ -120,31 +126,33 @@ pipachs () {  # <req> [req...]
     pips requirements.txt
 }
 
+ __pipu () {  # <hashes|nohashes> <reqsin> [req...]
+     local gen_hashes=${1:#nohashes}
+     local reqsin=$2
+     local reqs=(${@:3})
+     print -rP "%F{cyan}> %F{yellow}upgrading%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${PWD:P}/#$HOME/~}%f"
+     if [[ $# -gt 2 ]]; then
+         if [[ $gen_hashes ]]; then
+             pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
+             pipch $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
+         else
+             pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
+             pipc $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
+         fi
+     elif [[ $gen_hashes ]]; then
+         pip-compile --no-header -U --generate-hashes $reqsin 2>&1 | hpype
+     else
+         pip-compile --no-header -U $reqsin 2>&1 | hpype
+     fi
+ }
+
 # recompile *requirements.txt with upgraded versions of all or specified packages (upgrade)
 pipu () {  # [req...]
-    local reqs=($@)
-    for reqsin in *requirements.in(N); do
-        print -rP "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
-        if [[ $# -gt 0 ]]; then
-            pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
-            pipc $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
-        else
-            pip-compile --no-header -U $reqsin 2>&1 | hpype
-        fi
-    done
+    zargs -ri___ -P $PROCS -- *requirements.in(N) -- __pipu nohashes ___ $@
 }
 # upgrade with hashes
 pipuh () {  # [req...]
-    local reqs=($@)
-    for reqsin in *requirements.in(N); do
-        print -rP "%F{cyan}> upgrading ${reqsin:r}.txt <- $reqsin . . .%f"
-        if [[ $# -gt 0 ]]; then
-            pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
-            pipch $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
-        else
-            pip-compile --no-header -U --generate-hashes $reqsin 2>&1 | hpype
-        fi
-    done
+    zargs -ri___ -P $PROCS -- *requirements.in(N) -- __pipu hashes ___ $@
 }
 
 # upgrade, then sync
@@ -232,7 +240,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
     if [[ -d $3 ]]; then
         vpylauncherfrom $1 $2 $3/$2
     elif [[ -e $3 ]]; then
-        print -rP "%F{red}> ${3/#$HOME/~} exists%f"
+        print -rP "%F{red}> ${${3:a}/#$HOME/~} exists! %B::%b ${${1:P}/#$HOME/~}%f"
         return 1
     else
         ln -s "$(venvs_path $1)/venv/bin/$2" $3
@@ -253,35 +261,41 @@ prunevenvs () {
     done
 }
 
-# pip list -o for all projects
-pipcheckold () {
-    for proj in ${VENVS_WORLD}/*/project(N:P); do
-        if [[ -d $proj ]]; then
-            print -rlP '' "%F{cyan}> checking ${proj/#$HOME/~} . . .%f"
-            vpyfrom $proj pip list -o --format freeze | grep -v "^setuptools=" | hpype
-        fi
-    done
+ __pipcheckoldcells () {  # <proj-dir>
+     # TODO: use jq if present, fall back to this
+     local proj=${1:P}
+     local cells=($(vpyfrom $proj pip --disable-pip-version-check list -o | tail +3 | grep -Ev '^(setuptools|six|pip|pip-tools) ' | awk '{print $1,$2,$3,$4}'))
+     # [package; version; latest; type] -> [package; version; latest; proj-dir]
+     for ((i = 1; i <= $#cells; i++)); do
+         if (( $i % 4 == 0 )); then cells[i]=${proj/#$HOME/~}; fi
+     done
+     print -rl $cells
+ }
+# pip list -o for all or specified projects
+pipcheckold () {  # [proj-dir...]
+    local cells=("%F{cyan}%BPackage%b%f" "%F{cyan}%BVersion%b%f" "%F{cyan}%BLatest%b%f" "%F{cyan}%BProject%b%f")
+    cells+=(${(f)"$(zargs -rl -P $PROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/)} -- __pipcheckoldcells)"})
+    if [[ $#cells -gt 4 ]]; then print -rPaC 4 $cells; fi
 }
+
+ __pipusproj () {  # <proj-dir>
+     trap "cd $PWD" EXIT
+     cd $1
+     activate
+     pipus
+     deactivate
+ }
 
 # pipus for all or specified projects
 pipusall () {  # [proj-dir...]
-    trap "cd $PWD" EXIT
-    for proj in ${@:-${VENVS_WORLD}/*/project(N:P)}; do
-        if [[ -d $proj ]]; then
-            print -rlP '' "%F{cyan}> visiting ${proj/#$HOME/~} . . .%f"
-            cd $proj
-            activate
-            pipus
-            deactivate
-        fi
-    done
+    zargs -ri___ -P $PROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- __pipusproj ___ | grep '::'
 }
 
 # inject loose requirements.in dependencies into pyproject.toml
 # run either from the folder housing pyproject.toml, or one below
 # to categorize, name files <category>-requirements.in
 pypc () {
-    pip install -qU tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first%f"
+    pip install -qU tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#$HOME/~}%f"
     python -c "
 from pathlib import Path
 import tomlkit
@@ -294,7 +308,7 @@ reqsins = [*pyproject.parent.glob(f'*/*{suffix}')] + [*pyproject.parent.glob(f'*
 if pyproject.is_file():
     toml_data = tomlkit.parse(pyproject.read_text())
     for reqsin in reqsins:
-        print(f'\033[96m> injecting {reqsin} -> {pyproject} . . .\033[0m')
+        print(f'\033[96m> injecting {reqsin} -> {pyproject}\033[0m')
         pyproject_reqs = [
             line
             for line in reqsin.read_text().splitlines()
@@ -329,14 +343,14 @@ if pyproject.is_file():
 vpysublp () {
     local stp=$(__get_sublp)
     local pypath=$(venvs_path)/venv/bin/python
-    print -rP "%F{cyan}> writing interpreter ${pypath/#$HOME/~} -> ${stp/#$HOME/~} . . .%f"
+    print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#$HOME/~} %B->%b ${stp/#$HOME/~} %B::%b ${${PWD:P}/#$HOME/~}%f"
     python -c "
 from pathlib import Path
 from json import loads, dumps
 spfile = Path('''${stp}''')
 sp = loads(spfile.read_text())
 sp.setdefault('settings', {})
-sp['settings']['python_interpreter'] = '''$(venvs_path)/venv/bin/python'''
+sp['settings']['python_interpreter'] = '''${pypath}'''
 spfile.write_text(dumps(sp, indent=4))
     "
 }
@@ -346,6 +360,29 @@ sublp () {  # [subl-arg...]
     vpysublp
     subl --project "$(__get_sublp)" $@
 }
+
+ __pipzlistrow () {  # <projects_home> <bin>
+     local projects_home=$1
+     local bin=$2
+     local plink=${bin:P:h:h:h}/project
+     local pdir=${plink:P}
+     if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
+         local piplistline=($(vpyfrom $pdir pip list | grep "^${pdir:t} "))
+         print -rl "${bin:t}" "${piplistline[1,2]}" "$(vpyfrom $pdir python -V)"
+     fi
+ }
+
+ __pipzinstallpkg () {  # <projects_home> <pkg>
+     trap "cd $PWD" EXIT
+     local projects_home=$1
+     local pkg=$2
+     mkdir -p $projects_home/$pkg
+     cd $projects_home/$pkg
+     envin
+     rm -f requirements.{in,txt}
+     pipacs $pkg
+     envout
+ }
 
 # a basic pipx clone
 # supported commands:
@@ -365,28 +402,24 @@ pipz () {
     local bins_home=${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin
     case $1 in
     'install')
+        zargs -rl -P $PROCS -- ${@:2} -- __pipzinstallpkg $projects_home
+        mkdir -p $bins_home
         local bins
-        for app in ${@:2}; do
-            mkdir -p $bins_home $projects_home/$app
-            cd $projects_home/$app
-            envin
-            rm -f requirements.{in,txt}
-            pipacs $app
-            envout
-            bins=("$(venvs_path)/venv/bin/"*(:t))
+        for pkg in ${@:2}; do
+            cd $projects_home/$pkg
+            bins=("$(venvs_path)/venv/bin/"*(N:t))
             bins=(${bins:#(activate(|.csh|.fish)|easy_install(|-<->*)|pip(|<->*|-compile|-sync)|python(|<->*))})
-            bins=(${(f)"$(print -rl $bins | fzf --reverse -m -0 -1 --prompt='['$app'] Which scripts should be added to the path? Select more than one with <tab>.')"})
+            bins=(${(f)"$(print -rl $bins | fzf --reverse -m -0 -1 --prompt='['$pkg'] Which scripts should be added to the path? Select more than one with <tab>.')"})
             for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
         done
     ;;
     'uninstall')
-        for app in ${@:2}; do
-            rm -rf $projects_home/$app
-            rm -rf "$(venvs_path $projects_home/$app)"
-            for bin in $bins_home/*(N); do
-                if [[ ${bin:P} =~ "^$(venvs_path $projects_home/$app)/" ]]; then
-                    rm $bin
-                fi
+        local vpath
+        for pkg in ${@:2}; do
+            vpath=$(venvs_path $projects_home/$pkg)
+            rm -rf $projects_home/$pkg $vpath
+            for bin in $bins_home/*(@N); do
+                if [[ ${bin:P} =~ "^${vpath}/" ]]; then rm $bin; fi
             done
         done
     ;;
@@ -400,58 +433,49 @@ pipz () {
         print -rP "projects are in %F{cyan}${projects_home/#$HOME/~}%f"
         print -rP "venvs are in %F{cyan}${${VENVS_WORLD}/#$HOME/~}%f"
         print -rP "apps are exposed at %F{cyan}${bins_home/#$HOME/~}%f"
-        local plink
-        local pdir
-        local rows=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
-        local piplistline
-        for bin in $bins_home/*(N); do
-            plink=${bin:P:h:h:h}/project
-            pdir=${plink:P}
-            if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
-                piplistline=($(vpyfrom $pdir pip list | grep -E "^${pdir:t} " | tr -s ' '))
-                rows+=(${bin:t} "$piplistline[1,2]" "$(vpyfrom $pdir python -V)")
-            fi
-        done
-        print -rPaC 3 $rows
+        print -rP $bins_home/*(@N:t)
+        local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
+        cells+=(${(f)"$(zargs -rl -P $PROCS -- $bins_home/*(@N) -- __pipzlistrow $projects_home)"})
+        if [[ $#cells -gt 3 ]]; then print -rPaC 3 $cells; fi
     ;;
     'reinstall-all')
-        for app in ${@:2}; do
-            pipz uninstall $app
-            pipz install $app
-        done
+        pkgs=($projects_home/*(/N:t))
+        pipz uninstall $pkgs
+        pipz install $pkgs
     ;;
     'uninstall-all')
-        for app in ${@:2}; do pipz uninstall $app; done
+        pipz uninstall $projects_home/*(/N:t)
     ;;
     'inject')
         cd $projects_home/$2 || return 1
-        local blacklist=("$(venvs_path)/venv/bin/"*(:t))
+        local vbinpath="$(venvs_path)/venv/bin/"
+        local blacklist=(${vbinpath}*(N:t))
         envin
         pipacs ${@:3}
         envout
-        local bins=("$(venvs_path)/venv/bin/"*(:t))
+        local bins=(${vbinpath}*(N:t))
         bins=(${bins:|blacklist})
-        bins=(${(f)"$(print -rl $bins | fzf --reverse -m -0 -1 --prompt='['$app'] Which scripts should be added to the path? Select more than one with <tab>.')"})
+        bins=(${(f)"$(print -rl $bins | fzf --reverse -m -0 -1 --prompt='['$2'] Which scripts should be added to the path? Select more than one with <tab>.')"})
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
     'runpip')
         vpyfrom $projects_home/$2 pip ${@:3}
     ;;
     'runpkg')
-        local app=$2
+        local pkg=$2
         local cmd=(${@:3})
-        local projdir=${TMPPREFIX}_pipz_${app}
-        local bin=$(venvs_path $projdir)/venv/bin/$cmd[1]
+        local projdir=${TMPPREFIX}_pipz/${pkg}
+        local vpath=$(venvs_path $projdir)
+        local venv=${vpath}/venv
+        local bin=${venv}/bin/$cmd[1]
         if [[ ! -f $bin || ! -x $bin ]]; then
-            mkdir -p $projdir
-            cd $projdir
-            envin
-            rm -f requirements.{in,txt}
-            pipacs $app
+            [[ -d $venv ]] || python3 -m venv $venv
+            ln -sfn $projdir ${vpath}/project
+            . $venv/bin/activate
+            pipi $pkg -q
             envout
-            cd - 1> /dev/null
         fi
-        vpyfrom $projdir $cmd
+        ${venv}/bin/${cmd}
     ;;
     *)
         zpy pipz
