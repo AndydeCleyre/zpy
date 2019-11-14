@@ -3,15 +3,15 @@
 # <VENVS_WORLD>/<`venvs_path proj-dir`>/{venv,venv2,venvPyPy}
 VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
 
-# syntax highlighter, reading stdin
-_hlt () {  # <syntax>
-    # recommended themes: aiseered, base16/flat, moria, oxygenated
-    ((( $+commands[highlight] )) && highlight -O truecolor -s moria -S $1) ||
-    ((( $+commands[bat]       )) && bat -l $1 -p)                          ||
-                                    cat -
-}
+ # syntax highlighter, reading stdin
+ __hlt () {  # <syntax>
+     # recommended themes: aiseered, base16/flat, moria, oxygenated
+     ((( $+commands[highlight] )) && highlight -O truecolor -s moria -S $1) ||
+     ((( $+commands[bat]       )) && bat -l $1 -p)                          ||
+                                     cat -
+ }
 # pipe pythonish syntax through this to make it colorful
-alias hpype="_hlt py"
+alias hpype="__hlt py"
 
 # print description and arguments for all or specified functions
 # to see actual function contents, use `which <funcname>`
@@ -23,13 +23,13 @@ zpy () {  # [zpy-function [python.zshrc]]
         | uniq \
         | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
         | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g' \
-        | _hlt zsh
+        | __hlt zsh
     else
         pcregrep '^(alias|([^ \n]+ \(\))|#|$)' $zpyzshrc \
         | uniq \
         | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
         | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g' \
-        | _hlt zsh
+        | __hlt zsh
     fi
 }
 
@@ -85,19 +85,19 @@ pipchs () {  # [reqs-in...]
     pips ${^@:r}.txt
 }
 
+ __pipa () {  # <category> <req> [req...]
+     local reqsin=${1:+${1}-}requirements.in
+     print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${PWD:P}/#$HOME/~}%f"
+     print -rl ${@:2} >> $reqsin
+     hpype < $reqsin
+ }
 # add loose requirements to [<category>-]requirements.in (add)
-_pipa () {  # <category> <req> [req...]
-    local reqsin=${1:+${1}-}requirements.in
-    print -rP "%F{cyan}> appending -> $reqsin . . .%f"
-    print -rl ${@:2} >> $reqsin
-    hpype < $reqsin
-}
-alias pipa="_pipa ''"  # <req> [req...]
-alias pipabuild="_pipa build"  # <req> [req...]
-alias pipadev="_pipa dev"  # <req> [req...]
-alias pipadoc="_pipa doc"  # <req> [req...]
-alias pipapublish="_pipa publish"  # <req> [req...]
-alias pipatest="_pipa test"  # <req> [req...]
+alias pipa="__pipa ''"  # <req> [req...]
+alias pipabuild="__pipa build"  # <req> [req...]
+alias pipadev="__pipa dev"  # <req> [req...]
+alias pipadoc="__pipa doc"  # <req> [req...]
+alias pipapublish="__pipa publish"  # <req> [req...]
+alias pipatest="__pipa test"  # <req> [req...]
 
 # add to requirements.in and compile it to requirements.txt
 pipac () {  # <req> [req...]
@@ -157,21 +157,21 @@ pipuhs () {  # [req...]
     pips
 }
 
+ __envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
+     local vpath=$(venvs_path)
+     local venv=${vpath}/${1}
+     print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#$HOME/~} %B::%b ${${PWD:P}/#$HOME/~}%f"
+     [[ -d $venv ]] || eval $2 ${(q-)venv}
+     ln -sfn $PWD ${vpath}/project
+     . $venv/bin/activate
+     pip install -qU pip pip-tools
+     rehash
+     pips ${@:3}
+ }
 # activate venv for the current folder and install requirements, creating venv if necessary
-_envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
-    local vpath=$(venvs_path)
-    local venv=${vpath}/${1}
-    print -rP "%F{cyan}> entering venv @ ${venv/#$HOME/~} . . .%f"
-    [[ -d $venv ]] || eval $2 ${(q-)venv}
-    ln -sfn $PWD ${vpath}/project
-    . $venv/bin/activate
-    pip install -qU pip pip-tools
-    rehash
-    pips ${@:3}
-}
-alias envin="_envin venv 'python3 -m venv'"  # [reqs-txt...]
-alias envin2="_envin venv2 virtualenv2"  # [reqs-txt...]
-alias envinpypy="_envin venvPyPy 'pypy3 -m venv'"  # [reqs-txt...]
+alias envin="__envin venv 'python3 -m venv'"  # [reqs-txt...]
+alias envin2="__envin venv2 virtualenv2"  # [reqs-txt...]
+alias envinpypy="__envin venvPyPy 'pypy3 -m venv'"  # [reqs-txt...]
 
 # activate without installing anything
 activate () {  # [proj-dir]
@@ -184,47 +184,48 @@ activatefzf () {
 # deactivate
 alias envout="deactivate"
 
+ __whichvpy () {  # <venv-name> <script>
+     print -rn "$(venvs_path ${2:P:h})/$1/bin/python"
+ }
 # get path of python for the given script's folder's associated venv
-_whichvpy () {  # <venv-name> <script>
-    print -rn "$(venvs_path ${2:P:h})/$1/bin/python"
-}
-alias whichvpy="_whichvpy venv"  # <script>
+alias whichvpy="__whichvpy venv"  # <script>
 
+ __vpy () {  # <venv-name> <script> [script-arg...]
+     "$(__whichvpy $1 $2)" ${@:2}
+ }
 # run script with its folder's associated venv
-_vpy () {  # <venv-name> <script> [script-arg...]
-    "$(_whichvpy $1 $2)" ${@:2}
-}
-alias vpy="_vpy venv"  # <script> [script-arg...]
-alias vpy2="_vpy venv2"  # <script> [script-arg...]
-alias vpypy="_vpy venvPyPy"  # <script> [script-arg...]
+alias vpy="__vpy venv"  # <script> [script-arg...]
+alias vpy2="__vpy venv2"  # <script> [script-arg...]
+alias vpypy="__vpy venvPyPy"  # <script> [script-arg...]
 
 # get path of project for the activated venv
 whichpyproj () {
     print -rn ${"$(which python)":h:h:h}/project(N:P)
 }
 
+ __vpyshebang () {  # <venv-name> <script> [script...]
+     local vpybin
+     local vpyscript=$(whence -p vpy)
+     for script in ${@:2}; do
+         chmod +x $script
+         vpybin="${vpyscript:-$(__whichvpy $1 $script)}"
+         print -rl "#!${vpybin}" "$(<${script})" > $script
+     done
+ }
 # prepend each script with a shebang for its folder's associated venv python
 # if vpy exists in the PATH, #!/path/to/vpy will be used instead
 # also ensure the script is executable
-_vpyshebang () {  # <venv-name> <script> [script...]
-    local vpybin
-    for script in ${@:2}; do
-        chmod +x $script
-        vpybin=$(whence -p vpy) || vpybin=$(_whichvpy $1 $script)
-        print -rl "#\!${vpybin}" "$(<${script})" > $script
-    done
-}
-alias vpyshebang="_vpyshebang venv"  # <script> [script...]
-alias vpy2shebang="_vpyshebang venv2"  # <script> [script...]
-alias vpypyshebang="_vpyshebang venvPyPy"  # <script> [script...]
+alias vpyshebang="__vpyshebang venv"  # <script> [script...]
+alias vpy2shebang="__vpyshebang venv2"  # <script> [script...]
+alias vpypyshebang="__vpyshebang venvPyPy"  # <script> [script...]
 
+ __vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
+     "$(venvs_path $2)/$1/bin/$3" ${@:4}
+ }
 # run script from a given project folder's associated venv's bin folder
-_vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
-    "$(venvs_path $2)/$1/bin/$3" ${@:4}
-}
-alias vpyfrom="_vpyfrom venv"  # <proj-dir> <script-name> [script-arg...]
-alias vpy2from="_vpyfrom venv2"  # <proj-dir> <script-name> [script-arg...]
-alias vpypyfrom="_vpyfrom venvPyPy"  # <proj-dir> <script-name> [script-arg...]
+alias vpyfrom="__vpyfrom venv"  # <proj-dir> <script-name> [script-arg...]
+alias vpy2from="__vpyfrom venv2"  # <proj-dir> <script-name> [script-arg...]
+alias vpypyfrom="__vpyfrom venvPyPy"  # <proj-dir> <script-name> [script-arg...]
 
 # generate an external launcher for a script in a given project folder's associated venv's bin folder
 vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
@@ -311,22 +312,22 @@ if pyproject.is_file():
     "
 }
 
-# get a new or existing sublime text project file for the working folder
-_get_sublp () {
-    local spfile
-    local spfiles=(*.sublime-project(N))
-    if [[ ! $spfiles ]]; then
-        spfile=${PWD:t}.sublime-project
-        print '{}' > $spfile
-    else
-        spfile=$spfiles[1]
-    fi
-    print -rn $spfile
-}
+ # get a new or existing sublime text project file for the working folder
+ __get_sublp () {
+     local spfile
+     local spfiles=(*.sublime-project(N))
+     if [[ ! $spfiles ]]; then
+         spfile=${PWD:t}.sublime-project
+         print '{}' > $spfile
+     else
+         spfile=$spfiles[1]
+     fi
+     print -rn $spfile
+ }
 
 # specify the venv interpreter in a new or existing sublime text project file for the working folder
 vpysublp () {
-    local stp=$(_get_sublp)
+    local stp=$(__get_sublp)
     local pypath=$(venvs_path)/venv/bin/python
     print -rP "%F{cyan}> writing interpreter ${pypath/#$HOME/~} -> ${stp/#$HOME/~} . . .%f"
     python -c "
@@ -343,7 +344,7 @@ spfile.write_text(dumps(sp, indent=4))
 # launch a new or existing sublime text project, setting venv interpreter
 sublp () {  # [subl-arg...]
     vpysublp
-    subl --project "$(_get_sublp)" $@
+    subl --project "$(__get_sublp)" $@
 }
 
 # a basic pipx clone
