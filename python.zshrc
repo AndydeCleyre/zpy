@@ -392,7 +392,7 @@ sublp () {  # [subl-arg...]
 # pipz upgrade-all
 # pipz list
 # pipz uninstall-all
-# pipz reinstall-all
+# pipz reinstall [pkg...]
 # pipz inject <pkg> <extra-pkg> [extra-pkg...]
 # pipz runpip <pkg> <pip-arg...>
 # pipz runpkg <pkg> <cmd> [cmd-arg...]
@@ -438,8 +438,8 @@ pipz () {
         cells+=(${(f)"$(zargs -rl -P $PROCS -- $bins_home/*(@N) -- __pipzlistrow $projects_home)"})
         if [[ $#cells -gt 3 ]]; then print -rPaC 3 $cells; fi
     ;;
-    'reinstall-all')
-        pkgs=($projects_home/*(/N:t))
+    'reinstall')
+        local pkgs=(${${@:2}:-$projects_home/*(/N:t)})
         pipz uninstall $pkgs
         pipz install $pkgs
     ;;
