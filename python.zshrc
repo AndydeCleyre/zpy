@@ -408,7 +408,8 @@ pipz () {
         for pkg in ${@:2}; do
             cd $projects_home/$pkg
             bins=("$(venvs_path)/venv/bin/"*(N:t))
-            bins=(${bins:#(activate(|.csh|.fish)|easy_install(|-<->*)|pip(|<->*|-compile|-sync)|python(|<->*))})
+            bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|pip(|<->*)|python(|<->*))})
+            [[ $pkg != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
             bins=(${(f)"$(print -rl $bins | fzf --reverse -m -0 -1 --prompt='['$pkg'] Which scripts should be added to the path? Select more than one with <tab>.')"})
             for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
         done
