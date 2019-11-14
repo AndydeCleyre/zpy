@@ -186,7 +186,7 @@ activate () {  # [proj-dir]
     . "$(venvs_path ${1:-${PWD}})/venv/bin/activate"
 }
 activatefzf () {
-    local projects=(${VENVS_WORLD}/*/project(N:P))
+    local projects=(${VENVS_WORLD}/*/project(@N-/:P))
     activate "$(print -rl $projects | fzf --reverse -0 -1)"
 }
 # deactivate
@@ -208,7 +208,7 @@ alias vpypy="__vpy venvPyPy"  # <script> [script-arg...]
 
 # get path of project for the activated venv
 whichpyproj () {
-    print -rn ${"$(which python)":h:h:h}/project(N:P)
+    print -rn ${"$(which python)":h:h:h}/project(@N:P)
 }
 
  __vpyshebang () {  # <venv-name> <script> [script...]
@@ -250,12 +250,12 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
 # delete venvs for project folders which no longer exist
 prunevenvs () {
     local orphaned_venv
-    for proj in ${VENVS_WORLD}/*/project(N:P); do
+    for proj in ${VENVS_WORLD}/*/project(@N:P); do
         if [[ ! -d $proj ]]; then
             orphaned_venv=$(venvs_path $proj)
             print -rl "Missing: ${proj/#$HOME/~}" "Orphan: $(du -hs $orphaned_venv)"
             read -q "?Delete orphan [yN]? "
-            [[ $REPLY = 'y' ]] && rm -r $orphaned_venv
+            [[ $REPLY = 'y' ]] && rm -rf $orphaned_venv
             print '\n'
         fi
     done
@@ -427,7 +427,7 @@ pipz () {
         pipusall $projects_home/${^@:2}
     ;;
     'upgrade-all')
-        pipusall $projects_home/*
+        pipusall $projects_home/*(/N)
     ;;
     'list')
         print -rP "projects are in %F{cyan}${projects_home/#$HOME/~}%f"
