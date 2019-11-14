@@ -362,6 +362,7 @@ sublp () {  # [subl-arg...]
 }
 
  __pipzlistrow () {  # <projects_home> <bin>
+     # TODO: use jq if present, fall back to this
      local projects_home=$1
      local bin=$2
      local plink=${bin:P:h:h:h}/project
@@ -387,11 +388,9 @@ sublp () {  # [subl-arg...]
 # a basic pipx clone
 # supported commands:
 # pipz install <pkg> [pkg...]
-# pipz uninstall <pkg> [pkg...]
-# pipz upgrade <pkg> [pkg...]
-# pipz upgrade-all
+# pipz uninstall [pkg...]
+# pipz upgrade [pkg...]
 # pipz list
-# pipz uninstall-all
 # pipz reinstall [pkg...]
 # pipz inject <pkg> <extra-pkg> [extra-pkg...]
 # pipz runpip <pkg> <pip-arg...>
@@ -415,20 +414,25 @@ pipz () {
         done
     ;;
     'uninstall')
-        local vpath
-        for pkg in ${@:2}; do
-            vpath=$(venvs_path $projects_home/$pkg)
-            rm -rf $projects_home/$pkg $vpath
-            for bin in $bins_home/*(@N); do
-                if [[ ${bin:P} =~ "^${vpath}/" ]]; then rm $bin; fi
+        if [[ ${@:2} ]]; then
+            local vpath
+            for pkg in ${@:2}; do
+                vpath=$(venvs_path $projects_home/$pkg)
+                rm -rf $projects_home/$pkg $vpath
+                for bin in $bins_home/*(@N); do
+                    if [[ ${bin:P} =~ "^${vpath}/" ]]; then rm $bin; fi
+                done
             done
-        done
+        else
+            pipz uninstall $projects_home/*(/:t)
+        fi
     ;;
     'upgrade')
-        pipusall $projects_home/${^@:2}
-    ;;
-    'upgrade-all')
-        pipusall $projects_home/*(/N)
+        if [[ ${@:2} ]]; then
+            pipusall $projects_home/${^@:2}
+        else
+            pipusall $projects_home/*(/N)
+        fi
     ;;
     'list')
         print -rP "projects are in %F{cyan}${projects_home/#$HOME/~}%f"
@@ -443,9 +447,6 @@ pipz () {
         local pkgs=(${${@:2}:-$projects_home/*(/N:t)})
         pipz uninstall $pkgs
         pipz install $pkgs
-    ;;
-    'uninstall-all')
-        pipz uninstall $projects_home/*(/N:t)
     ;;
     'inject')
         cd $projects_home/$2 || return 1
