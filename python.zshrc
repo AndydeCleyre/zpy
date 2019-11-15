@@ -441,7 +441,10 @@ pipz () {
         print -rP $bins_home/*(@N:t)
         local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
         cells+=(${(f)"$(zargs -rl -P $PROCS -- $bins_home/*(@N) -- __pipzlistrow $projects_home)"})
-        if [[ $#cells -gt 3 ]]; then print -rPaC 3 $cells; fi
+        if [[ $#cells -gt 3 ]]; then
+            print -rPaC 3 $cells | head -1
+            print -rPaC 3 $cells | tail +2 | sort
+        fi
     ;;
     'reinstall')
         local pkgs=(${${@:2}:-$projects_home/*(/N:t)})
