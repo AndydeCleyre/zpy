@@ -55,7 +55,7 @@ alias i2="ipython2"
 alias pipi="pip --disable-pip-version-check install -U"  # <req> [req...]
 
  __pipc () {  # <reqs-in> [pip-compile option...]
-     print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${PWD:P}/#$HOME/~}%f"
+     print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${PWD:P}/#~/~}%f"
      pip-compile --no-header ${@:2} $1 2>&1 | hpype
  }
 
@@ -72,7 +72,7 @@ pipch () {  # [reqs-in...]
 pips () {  # [reqs-txt...]
     local reqstxts=(${@:-*requirements.txt(N)})
     if [[ $reqstxts ]]; then
-        print -rP "%F{cyan}> %F{blue}syncing%F{cyan} env %B<-%b $reqstxts %B::%b ${${PWD:P}/#$HOME/~}%f"
+        print -rP "%F{cyan}> %F{blue}syncing%F{cyan} env %B<-%b $reqstxts %B::%b ${${PWD:P}/#~/~}%f"
         pip-sync -q $reqstxts
         for reqstxt in $reqstxts; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
             pip install -qr $reqstxt  # AND
@@ -93,7 +93,7 @@ pipchs () {  # [reqs-in...]
 
  __pipa () {  # <category> <req> [req...]
      local reqsin=${1:+${1}-}requirements.in
-     print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${PWD:P}/#$HOME/~}%f"
+     print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
      print -rl ${@:2} >> $reqsin
      hpype < $reqsin
  }
@@ -130,7 +130,7 @@ pipachs () {  # <req> [req...]
      local gen_hashes=${1:#nohashes}
      local reqsin=$2
      local reqs=(${@:3})
-     print -rP "%F{cyan}> %F{yellow}upgrading%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${PWD:P}/#$HOME/~}%f"
+     print -rP "%F{cyan}> %F{yellow}upgrading%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
      if [[ $# -gt 2 ]]; then
          if [[ $gen_hashes ]]; then
              pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
@@ -168,7 +168,7 @@ pipuhs () {  # [req...]
  __envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
      local vpath=$(venvs_path)
      local venv=${vpath}/${1}
-     print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#$HOME/~} %B::%b ${${PWD:P}/#$HOME/~}%f"
+     print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
      [[ -d $venv ]] || eval $2 ${(q-)venv}
      ln -sfn $PWD ${vpath}/project
      . $venv/bin/activate
@@ -240,7 +240,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
     if [[ -d $3 ]]; then
         vpylauncherfrom $1 $2 $3/$2
     elif [[ -e $3 ]]; then
-        print -rP "%F{red}> ${${3:a}/#$HOME/~} exists! %B::%b ${${1:P}/#$HOME/~}%f"
+        print -rP "%F{red}> ${${3:a}/#~/~} exists! %B::%b ${${1:P}/#~/~}%f"
         return 1
     else
         ln -s "$(venvs_path $1)/venv/bin/$2" $3
@@ -253,7 +253,7 @@ prunevenvs () {
     for proj in ${VENVS_WORLD}/*/project(@N:P); do
         if [[ ! -d $proj ]]; then
             orphaned_venv=$(venvs_path $proj)
-            print -rl "Missing: ${proj/#$HOME/~}" "Orphan: $(du -hs $orphaned_venv)"
+            print -rl "Missing: ${proj/#~/~}" "Orphan: $(du -hs $orphaned_venv)"
             read -q "?Delete orphan [yN]? "
             [[ $REPLY = 'y' ]] && rm -rf $orphaned_venv
             print '\n'
@@ -267,7 +267,7 @@ prunevenvs () {
      local cells=($(vpyfrom $proj pip --disable-pip-version-check list -o | tail +3 | grep -Ev '^(setuptools|six|pip|pip-tools) ' | awk '{print $1,$2,$3,$4}'))
      # [package; version; latest; type] -> [package; version; latest; proj-dir]
      for ((i = 1; i <= $#cells; i++)); do
-         if (( $i % 4 == 0 )); then cells[i]=${proj/#$HOME/~}; fi
+         if (( $i % 4 == 0 )); then cells[i]="${proj/#~/~}"; fi
      done
      print -rl $cells
  }
@@ -295,7 +295,7 @@ pipusall () {  # [proj-dir...]
 # run either from the folder housing pyproject.toml, or one below
 # to categorize, name files <category>-requirements.in
 pypc () {
-    pip install -qU tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#$HOME/~}%f"
+    pip install -qU tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#~/~}%f"
     python -c "
 from pathlib import Path
 import tomlkit
@@ -341,9 +341,10 @@ if pyproject.is_file():
 
 # specify the venv interpreter in a new or existing sublime text project file for the working folder
 vpysublp () {
+    # TODO: use jq if available, otherwise python
     local stp=$(__get_sublp)
     local pypath=$(venvs_path)/venv/bin/python
-    print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#$HOME/~} %B->%b ${stp/#$HOME/~} %B::%b ${${PWD:P}/#$HOME/~}%f"
+    print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~/~} %B->%b ${stp/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
     python -c "
 from pathlib import Path
 from json import loads, dumps
@@ -435,9 +436,9 @@ pipz () {
         fi
     ;;
     'list')
-        print -rP "projects are in %F{cyan}${projects_home/#$HOME/~}%f"
-        print -rP "venvs are in %F{cyan}${${VENVS_WORLD}/#$HOME/~}%f"
-        print -rP "apps are exposed at %F{cyan}${bins_home/#$HOME/~}%f"
+        print -rP "projects are in %F{cyan}${projects_home/#~/~}%f"
+        print -rP "venvs are in %F{cyan}${${VENVS_WORLD}/#~/~}%f"
+        print -rP "apps are exposed at %F{cyan}${bins_home/#~/~}%f"
         print -rP $bins_home/*(@N:t)
         local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
         cells+=(${(f)"$(zargs -rl -P $PROCS -- $bins_home/*(@N) -- __pipzlistrow $projects_home)"})
