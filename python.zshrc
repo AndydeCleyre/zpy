@@ -1,9 +1,11 @@
+ ZPYSRC=${0:P}
+
  autoload -Uz zargs
  PROCS="${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}"
 
-# path of folder containing all project-venvs (venvs_path) folders
+# path of folder containing all project-venv (venvs_path) folders
 # each project is linked to one or more of:
-# <VENVS_WORLD>/<`venvs_path proj-dir`>/{venv,venv2,venvPyPy}
+# $VENVS_WORLD/`venvs_path <proj-dir>`/{venv,venv2,venvPyPy}
 VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
 
  # syntax highlighter, reading stdin
@@ -18,17 +20,16 @@ alias hpype="__hlt py"
 
 # print description and arguments for all or specified functions
 # to see actual function contents, use `which <funcname>`
-zpy () {  # [zpy-function [python.zshrc]]
-    local zpyzshrc=${2:-$HOME/.python.zshrc}
+zpy () {  # [zpy-function]
     if [[ $# -gt 0 ]]; then
-        pcregrep -Mh '(^[^\n]+\n)*^(alias '$1'=|('$1' \(\)))\n?([^\n]+\n)*' $zpyzshrc \
+        pcregrep -Mh '(^[^\n]+\n)*^(alias '$1'=|('$1' \(\)))\n?([^\n]+\n)*' $ZPYSRC \
         | grep -Ev '^( |})' \
         | uniq \
         | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
         | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g' \
         | __hlt zsh
     else
-        pcregrep '^(alias|([^ \n]+ \(\))|#|$)' $zpyzshrc \
+        pcregrep '^(alias|([^ \n]+ \(\))|#|$)' $ZPYSRC \
         | uniq \
         | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
         | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g' \
