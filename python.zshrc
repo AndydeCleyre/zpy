@@ -366,13 +366,16 @@ sublp () {  # [subl-arg...]
 }
 
  __pipzlistrow () {  # <projects_home> <bin>
-     # TODO: use jq if present, fall back to this
      local projects_home=$1
      local bin=$2
      local plink=${bin:P:h:h:h}/project
      local pdir=${plink:P}
      if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
-         local piplistline=($(vpyfrom $pdir pip list | grep "^${pdir:t} "))
+         if (( $+commands[jq] )); then
+             local piplistline=($(vpyfrom $pdir pip list --format json | jq -r '.[] | select(.name=="'${pdir:t}'") | .name,.version'))
+         else
+             local piplistline=($(vpyfrom $pdir pip list | grep "^${pdir:t} "))
+         fi
          print -rl "${bin:t}" "${piplistline[1,2]}" "$(vpyfrom $pdir python -V)"
      fi
  }
