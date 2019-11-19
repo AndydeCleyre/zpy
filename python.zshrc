@@ -267,7 +267,7 @@ prunevenvs () {
  __pipcheckoldcells () {  # <proj-dir>
      # TODO: use jq if present, fall back to this
      local proj=${1:P}
-     local cells=($(vpyfrom $proj pip --disable-pip-version-check list -o | tail +3 | grep -Ev '^(setuptools|six|pip|pip-tools) ' | awk '{print $1,$2,$3,$4}'))
+     local cells=($(vpyfrom $proj pip --disable-pip-version-check list -o | tail -n +3 | grep -Ev '^(setuptools|six|pip|pip-tools) ' | awk '{print $1,$2,$3,$4}'))
      # [package; version; latest; type] -> [package; version; latest; proj-dir]
      for ((i = 1; i <= $#cells; i++)); do
          if (( $i % 4 == 0 )); then cells[i]="${proj/#~/~}"; fi
@@ -446,8 +446,8 @@ pipz () {
         local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
         cells+=(${(f)"$(zargs -rl -P $PROCS -- $bins_home/*(@N) -- __pipzlistrow $projects_home)"})
         if [[ $#cells -gt 3 ]]; then
-            print -rPaC 3 $cells | head -1
-            print -rPaC 3 $cells | tail +2 | sort
+            print -rPaC 3 $cells | head -n 1
+            print -rPaC 3 $cells | tail -n +2 | sort
         fi
     ;;
     'reinstall')
