@@ -3,10 +3,12 @@
  autoload -Uz zargs
  PROCS="${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}"
 
-# path of folder containing all project-venv (venvs_path) folders
-# each project is linked to one or more of:
-# $VENVS_WORLD/`venvs_path <proj-dir>`/{venv,venv2,venvPyPy}
-VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
+ export VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
+ # path of folder containing all project-venv (venvs_path) folders
+ # each project is linked to one or more of:
+ # $VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venvPyPy}
+ # which is also accessible as:
+ # `venvs_path <proj-dir>`/{venv,venv2,venvPyPy}
 
  # syntax highlighter, reading stdin
  __hlt () {  # <syntax>
