@@ -97,7 +97,7 @@ pipchs () {  # [reqs-in...]
  __pipa () {  # <category> <req> [req...]
      local reqsin=${1:+${1}-}requirements.in
      print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
-     print -rl ${@:2} >> $reqsin
+     print -rl ${@:2} >>! $reqsin
      hpype < $reqsin
  }
 # add loose requirements to [<category>-]requirements.in (add)
