@@ -445,12 +445,13 @@ pipz () {
         print -rP "projects are in %F{cyan}${projects_home/#~/~}%f"
         print -rP "venvs are in %F{cyan}${${VENVS_WORLD}/#~/~}%f"
         print -rP "apps are exposed at %F{cyan}${bins_home/#~/~}%f"
-        print
         local bins=($bins_home/*(@N:P))
-        print -r ${(i)${(M)bins:#${VENVS_WORLD}/*}:t}
+        bins=(${(M)bins:#${VENVS_WORLD}/*})
+        print
+        print -r ${(i)bins:t}
         print
         local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
-        cells+=(${(f)"$(zargs -rl -P $PROCS -- $bins_home/*(@N) -- __pipzlistrow $projects_home)"})
+        cells+=(${(f)"$(zargs -rl -P $PROCS -- $bins -- __pipzlistrow $projects_home)"})
         if [[ $#cells -gt 3 ]]; then
             print -rPaC 3 $cells | head -n 1
             print -rPaC 3 $cells | tail -n +2 | sort
