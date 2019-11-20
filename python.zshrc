@@ -39,7 +39,7 @@ zpy () {  # [zpy-function]
     fi
 }
 
-# get path of folder containing all venvs for the current folder or specified project path
+# get path of folder containing all venvs for the current folder or specified proj-dir
  if (( $+commands[md5sum] )); then
 venvs_path () {  # [proj-dir]
     print -rn "${VENVS_WORLD}/${$(print -rn ${${1:-${PWD}}:P} | md5sum)%% *}"
@@ -108,22 +108,22 @@ alias pipadoc="__pipa doc"  # <req> [req...]
 alias pipapublish="__pipa publish"  # <req> [req...]
 alias pipatest="__pipa test"  # <req> [req...]
 
-# add to requirements.in and compile it to requirements.txt
+# add to requirements.in, then compile it to requirements.txt
 pipac () {  # <req> [req...]
     pipa $@
     pipc requirements.in
 }
-# add to requirements.in and compile it with hashes to requirements.txt
+# add to requirements.in, then compile it with hashes to requirements.txt
 pipach () {  # <req> [req...]
     pipa $@
     pipch requirements.in
 }
-# add to requirements.in and compile it to requirements.txt, then sync to that
+# add to requirements.in, compile it to requirements.txt, then sync to that
 pipacs () {  # <req> [req...]
     pipac $@
     pips requirements.txt
 }
-# add to requirements.in and compile it with hashes to requirements.txt, then sync to that
+# add to requirements.in, compile it with hashes to requirements.txt, then sync to that
 pipachs () {  # <req> [req...]
     pipach $@
     pips requirements.txt
@@ -393,6 +393,7 @@ sublp () {  # [subl-arg...]
  }
 
 # a basic pipx clone
+# if no pkg is provided to {uninstall,upgrade,reinstall}, *all* pkgs will be affected
 # supported commands:
 # pipz install <pkg> [pkg...]
 # pipz uninstall [pkg...]
@@ -402,7 +403,9 @@ sublp () {  # [subl-arg...]
 # pipz inject <pkg> <extra-pkg> [extra-pkg...]
 # pipz runpip <pkg> <pip-arg...>
 # pipz runpkg <pkg> <cmd> [cmd-arg...]
-pipz () {
+# pipz  # show usage
+pipz () {  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [subcmd-arg...]
+    # TODO: py2, pypy
     trap "cd $PWD" EXIT
     local projects_home=${XDG_DATA_HOME:-~/.local/share}/python
     local bins_home=${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin
