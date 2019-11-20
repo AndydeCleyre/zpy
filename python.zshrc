@@ -417,7 +417,7 @@ sublp () {  # [subl-arg...]
 
 # a basic pipx clone
 # if no pkg is provided to {uninstall,upgrade,reinstall}, *all* pkgs will be affected
-# supported commands:
+# supported commands (py3 only):
 # pipz install <pkg> [pkg...]
 # pipz uninstall [pkg...]
 # pipz upgrade [pkg...]
@@ -428,7 +428,6 @@ sublp () {  # [subl-arg...]
 # pipz runpkg <pkg> <cmd> [cmd-arg...]
 # pipz  # show usage
 pipz () {  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [subcmd-arg...]
-    # TODO: py2, pypy
     trap "cd $PWD" EXIT
     local projects_home=${XDG_DATA_HOME:-~/.local/share}/python
     local bins_home=${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin
