@@ -265,13 +265,30 @@ prunevenvs () {
 }
 
  __pipcheckoldcells () {  # <proj-dir>
-     # TODO: use jq if present, fall back to this
      local proj=${1:P}
-     local cells=($(vpyfrom $proj pip --disable-pip-version-check list -o | tail -n +3 | grep -Ev '^(setuptools|six|pip|pip-tools) ' | awk '{print $1,$2,$3,$4}'))
-     # [package; version; latest; type] -> [package; version; latest; proj-dir]
-     for ((i = 1; i <= $#cells; i++)); do
-         if (( $i % 4 == 0 )); then cells[i]="${proj/#~/~}"; fi
-     done
+     if (( $+commands[jq] )); then
+         local cells=($(
+             vpyfrom $proj pip --disable-pip-version-check list -o --format json \
+             | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
+         ))
+         #    (package, version, latest)
+         # -> (package, version, latest, proj-dir)
+         for ((i = 3; i <= $#cells; i+=4)); do
+             cells[i]+=("${proj/#~/~}")
+         done
+     else
+         local cells=($(
+             vpyfrom $proj pip --disable-pip-version-check list -o \
+             | tail -n +3 \
+             | grep -Ev '^(setuptools|six|pip|pip-tools) ' \
+             | awk '{print $1,$2,$3,$4}'
+         ))
+         #    (package, version, latest, type)
+         # -> (package, version, latest, proj-dir)
+         for ((i = 4; i <= $#cells; i+=4)); do
+             cells[i]="${proj/#~/~}"
+         done
+     fi
      print -rl $cells
  }
 # pip list -o for all or specified projects
@@ -344,11 +361,13 @@ if pyproject.is_file():
 
 # specify the venv interpreter in a new or existing sublime text project file for the working folder
 vpysublp () {
-    # TODO: use jq if available, otherwise python
     local stp=$(__get_sublp)
     local pypath=$(venvs_path)/venv/bin/python
     print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~/~} %B->%b ${stp/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
-    python -c "
+    if (( $+commands[jq] )); then
+        print -r "$(jq --arg py $pypath '.settings+={python_interpreter: $py}' $stp)" >! $stp
+    else
+        python -c "
 from pathlib import Path
 from json import loads, dumps
 spfile = Path('''${stp}''')
@@ -356,7 +375,8 @@ sp = loads(spfile.read_text())
 sp.setdefault('settings', {})
 sp['settings']['python_interpreter'] = '''${pypath}'''
 spfile.write_text(dumps(sp, indent=4))
-    "
+        "
+    fi
 }
 
 # launch a new or existing sublime text project, setting venv interpreter
@@ -372,7 +392,10 @@ sublp () {  # [subl-arg...]
      local pdir=${plink:P}
      if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
          if (( $+commands[jq] )); then
-             local piplistline=($(vpyfrom $pdir pip list --format json | jq -r '.[] | select(.name=="'${pdir:t}'") | .name,.version'))
+             local piplistline=($(
+                 vpyfrom $pdir pip list --format json \
+                 | jq -r '.[] | select(.name=="'${pdir:t}'") | .name,.version'
+             ))
          else
              local piplistline=($(vpyfrom $pdir pip list | grep "^${pdir:t} "))
          fi
