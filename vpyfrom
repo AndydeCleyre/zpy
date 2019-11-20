@@ -1,7 +1,0 @@
-#!/usr/bin/env zsh
-VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
-venvs_path () {
-    ((( $+commands[md5sum] )) && print -rn "${VENVS_WORLD}/${$(print -rn ${${1:-${PWD}}:P} | md5sum)%% *}") ||
-                                 print -rn "${VENVS_WORLD}/$(md5 -qs ${${1:-${PWD}}:P})"
-}
-exec $(venvs_path ${1:P})/venv/bin/$2 ${@:3}

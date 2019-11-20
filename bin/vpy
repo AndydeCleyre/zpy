@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+VENVS_WORLD=${VENVS_WORLD:-${XDG_DATA_HOME:-~/.local/share}/venvs}
+
+if (( $+commands[md5sum] )); then
+    venvs_path () {  # [proj-dir]
+        print -rn "${VENVS_WORLD}/${$(print -rn ${${1:-${PWD}}:P} | md5sum)%% *}"
+    }
+else
+    venvs_path () {  # [proj-dir]
+        print -rn "${VENVS_WORLD}/$(md5 -qs ${${1:-${PWD}}:P})"
+    }
+fi
+
+exec $(venvs_path ${1:P:h})/venv/bin/python $@
