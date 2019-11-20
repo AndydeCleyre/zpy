@@ -220,7 +220,7 @@ whichpyproj () {
      for script in ${@:2}; do
          chmod +x $script
          vpybin="${vpyscript:-$(__whichvpy $1 $script)}"
-         print -rl "#!${vpybin}" "$(<${script})" > $script
+         print -rl "#!${vpybin}" "$(<${script})" >! $script
      done
  }
 # prepend each script with a shebang for its folder's associated venv python
@@ -335,7 +335,7 @@ if pyproject.is_file():
      local spfiles=(*.sublime-project(N))
      if [[ ! $spfiles ]]; then
          spfile=${PWD:t}.sublime-project
-         print '{}' > $spfile
+         print -r '{}' >! $spfile
      else
          spfile=$spfiles[1]
      fi
