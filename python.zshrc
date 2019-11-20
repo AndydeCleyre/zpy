@@ -442,7 +442,10 @@ pipz () {  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [su
             bins=("$(venvs_path)/venv/bin/"*(N:t))
             bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|pip(|<->*)|python(|<->*))})
             [[ $pkg != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
-            bins=(${(f)"$(print -rl $bins | fzf --reverse -m -0 -1 --prompt='['$pkg'] Which scripts should be added to the path? Select more than one with <tab>.')"})
+            bins=(${(f)"$(
+                print -rl $bins \
+                | fzf --reverse -m -0 -1 --prompt='['$pkg'] Which scripts should be added to the path? Select more than one with <tab>.'
+            )"})
             for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
         done
     ;;
@@ -497,7 +500,10 @@ pipz () {  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [su
         envout
         local bins=(${vbinpath}*(N:t))
         bins=(${bins:|blacklist})
-        bins=(${(f)"$(print -rl $bins | fzf --reverse -m -0 -1 --prompt='['$2'] Which scripts should be added to the path? Select more than one with <tab>.')"})
+        bins=(${(f)"$(
+            print -rl $bins \
+            | fzf --reverse -m -0 -1 --prompt='['$2'] Which scripts should be added to the path? Select more than one with <tab>.'
+        )"})
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
     'runpip')
