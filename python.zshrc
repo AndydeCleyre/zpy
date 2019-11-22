@@ -6,9 +6,9 @@
  export VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
  # path of folder containing all project-venv (venvs_path) folders
  # each project is linked to one or more of:
- # $VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venvPyPy}
+ # $VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venv-pypy,venv-<pyver>}
  # which is also accessible as:
- # `venvs_path <proj-dir>`/{venv,venv2,venvPyPy}
+ # `venvs_path <proj-dir>`/{venv,venv2,venv-pypy,venv-<pyver>}
 
  # syntax highlighter, reading stdin
  __hlt () {  # <syntax>
@@ -168,6 +168,11 @@ pipuhs () {  # [req...]
     pips
 }
 
+ __pyenv_name () {
+     local name=($(python -V 2>&1 | tail -n 1))
+     print -rn venv-${(j:-:)name:0:2:l:gs/[/}
+ }
+
  __envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
      local vpath=$(venvs_path)
      local venv=${vpath}/${1}
@@ -179,10 +184,18 @@ pipuhs () {  # [req...]
      rehash
      pips ${@:3}
  }
-# activate venv for the current folder and install requirements, creating venv if necessary
+# activate venv 'venv' for the current folder and install requirements, creating venv if necessary
+# python version will be whatever `python3` refers to at time of venv creation
 alias envin="__envin venv 'python3 -m venv'"  # [reqs-txt...]
+# like envin, but with venv 'venv2' and python2
 alias envin2="__envin venv2 virtualenv2"  # [reqs-txt...]
-alias envinpypy="__envin venvPyPy 'pypy3 -m venv'"  # [reqs-txt...]
+# like envin, but with venv 'venv-pypy' and pypy3
+alias envinpypy="__envin venv-pypy 'pypy3 -m venv'"  # [reqs-txt...]
+# like envin, but with venv 'venv-<pyver>' (based on `python --version`)
+# useful if you use pyenv or similar for multiple py3 versions on the same project
+pyenvin () {  # [reqs-txt...]
+    __envin $(__pyenv_name) 'python -m venv' $@
+}
 
 # activate without installing anything
 activate () {  # [proj-dir]
@@ -204,10 +217,14 @@ alias whichvpy="__whichvpy venv"  # <script>
  __vpy () {  # <venv-name> <script> [script-arg...]
      "$(__whichvpy $1 $2)" ${@:2}
  }
-# run script with its folder's associated venv
+# run script with its folder's associated venv 'venv'
 alias vpy="__vpy venv"  # <script> [script-arg...]
+# like vpy, but with venv 'venv2'
 alias vpy2="__vpy venv2"  # <script> [script-arg...]
-alias vpypy="__vpy venvPyPy"  # <script> [script-arg...]
+# like vpy, but with venv 'venv-pypy'
+alias vpypy="__vpy venv-pypy"  # <script> [script-arg...]
+# like vpy, but with venv 'venv-<pyver>'
+vpyenv () { __vpy $(__pyenv_name) $@ }  # <script> [script-arg...]
 
 # get path of project for the activated venv
 whichpyproj () {
@@ -228,7 +245,8 @@ whichpyproj () {
 # also ensure the script is executable
 alias vpyshebang="__vpyshebang venv"  # <script> [script...]
 alias vpy2shebang="__vpyshebang venv2"  # <script> [script...]
-alias vpypyshebang="__vpyshebang venvPyPy"  # <script> [script...]
+alias vpypyshebang="__vpyshebang venv-pypy"  # <script> [script...]
+vpyenvshebang () { __vpyshebang $(__pyenv_name) $@ }  # <script> [script...]
 
  __vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
      "$(venvs_path $2)/$1/bin/$3" ${@:4}
@@ -236,7 +254,8 @@ alias vpypyshebang="__vpyshebang venvPyPy"  # <script> [script...]
 # run script from a given project folder's associated venv's bin folder
 alias vpyfrom="__vpyfrom venv"  # <proj-dir> <script-name> [script-arg...]
 alias vpy2from="__vpyfrom venv2"  # <proj-dir> <script-name> [script-arg...]
-alias vpypyfrom="__vpyfrom venvPyPy"  # <proj-dir> <script-name> [script-arg...]
+alias vpypyfrom="__vpyfrom venv-pypy"  # <proj-dir> <script-name> [script-arg...]
+vpyenvfrom () { __vpyfrom $(__pyenv_name) $@ }  # <proj-dir> <script-name> [script-arg...]
 
 # generate an external launcher for a script in a given project folder's associated venv's bin folder
 vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
@@ -415,9 +434,9 @@ sublp () {  # [subl-arg...]
      envout
  }
 
-# a basic pipx clone
+# a basic pipx clone (py3 only)
 # if no pkg is provided to {uninstall,upgrade,reinstall}, *all* pkgs will be affected
-# supported commands (py3 only):
+# supported commands (pipx semantics):
 # pipz install <pkg> [pkg...]
 # pipz uninstall [pkg...]
 # pipz upgrade [pkg...]
