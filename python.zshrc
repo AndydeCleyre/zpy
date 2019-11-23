@@ -169,8 +169,13 @@ pipuhs () {  # [req...]
 }
 
  __pyenv_name () {
-     local name=($(python -V 2>&1 | tail -n 1))
-     print -rn venv-${(j:-:)name:0:2:l:gs/[/}
+     if (( $+commands[python] )); then
+         local name=($(python -V 2>&1 | tail -n 1))
+         print -rn venv-${(j:-:)name:0:2:l:gs/[/}
+     else
+         print -rP "%F{red}> No 'python' found in path!%f" 1>&2
+         return 1
+     fi
  }
 
  __envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
@@ -178,6 +183,10 @@ pipuhs () {  # [req...]
      local venv=${vpath}/${1}
      print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
      [[ -d $venv ]] || eval $2 ${(q-)venv}
+     if (( $? )); then
+        print -rP "%F{red}> FAILED: $2 ${(q-)venv}" 1>&2
+        return 1
+     fi
      ln -sfn $PWD ${vpath}/project
      . $venv/bin/activate
      pip install -qU pip pip-tools
@@ -194,7 +203,12 @@ alias envinpypy="__envin venv-pypy 'pypy3 -m venv'"  # [reqs-txt...]
 # like envin, but with venv 'venv-<pyver>' (based on `python --version`)
 # useful if you use pyenv or similar for multiple py3 versions on the same project
 pyenvin () {  # [reqs-txt...]
-    __envin $(__pyenv_name) 'python -m venv' $@
+    if (( $+commands[python] )); then
+        __envin $(__pyenv_name) 'python -m venv' $@
+    else
+        print -rP "%F{red}> No 'python' found in path!%f" 1>&2
+        return 1
+    fi
 }
 
 # activate without installing anything
@@ -277,7 +291,7 @@ prunevenvs () {
             orphaned_venv=$(venvs_path $proj)
             print -rl "Missing: ${proj/#~/~}" "Orphan: $(du -hs $orphaned_venv)"
             read -q "?Delete orphan [yN]? "
-            [[ $REPLY = 'y' ]] && rm -rf $orphaned_venv
+            [[ $REPLY == 'y' ]] && rm -rf $orphaned_venv
             print '\n'
         fi
     done
