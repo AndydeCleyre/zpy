@@ -276,7 +276,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
     if [[ -d $3 ]]; then
         vpylauncherfrom $1 $2 $3/$2
     elif [[ -e $3 ]]; then
-        print -rP "%F{red}> ${${3:a}/#~/~} exists! %B::%b ${${1:P}/#~/~}%f"
+        print -rP "%F{red}> ${${3:a}/#~/~} exists! %B::%b ${${1:P}/#~/~}%f" 1>&2
         return 1
     else
         ln -s "$(venvs_path $1)/venv/bin/$2" $3
