@@ -167,6 +167,13 @@ But wait, there's more! Find it all at `Functions & Aliases`_.
 Installation
 ------------
 
+Try it isolation with docker or podman, if you like:
+
+.. code-block:: bash
+
+    docker run --net=host -it andydecleyre/zpy-alpine:latest
+    podman run --net=host -it docker.io/andydecleyre/zpy-alpine:latest
+
 Install dependencies as appropriate for your platform, then:
 
 .. code-block:: bash
