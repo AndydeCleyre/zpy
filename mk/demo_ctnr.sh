@@ -45,5 +45,3 @@ buildah config \
     $ctnr
 img="$(buildah commit $ctnr zpy-alpine)"
 buildah tag "$img" "zpy-alpine:latest" "zpy-alpine:$(git describe)"
-
-buildah run -t $ctnr zsh
