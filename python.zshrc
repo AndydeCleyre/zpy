@@ -499,7 +499,7 @@ pipz () {  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [su
         if [[ ${@:2} ]]; then
             pipusall $projects_home/${^@:2}
         else
-            pipusall $projects_home/*(/N)
+            pipusall $projects_home/*(/)
         fi
     ;;
     'list')
