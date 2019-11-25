@@ -12,9 +12,9 @@
 
  # syntax highlighter, reading stdin
  __hlt () {  # <syntax>
-     # recommended themes: aiseered, base16/flat, moria, oxygenated
-     ((( $+commands[highlight] )) && highlight -O truecolor -s moria -S $1) ||
+     # recommended highlight themes: aiseered, base16/flat, moria, oxygenated
      ((( $+commands[bat]       )) && bat -l $1 -p)                          ||
+     ((( $+commands[highlight] )) && highlight -O truecolor -s moria -S $1) ||
                                      cat -
  }
 # pipe pythonish syntax through this to make it colorful
