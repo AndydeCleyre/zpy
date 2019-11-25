@@ -1,5 +1,4 @@
-help.sh
-vars.json
+/mk/help.txt
+/mk/readme_vars.json
 *.sublime-project
 *.sublime-workspace
-demo

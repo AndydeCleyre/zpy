@@ -1,5 +1,5 @@
 #!/bin/sh
-pcregrep '^(alias|([^ \n]+ \(\))|#|$)' "${1:-$(dirname "$0")/python.zshrc}" \
+pcregrep '^(alias|([^ \n]+ \(\))|#|$)' "${1:-$(dirname "$0")/../python.zshrc}" \
 | uniq \
 | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
 | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g'
