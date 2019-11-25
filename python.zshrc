@@ -200,9 +200,9 @@ alias envin="__envin venv 'python3 -m venv'"  # [reqs-txt...]
 alias envin2="__envin venv2 virtualenv2"  # [reqs-txt...]
 # like envin, but with venv 'venv-pypy' and pypy3
 alias envinpypy="__envin venv-pypy 'pypy3 -m venv'"  # [reqs-txt...]
-# like envin, but with venv 'venv-<pyver>' (based on `python --version`)
+# like envin, but with venv 'venv-<pyver>' and command `python`
 # useful if you use pyenv or similar for multiple py3 versions on the same project
-pyenvin () {  # [reqs-txt...]
+envinpy () {  # [reqs-txt...]
     if (( $+commands[python] )); then
         __envin $(__pyenv_name) 'python -m venv' $@
     else
