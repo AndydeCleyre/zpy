@@ -3,6 +3,7 @@ zpy: Zsh helpers for Python venvs with pip-tools
 ================================================
 
 .. image:: https://quay.io/repository/andykluger/zpy-alpine/status
+   :target: https://quay.io/repository/andykluger/zpy-alpine
 
 These functions aim to help with your workflows, without being restrictive.
 
