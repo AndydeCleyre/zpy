@@ -7,7 +7,7 @@ alias bldru="buildah run --user $user $ctnr"
 
 # start with a daily build of alpine:edge with zsh, prezto, micro, and a user
 today=$(date +%Y.%j)
-if ! buildah from --name $ctnr --pull=false prezto-alpine:$today; then
+if ! buildah from --name $ctnr --pull=false localhost/prezto-alpine:$today; then
     buildah from --name $ctnr alpine:edge
 
     # enable testing repo
@@ -27,6 +27,7 @@ if ! buildah from --name $ctnr --pull=false prezto-alpine:$today; then
     bldru sh -c 'echo "unalias ln ls" >> ~/.zshrc'
     bldru sh -c 'echo "export EDITOR=micro" >> ~/.zshrc'
     bldru sh -c 'echo "path=(~/.local/bin \$path)" >> ~/.zshrc'
+    bldru rm -rf /home/$user/.zprezto/.git /home/$user/.zprezto/modules/prompt/external/powerlevel10k
     img="$(buildah commit $ctnr prezto-alpine)"
     buildah tag "$img" "prezto-alpine:latest" "prezto-alpine:$today"
 fi
