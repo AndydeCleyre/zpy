@@ -44,4 +44,6 @@ buildah config \
     --cmd zsh \
     $ctnr
 img="$(buildah commit $ctnr zpy-alpine)"
-buildah tag "$img" "zpy-alpine:latest" "zpy-alpine:$(git describe)" "docker.io/andydecleyre/zpy-alpine:latest" "docker.io/andydecleyre/zpy-alpine:$(git describe)"
+buildah tag "$img" \
+    "zpy-alpine:latest" "zpy-alpine:$(git describe)" \
+    "quay.io/andykluger/zpy-alpine:latest" "quay.io/andykluger/zpy-alpine:$(git describe)"

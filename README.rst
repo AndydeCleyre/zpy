@@ -2,6 +2,8 @@
 zpy: Zsh helpers for Python venvs with pip-tools
 ================================================
 
+.. image:: https://quay.io/repository/andykluger/zpy-alpine/status
+
 These functions aim to help with your workflows, without being restrictive.
 
 They can generally replace usage of pipenv, poetry [#]_, pipx, virtualenvwrapper, etc.
@@ -171,8 +173,8 @@ Try it isolation with docker or podman, if you like:
 
 .. code-block:: bash
 
-    docker run --net=host -it andydecleyre/zpy-alpine:latest
-    podman run --net=host -it docker.io/andydecleyre/zpy-alpine:latest
+    docker run --net=host -it quay.io/andykluger/zpy-alpine:latest
+    podman run --net=host -it quay.io/andykluger/zpy-alpine:latest
 
 Install dependencies as appropriate for your platform, then:
 
