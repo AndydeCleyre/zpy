@@ -15,8 +15,25 @@ __ https://flit.readthedocs.io/en/latest/
 
 .. code-block:: bash
 
-    envin
-    pipacs requests structlog
+    (venv) ~/proj $ pipacs requests structlog
+
+.. code-block:: python
+
+    > appending -> requirements.in :: ~/proj
+    requests
+    structlog
+    > compiling requirements.in -> requirements.txt :: ~/proj
+    certifi==2019.9.11        # via requests
+    chardet==3.0.4            # via requests
+    idna==2.8                 # via requests
+    requests==2.22.0
+    six==1.13.0               # via structlog
+    structlog==19.2.0
+    urllib3==1.25.7           # via requests
+    > syncing env <- requirements.txt :: ~/proj
+
+.. contents::
+   :depth: 1
 
 Guiding Ideas
 -------------
