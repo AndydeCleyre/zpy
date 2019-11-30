@@ -52,6 +52,15 @@ Preview
 
 .. image:: https://s5.gifyu.com/images/1574710326.gif
 
+Try it in isolation with docker or podman, if you like:
+
+.. code-block:: bash
+
+    docker run --net=host -it quay.io/andykluger/zpy-alpine:latest
+    podman run --net=host -it quay.io/andykluger/zpy-alpine:latest
+
+Run ``zpy`` to see a full reference of `Functions & Aliases`_.
+
 Paths & Wording
 ---------------
 
@@ -186,13 +195,6 @@ But wait, there's more! Find it all at `Functions & Aliases`_.
 
 Installation
 ------------
-
-Try it isolation with docker or podman, if you like:
-
-.. code-block:: bash
-
-    docker run --net=host -it quay.io/andykluger/zpy-alpine:latest
-    podman run --net=host -it quay.io/andykluger/zpy-alpine:latest
 
 Install dependencies as appropriate for your platform, then:
 
