@@ -348,7 +348,7 @@ pipusall () {  # [proj-dir...]
 # run either from the folder housing pyproject.toml, or one below
 # to categorize, name files <category>-requirements.in
 pypc () {
-    pip install -qU tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#~/~}%f"
+    pip install -q tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#~/~}%f"
     python -c "
 from pathlib import Path
 import tomlkit
