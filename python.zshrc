@@ -448,14 +448,24 @@ sublp () {  # [subl-arg...]
      envout
  }
 
+ __pipzchoosepkgs () {  # <projects_home> [header='Packages:']
+    REPLY=(${(f)"$(
+        print -rl $1/*(/:t) \
+        | fzf --reverse -m -0 --header="${2:-Packages:}" --prompt='Which packages? Select more than one with <tab>. Filter: '
+    )"})
+}
+
 # a basic pipx clone (py3 only)
-# if no pkg is provided to {uninstall,upgrade,reinstall}, *all* pkgs will be affected
+# if no pkg is provided to {uninstall,upgrade,reinstall}, fzf will be invoked
 # supported commands (pipx semantics):
 # pipz install <pkg> [pkg...]
 # pipz uninstall [pkg...]
+# pipz uninstall-all
 # pipz upgrade [pkg...]
+# pipz upgrade-all
 # pipz list
 # pipz reinstall [pkg...]
+# pipz reinstall-all
 # pipz inject <pkg> <extra-pkg> [extra-pkg...]
 # pipz runpip <pkg> <pip-arg...>
 # pipz runpkg <pkg> <cmd> [cmd-arg...]
@@ -476,31 +486,43 @@ pipz () {  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [su
             [[ $pkg != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
             bins=(${(f)"$(
                 print -rl $bins \
-                | fzf --reverse -m -0 -1 --prompt='['$pkg'] Which scripts should be added to the path? Select more than one with <tab>.'
+                | fzf --reverse -m -0 -1 --header="Installing $pkg . . ." --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
             )"})
             for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
         done
     ;;
     'uninstall')
         if [[ ${@:2} ]]; then
-            local vpath
-            for pkg in ${@:2}; do
-                vpath=$(venvs_path $projects_home/$pkg)
-                rm -rf $projects_home/$pkg $vpath
-                for bin in $bins_home/*(@N); do
-                    if [[ ${bin:P} =~ "^${vpath}/" ]]; then rm $bin; fi
-                done
-            done
+            local pkgs=(${@:2})
         else
-            pipz uninstall $projects_home/*(/:t)
+            __pipzchoosepkgs $projects_home 'Uninstalling . . .'
+            [[ $REPLY ]] || return 1
+            local pkgs=($REPLY)
         fi
+        local vpath
+        for pkg in $pkgs; do
+            vpath=$(venvs_path $projects_home/$pkg)
+            rm -rf $projects_home/$pkg $vpath
+            for bin in $bins_home/*(@N); do
+                if [[ ${bin:P} =~ "^${vpath}/" ]]; then rm $bin; fi
+            done
+        done
+    ;;
+    'uninstall-all')
+        pipz uninstall $projects_home/*(/:t)
     ;;
     'upgrade')
         if [[ ${@:2} ]]; then
-            pipusall $projects_home/${^@:2}
+            local pkgs=(${@:2})
         else
-            pipusall $projects_home/*(/)
+            __pipzchoosepkgs $projects_home 'Upgrading . . .'
+            [[ $REPLY ]] || return 1
+            local pkgs=($REPLY)
         fi
+        pipusall $projects_home/${^pkgs}
+    ;;
+    'upgrade-all')
+        pipusall $projects_home/*(/)
     ;;
     'list')
         print -rP "projects are in %F{cyan}${projects_home/#~/~}%f"
@@ -519,9 +541,18 @@ pipz () {  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [su
         fi
     ;;
     'reinstall')
-        local pkgs=(${${@:2}:-$projects_home/*(/N:t)})
+        if [[ ${@:2} ]]; then
+            local pkgs=(${@:2})
+        else
+            __pipzchoosepkgs $projects_home 'Reinstalling . . .'
+            [[ $REPLY ]] || return 1
+            local pkgs=($REPLY)
+        fi
         pipz uninstall $pkgs
         pipz install $pkgs
+    ;;
+    'reinstall-all')
+        pipz reinstall $projects_home/*(/N:t)
     ;;
     'inject')
         cd $projects_home/$2 || return 1
@@ -534,7 +565,7 @@ pipz () {  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [su
         bins=(${bins:|blacklist})
         bins=(${(f)"$(
             print -rl $bins \
-            | fzf --reverse -m -0 -1 --prompt='['$2'] Which scripts should be added to the path? Select more than one with <tab>.'
+            | fzf --reverse -m -0 -1 --header="$2" --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
         )"})
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
