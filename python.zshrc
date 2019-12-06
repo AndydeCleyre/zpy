@@ -419,6 +419,7 @@ sublp () {  # [subl-arg...]
 }
 
  __pipzlistrow () {  # <projects_home> <bin>
+     setopt localoptions extendedglob
      local projects_home=$1
      local bin=$2
      local plink=${bin:P:h:h:h}/project
@@ -427,10 +428,10 @@ sublp () {  # [subl-arg...]
          if (( $+commands[jq] )); then
              local piplistline=($(
                  vpyfrom $pdir pip list --format json \
-                 | jq -r '.[] | select(.name=="'${pdir:t:gs/_/-}'") | .name,.version'
+                 | jq -r '.[] | select(.name=="'${${pdir:t}//[^[:alnum:].]##/-}'") | .name,.version'
              ))
          else
-             local piplistline=($(vpyfrom $pdir pip list | grep "^${pdir:t:gs/_/-} "))
+             local piplistline=($(vpyfrom $pdir pip list | grep "^${${pdir:t}//[^[:alnum:].]##/-} "))
          fi
          print -rl "${bin:t}" "${piplistline[1,2]}" "$(vpyfrom $pdir python -V)"
      fi
