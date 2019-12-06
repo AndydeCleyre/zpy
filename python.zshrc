@@ -566,7 +566,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         bins=(${bins:|blacklist})
         bins=(${(f)"$(
             print -rl $bins \
-            | fzf --reverse -m -0 -1 --header="$2" --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
+            | fzf --reverse -m -0 --header="$2" --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
         )"})
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
