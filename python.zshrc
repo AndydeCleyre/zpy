@@ -470,7 +470,7 @@ sublp () {  # [subl-arg...]
 # pipz runpip <pkg> <pip-arg...>
 # pipz runpkg <pkg> <cmd> [cmd-arg...]
 # pipz  # show usage
-pipz () {  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [subcmd-arg...]
+pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
     trap "cd $PWD" EXIT
     local projects_home=${XDG_DATA_HOME:-~/.local/share}/python
     local bins_home=${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin
