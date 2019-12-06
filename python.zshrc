@@ -427,10 +427,10 @@ sublp () {  # [subl-arg...]
          if (( $+commands[jq] )); then
              local piplistline=($(
                  vpyfrom $pdir pip list --format json \
-                 | jq -r '.[] | select(.name=="'${pdir:t}'") | .name,.version'
+                 | jq -r '.[] | select(.name=="'${pdir:t:gs/_/-}'") | .name,.version'
              ))
          else
-             local piplistline=($(vpyfrom $pdir pip list | grep "^${pdir:t} "))
+             local piplistline=($(vpyfrom $pdir pip list | grep "^${pdir:t:gs/_/-} "))
          fi
          print -rl "${bin:t}" "${piplistline[1,2]}" "$(vpyfrom $pdir python -V)"
      fi
