@@ -431,8 +431,12 @@ sublp () {  # [subl-arg...]
                  | jq -r '.[] | select(.name=="'${${pdir:t}//[^[:alnum:].]##/-}'") | .name,.version'
              ))
          else
-             local piplistline=($(vpyfrom $pdir pip list | grep "^${${pdir:t}//[^[:alnum:].]##/-} "))
+             local piplistline=($(
+                 vpyfrom $pdir pip list \
+                 | grep "^${${pdir:t}//[^[:alnum:].]##/-} "
+             ))
          fi
+         piplistline+=('????')
          print -rl "${bin:t}" "${piplistline[1,2]}" "$(vpyfrom $pdir python -V)"
      fi
  }
@@ -443,8 +447,8 @@ sublp () {  # [subl-arg...]
      local pkg=$2
      mkdir -p $projects_home/$pkg
      cd $projects_home/$pkg
-     envin
      rm -f requirements.{in,txt}
+     activate
      pipacs $pkg
      envout
  }
