@@ -448,7 +448,7 @@ sublp () {  # [subl-arg...]
      mkdir -p $projects_home/$pkg
      cd $projects_home/$pkg
      rm -f requirements.{in,txt}
-     activate
+     activate 2>/dev/null || envin
      pipacs $pkg
      envout
  }
