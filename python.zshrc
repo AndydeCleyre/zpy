@@ -39,6 +39,12 @@ zpy () {  # [zpy-function]
     fi
 }
 
+ _zpy () {
+     _message -r "$(zpy zpy)"
+     _alternative "arguments:zpy functions:($(zpy | grep -Eo '^[^ |#]+'))"
+ }
+ compdef _zpy zpy
+
 # get path of folder containing all venvs for the current folder or specified proj-dir
  if (( $+commands[md5sum] )); then
 venvs_path () {  # [proj-dir]
