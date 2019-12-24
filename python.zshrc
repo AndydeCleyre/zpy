@@ -96,43 +96,48 @@ pipcs () {  # [reqs-in...]
     pipc $@
     pips ${^@:r}.txt
 }
-# compile with hashes, then sync
+# Compile with hashes, then sync.
 pipchs () {  # [reqs-in...]
     pipch $@
     pips ${^@:r}.txt
 }
 
- __pipa () {  # <category> <req> [req...]
+ -zpy_pipa () {  # <category> <req...>
      local reqsin=${1:+${1}-}requirements.in
      print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
      print -rl ${@[2,-1]} >>! $reqsin
      -zpy_hlt py < $reqsin
  }
-# add loose requirements to [<category>-]requirements.in (add)
-alias pipa="__pipa ''"  # <req> [req...]
-alias pipabuild="__pipa build"  # <req> [req...]
-alias pipadev="__pipa dev"  # <req> [req...]
-alias pipadoc="__pipa doc"  # <req> [req...]
-alias pipapublish="__pipa publish"  # <req> [req...]
-alias pipatest="__pipa test"  # <req> [req...]
 
-# add to requirements.in, then compile it to requirements.txt
-pipac () {  # <req> [req...]
-    pipa $@
+# Add loose requirements to [<category>-]requirements.in (add).
+# pipa(|build|dev|doc|publish|test) <req...>
+alias pipa="-zpy_pipa ''"  # <req...>
+
+# Add loose requirements to [<category>-]requirements.in (add).
+alias pipabuild="-zpy_pipa build"  # <req...>
+alias pipadev="-zpy_pipa dev"  # <req...>
+alias pipadoc="-zpy_pipa doc"  # <req...>
+alias pipapublish="-zpy_pipa publish"  # <req...>
+alias pipatest="-zpy_pipa test"  # <req...>
+
+# Add to requirements.in, then compile it to requirements.txt (add, compile).
+pipac () {  # <req...>
+    -zpy_pipa '' $@
     pipc requirements.in
 }
-# add to requirements.in, then compile it with hashes to requirements.txt
-pipach () {  # <req> [req...]
-    pipa $@
+# Add to requirements.in, then compile it with hashes to requirements.txt.
+pipach () {  # <req...>
+    -zpy_pipa '' $@
     pipch requirements.in
 }
-# add to requirements.in, compile it to requirements.txt, then sync to that
-pipacs () {  # <req> [req...]
+#
+# Add to requirements.in, compile it to requirements.txt, then sync to that (add, compile, sync).
+pipacs () {  # <req...>
     pipac $@
     pips requirements.txt
 }
-# add to requirements.in, compile it with hashes to requirements.txt, then sync to that
-pipachs () {  # <req> [req...]
+# Add, compile with hashes, sync.
+pipachs () {  # <req...>
     pipach $@
     pips requirements.txt
 }
