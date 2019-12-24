@@ -595,7 +595,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local bins=($bins_home/*(@N:P))
         bins=(${(M)bins:#${VENVS_WORLD}/*})
         print
-        print -r ${(i)bins:t}
+        print -rC 4 $projects_home/*(/:t)
         print
         local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
         cells+=(${(f)"$(zargs -rl -P $ZPYPROCS -- $bins -- -zpy_pipzlistrow $projects_home)"})
