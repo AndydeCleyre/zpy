@@ -432,8 +432,8 @@ if pyproject.is_file():
     "
 }
 
- # get a new or existing sublime text project file for the working folder
- __get_sublp () {
+ # Get a new or existing Sublime Text project file for the working folder.
+ -zpy_get_sublp () {
      local spfile
      local spfiles=(*.sublime-project(N))
      if [[ ! $spfiles ]]; then
@@ -445,9 +445,9 @@ if pyproject.is_file():
      print -rn $spfile
  }
 
-# specify the venv interpreter in a new or existing sublime text project file for the working folder
+# Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
 vpysublp () {
-    local stp=$(__get_sublp)
+    local stp=$(-zpy_get_sublp)
     local pypath=$(venvs_path)/venv/bin/python
     print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~/~} %B->%b ${stp/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
     if (( $+commands[jq] )); then
@@ -465,10 +465,10 @@ spfile.write_text(dumps(sp, indent=4))
     fi
 }
 
-# launch a new or existing sublime text project, setting venv interpreter
+# Launch a new or existing Sublime Text project, setting venv interpreter.
 sublp () {  # [subl-arg...]
     vpysublp
-    subl --project "$(__get_sublp)" $@
+    subl --project "$(-zpy_get_sublp)" $@
 }
 
  -zpy_pipzlistrow () {  # <projects_home> <bin>
