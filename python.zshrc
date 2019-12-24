@@ -660,3 +660,109 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
     ;;
     esac
 }
+
+ # Completions
+ # -----------
+
+ # Message-only
+ for zpyfn in activatefzf pipa pipac pipu prunevenvs pypc sublp vpysublp whichpyproj; do
+     _${zpyfn} () { _message -r "$(zpy ${0[2,-1]})" }
+     compdef _${zpyfn} ${zpyfn} 2>/dev/null  # Includes gratuitous compdef for pipa
+ done
+ compdef _pipa -zpy_pipa 2>/dev/null
+ compdef _pipac pipach pipacs pipachs 2>/dev/null
+ compdef _pipu pipuh pipus pipuhs 2>/dev/null
+
+ # Folders
+ for zpyfn in activate venvs_path; do
+     _${zpyfn} () {
+         _message -r "$(zpy ${0[2,-1]})"
+         _files -/
+     }
+     compdef _${zpyfn} ${zpyfn} 2>/dev/null
+ done
+
+ # *.txt
+ for zpyfn in envin pips; do
+     _${zpyfn} () {
+         _message -r "$(zpy ${0[2,-1]})"
+         _files -g '*.txt'
+     }
+ done
+ compdef _envin -zpy_envin envincurrent 2>/dev/null
+ compdef _pips pips 2>/dev/null
+
+ # Project Folders
+ for zpyfn in pipcheckold pipusall; do
+     _${zpyfn} () {
+         _message -r "$(zpy ${0[2,-1]})"
+         local projects=(${VENVS_WORLD}/*/project(@N-/:P))
+         _alternative "arguments:projects:($projects)"
+     }
+     compdef _${zpyfn} ${zpyfn} 2>/dev/null
+ done
+
+ # Project Scripts
+ for zpyfn in vpy vpyshebang; do
+     _${zpyfn} () {
+         _message -r "$(zpy ${0[2,-1]})"
+         local script_arg
+         [[ ${words[1]} =~ '^vpycurrent' ]] && script_arg=1 || script_arg=2
+         local scripts=(${VENVS_WORLD}/*/project/*.py(N:P))
+         _arguments $script_arg":scripts:($scripts)"
+     }
+     compdef _${zpyfn} -zpy_${zpyfn} ${zpyfn/vpy/vpycurrent} 2>/dev/null
+ done
+
+ _pipc () {
+     _message -r "$(zpy pipc)"
+     _files -g '*.in'
+ }
+ compdef _pipc pipc pipch pipcs pipchs 2>/dev/null
+
+ _zpy () {
+     _message -r "$(zpy zpy)"
+     _alternative "arguments:functions:($(-zpy | grep -Eo '^[^ |#]+'))"
+ }
+ compdef _zpy zpy 2>/dev/null
+
+ _vpyfrom () {
+     _message -r "$(zpy vpyfrom)"
+     local proj_arg
+     local script_arg
+     if [[ ${words[1]} == vpycurrentfrom ]]; then
+         proj_arg=1
+         script_arg=2
+     else
+         proj_arg=2
+         script_arg=3
+     fi
+     local projects=(${VENVS_WORLD}/*/project(@N-/:P))
+     _arguments $proj_arg":projects:($projects)"
+     local binpath=$(venvs_path ${words[$[proj_arg+1]]})/venv/bin
+     _arguments $script_arg":scripts:_files -W $binpath"
+ }
+ compdef _vpyfrom -zpy_vpyfrom vpycurrentfrom 2>/dev/null
+
+ _vpylauncherfrom () {
+     _message -r "$(zpy vpylauncherfrom)"
+     local projects=(${VENVS_WORLD}/*/project(@N-/:P))
+     _arguments "1:projects:($projects)"
+     local binpath=$(venvs_path ${words[2]})/venv/bin
+     _arguments "2:scripts:_files -W $binpath"
+     _arguments '3:destinations:_files -/'
+ }
+ compdef _vpylauncherfrom vpylauncherfrom 2>/dev/null
+
+ _pipz () {
+     _message -r "$(zpy pipz)"
+     local cmds=(list install uninstall uninstall-all upgrade upgrade-all reinstall reinstall-all inject runpip runpkg)
+     _arguments "1:commands:($cmds)"
+     local pkgs=(${XDG_DATA_HOME:-~/.local/share}/python/*(/:t))
+     if [[ ${words[2]} =~ '^((un|re)install|upgrade)$' ]]; then
+         _alternative "arguments:installed packages:($pkgs)"
+     elif [[ ${words[2]} =~ '^(inject|runpip)$' ]]; then
+         _arguments "2:installed packages:($pkgs)"
+     fi
+ }
+ compdef _pipz pipz 2>/dev/null
