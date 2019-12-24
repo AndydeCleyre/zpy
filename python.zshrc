@@ -510,7 +510,8 @@ sublp () {  # [subl-arg...]
  -zpy_pipzchoosepkgs () {  # <projects_home> [header='Packages:']
     reply=(${(f)"$(
         print -rl $1/*(/:t) \
-        | fzf --reverse -m -0 --header="${2:-Packages:}" --prompt='Which packages? Select more than one with <tab>. Filter: '
+        | fzf --reverse -m -0 --header="${2:-Packages:}" \
+        --prompt='Which packages? Select more than one with <tab>. Filter: '
     )"})
 }
 
@@ -547,7 +548,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $pkgname != wheel ]] && bins=(${bins:#wheel})
             bins=(${(f)"$(
                 print -rl $bins \
-                | fzf --reverse -m -0 -1 --header="Installing $pkg . . ." --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
+                | fzf --reverse -m -0 -1 --header="Installing $pkg . . ." \
+                --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
             )"})
             for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
         done
@@ -627,7 +629,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         bins=(${bins:|blacklist})
         bins=(${(f)"$(
             print -rl $bins \
-            | fzf --reverse -m -0 --header="$2" --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
+            | fzf --reverse -m -0 --header="$2" \
+            --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
         )"})
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
