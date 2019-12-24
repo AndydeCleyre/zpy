@@ -231,9 +231,17 @@ envincurrent () {  # [reqs-txt...]
     || return 1
 }
 
-# activate without installing anything
+# If `venvs_path`/venv exists for the current or specified project folder,
+# activate it without installing anything.
+# Otherwise, act as `envin` (create, activate, sync).
 activate () {  # [proj-dir]
-    . "$(venvs_path ${1:-${PWD}})/venv/bin/activate"
+    local projdir=${1:-${PWD}}
+    . "$(venvs_path ${projdir})/venv/bin/activate" 2>/dev/null
+    if [[ $? == 127 ]]; then
+        trap "cd $PWD" EXIT
+        cd "$projdir"
+        -zpy_envin venv 'python3 -m venv'
+    fi
 }
 # Activate `venvs_path <proj-dir>`/venv for an interactively chosen project folder.
 activatefzf () {
@@ -493,7 +501,7 @@ sublp () {  # [subl-arg...]
      mkdir -p $projects_home/$pkg
      cd $projects_home/$pkg
      rm -f requirements.{in,txt}
-     activate 2>/dev/null || envin
+     activate
      pipacs $pkg
      deactivate
  }
