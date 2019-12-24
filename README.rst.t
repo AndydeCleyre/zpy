@@ -2,38 +2,22 @@
 zpy: Zsh helpers for Python venvs with pip-tools
 ================================================
 
-.. image:: https://quay.io/repository/andykluger/zpy-alpine/status
-   :target: https://quay.io/repository/andykluger/zpy-alpine
+|repo| |container| |contact|
 
 These functions aim to help with your workflows, without being restrictive.
 
-They can generally replace usage of pipenv, poetry [#]_, pipx, virtualenvwrapper, etc.
+They can generally replace usage of pipenv, poetry [#]_, pipx, pipsi, virtualenvwrapper, etc.
 
 .. [#] when used with flit__
 
 __ https://flit.readthedocs.io/en/latest/
 
-.. code-block:: bash
-
-    (venv) ~/proj $ pipacs requests structlog
-
-.. code-block:: python
-
-    > appending -> requirements.in :: ~/proj
-    requests
-    structlog
-    > compiling requirements.in -> requirements.txt :: ~/proj
-    certifi==2019.9.11        # via requests
-    chardet==3.0.4            # via requests
-    idna==2.8                 # via requests
-    requests==2.22.0
-    six==1.13.0               # via structlog
-    structlog==19.2.0
-    urllib3==1.25.7           # via requests
-    > syncing env <- requirements.txt :: ~/proj
+.. image:: https://i.imgur.com/QjUQvlR.png
+<!--(if include_toc == "True")-->
 
 .. contents::
    :depth: 1
+<!--(end)-->
 
 Guiding Ideas
 -------------
@@ -61,29 +45,6 @@ Try it in isolation with docker or podman, if you like:
 
 Run ``zpy`` to see a full reference of `Functions & Aliases`_.
 
-Paths & Wording
----------------
-
-- A *project* (or *proj-dir*) is any folder containing one or more
-  ``*requirements.{in,txt}`` files, and usually some Python code.
-- Each *project* is associated with an external *venvs_path* folder,
-  at ``$VENVS_WORLD/<project path hash>``.
-- ``VENVS_WORLD`` is by default ``$XDG_DATA_HOME/venvs`` or ``~/.local/share/venvs``,
-  but can be overridden by ``export``\ ing after sourcing ``python.zshrc``.
-- Within each *venvs_path* will be generated:
-
-  + one or more named venv folders (``venv``, ``venv2``, ``venv-pypy``,
-    ``venv-<pyver>``) based on the desired Python
-  + a symlink back to the *project*
-
-- As this project thinly wraps pip-tools__, *compile* means to generate version-locked
-  ``*requirements.txt``\ s (*reqs-txt*\ s) from manually maintained
-  ``*requirements.in``\ s (*reqs-in*\ s), and *sync* means to ensure your current
-  environment matches a set of *reqs-txt*\ s.
-- *add* means to insert a new requirement into a *reqs-in* file.
-
-__ https://github.com/jazzband/pip-tools
-
 Basic Operations
 ----------------
 
@@ -91,12 +52,11 @@ In and Out
 ``````````
 
 The primary commands for managing whether you're inside or outside a venv are ``envin``
-and ``envout``. Extra helpers include ``activate``, ``activatefzf``, ``envin2``,
-``envinpypy``, and ``envinpy``.
+and ``envout``. Extra helpers are available for alternate Python interpreters.
 
 ``envin`` will:
 
-- create a new venv for the current folder, if it doesn't already exist
+- create a new venv for the current *project* (folder), if it doesn't already exist
 - activate the venv
 - ensure pip-tools is installed in the venv
 - install and uninstall packages as necessary to exactly match those specified in all
@@ -130,13 +90,13 @@ The basic operations are *add*, *compile*, and *sync* (``pipa``, ``pipc``, ``pip
 Adding a requirement is simply putting a new ``requirements.txt``-syntax__ line into
 ``requirements.in``, or a categorized ``<category>-requirements.in``.
 
+__ https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format
+
 You may pass one or more requirements to ``pipa`` to add lines to your
 ``requirements.in``. Helpers that work the same way are provided for some categorized
-``*-requirements.in`` files as well: ``pipabuild``, ``pipadev``, ``pipadoc``,
-``pipapublish``, and ``pipatest``. You can also add special constraints__ for layered
-requirements workflows, or add "include" lines like ``-r prod-requirements.in``.
-
-__ https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format
+``*-requirements.in`` files as well (like ``pipadev``, ``pipadoc``, and ``pipatest``).
+You can also add special constraints__ for layered requirements workflows, or add
+"include" lines like ``-r prod-requirements.in``.
 
 __ https://github.com/jazzband/pip-tools#workflow-for-layered-requirements
 
@@ -153,8 +113,9 @@ uninstalling packages as necessary. You may also pass specific *reqs-txt*\ s as
 arguments to match only those.
 
 Often, you'll want to do a few of these things in sequence. You can do so with
-``pipac``/``pipach`` (*add*, *compile*), ``pipacs``/``pipachs``
-(*add*, *compile*, *sync*), and ``pipus``/``pipuhs`` (*upgrade-compile*, *sync*).
+``pipac`` (*add*, *compile*), ``pipacs`` (*add*, *compile*, *sync*), and ``pipus``
+(*upgrade-compile*, *sync*). If you want hashes included in the output, use ``pipach``,
+``pipachs``, and ``pipuhs``.
 
 .. image:: https://s5.gifyu.com/images/1574712687.gif
 
@@ -193,26 +154,39 @@ Oh, and there's a mini pipx clone, ``pipz``, for installing and managing isolate
 
 But wait, there's more! Find it all at `Functions & Aliases`_.
 
+Functions & Aliases
+-------------------
+
+.. code-block:: bash
+
+<!--(for line in help.splitlines())-->
+    $! line !$
+<!--(end)-->
+
 Installation
 ------------
 
-Install dependencies as appropriate for your platform, then:
+Install dependencies as appropriate for your platform, then source ``python.zshrc``:
 
 .. code-block:: bash
 
     git clone https://github.com/andydecleyre/zpy
-    ln -s $PWD/zpy/python.zshrc ~/.python.zshrc
-    echo '. ~/.python.zshrc' >> ~/.zshrc
+    echo ". $PWD/zpy/python.zshrc" >> ~/.zshrc
 
-It doesn't have to be ``~/.python.zshrc``, it can be anywhere.
-
-If you use a fancy Zsh plugin tool, you can install with a command like one of these:
+If you use a fancy Zsh plugin tool, you can instead use a command like one of these:
 
 .. code-block:: bash
 
     antigen bundle andydecleyre/zpy python.zshrc
     antibody bundle andydecleyre/zpy path:python.zshrc
     zgen load andydecleyre/zpy python.zshrc
+
+If you want completions, make sure to load ``compinit`` beforehand:
+
+.. code-block:: bash
+
+    autoload -U compinit
+    compinit
 
 Dependencies for Popular Platforms
 ``````````````````````````````````
@@ -263,6 +237,13 @@ Fedora
 
     sudo dnf install fzf git-core highlight jq pcre-tools python3 zsh
 
+MacOS
+~~~~~
+
+.. code-block:: bash
+
+    brew install fzf git highlight jq python zsh
+
 OpenSUSE
 ~~~~~~~~
 
@@ -283,15 +264,37 @@ For example:
 
     ln -s $PWD/zpy/bin/vpy* ~/.local/bin/
 
-Functions & Aliases
--------------------
+Paths & Wording
+---------------
 
-.. code-block:: bash
+- A *project* (or *proj-dir*) is any folder containing one or more
+  ``*requirements.{in,txt}`` files, and usually some Python code.
+- Each *project* is associated with an external *venvs_path* folder,
+  at ``$VENVS_WORLD/<project path hash>``.
+- ``VENVS_WORLD`` is by default ``$XDG_DATA_HOME/venvs`` or ``~/.local/share/venvs``,
+  but can be overridden by ``export``\ ing after sourcing ``python.zshrc``.
+- Within each *venvs_path* will be generated:
 
-<!--(for line in help.splitlines())-->
-    $! line !$
-<!--(end)-->
+  + one or more named venv folders (``venv``, ``venv2``, ``venv-pypy``,
+    ``venv-<pyver>``) based on the desired Python
+  + a symlink back to the *project*
 
-Feedback welcome! Submit an issue here or reach me on Telegram__.
+- As this project thinly wraps pip-tools__, *compile* means to generate version-locked
+  ``*requirements.txt``\ s (*reqs-txt*\ s) from manually maintained
+  ``*requirements.in``\ s (*reqs-in*\ s), and *sync* means to ensure your current
+  environment matches a set of *reqs-txt*\ s.
+- *add* means to insert a new requirement into a *reqs-in* file.
 
-__ https://t.me/andykluger
+__ https://github.com/jazzband/pip-tools
+
+.. |repo| image:: https://img.shields.io/github/size/andydecleyre/zpy/python.zshrc?logo=github&label=Code
+   :target: https://github.com/andydecleyre/zpy
+   :alt: GitHub file size in bytes
+
+.. |container| image:: https://img.shields.io/badge/Container-Quay.io-blue?logo=red-hat
+   :target: https://quay.io/repository/andykluger/zpy-alpine
+   :alt: Demo container
+
+.. |contact| image:: https://img.shields.io/badge/Contact-Telegram-blue?logo=telegram
+   :target: https://t.me/andykluger
+   :alt: Contact developer on Telegram

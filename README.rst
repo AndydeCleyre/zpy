@@ -2,21 +2,20 @@
 zpy: Zsh helpers for Python venvs with pip-tools
 ================================================
 
-.. image:: https://quay.io/repository/andykluger/zpy-alpine/status
-   :target: https://quay.io/repository/andykluger/zpy-alpine
+|repo| |container| |contact|
 
 These functions aim to help with your workflows, without being restrictive.
 
-They can generally replace usage of pipenv, poetry [#]_, pipx, virtualenvwrapper, etc.
+They can generally replace usage of pipenv, poetry [#]_, pipx, pipsi, virtualenvwrapper, etc.
 
 .. [#] when used with flit__
 
 __ https://flit.readthedocs.io/en/latest/
 
-.. code-block:: bash
+.. image:: https://i.imgur.com/QjUQvlR.png
 
-    envin
-    pipacs requests structlog
+.. contents::
+   :depth: 1
 
 Guiding Ideas
 -------------
@@ -35,28 +34,14 @@ Preview
 
 .. image:: https://s5.gifyu.com/images/1574710326.gif
 
-Paths & Wording
----------------
+Try it in isolation with docker or podman, if you like:
 
-- A *project* (or *proj-dir*) is any folder containing one or more
-  ``*requirements.{in,txt}`` files, and usually some Python code.
-- Each *project* is associated with an external *venvs_path* folder,
-  at ``$VENVS_WORLD/<project path hash>``.
-- ``VENVS_WORLD`` is by default ``$XDG_DATA_HOME/venvs`` or ``~/.local/share/venvs``,
-  but can be overridden by ``export``\ ing after sourcing ``python.zshrc``.
-- Within each *venvs_path* will be generated:
+.. code-block:: bash
 
-  + one or more named venv folders (``venv``, ``venv2``, ``venv-pypy``,
-    ``venv-<pyver>``) based on the desired Python
-  + a symlink back to the *project*
+    docker run --net=host -it quay.io/andykluger/zpy-alpine:latest
+    podman run --net=host -it quay.io/andykluger/zpy-alpine:latest
 
-- As this project thinly wraps pip-tools__, *compile* means to generate version-locked
-  ``*requirements.txt``\ s (*reqs-txt*\ s) from manually maintained
-  ``*requirements.in``\ s (*reqs-in*\ s), and *sync* means to ensure your current
-  environment matches a set of *reqs-txt*\ s.
-- *add* means to insert a new requirement into a *reqs-in* file.
-
-__ https://github.com/jazzband/pip-tools
+Run ``zpy`` to see a full reference of `Functions & Aliases`_.
 
 Basic Operations
 ----------------
@@ -65,12 +50,11 @@ In and Out
 ``````````
 
 The primary commands for managing whether you're inside or outside a venv are ``envin``
-and ``envout``. Extra helpers include ``activate``, ``activatefzf``, ``envin2``,
-``envinpypy``, and ``envinpy``.
+and ``envout``. Extra helpers are available for alternate Python interpreters.
 
 ``envin`` will:
 
-- create a new venv for the current folder, if it doesn't already exist
+- create a new venv for the current *project* (folder), if it doesn't already exist
 - activate the venv
 - ensure pip-tools is installed in the venv
 - install and uninstall packages as necessary to exactly match those specified in all
@@ -104,13 +88,13 @@ The basic operations are *add*, *compile*, and *sync* (``pipa``, ``pipc``, ``pip
 Adding a requirement is simply putting a new ``requirements.txt``-syntax__ line into
 ``requirements.in``, or a categorized ``<category>-requirements.in``.
 
+__ https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format
+
 You may pass one or more requirements to ``pipa`` to add lines to your
 ``requirements.in``. Helpers that work the same way are provided for some categorized
-``*-requirements.in`` files as well: ``pipabuild``, ``pipadev``, ``pipadoc``,
-``pipapublish``, and ``pipatest``. You can also add special constraints__ for layered
-requirements workflows, or add "include" lines like ``-r prod-requirements.in``.
-
-__ https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format
+``*-requirements.in`` files as well (like ``pipadev``, ``pipadoc``, and ``pipatest``).
+You can also add special constraints__ for layered requirements workflows, or add
+"include" lines like ``-r prod-requirements.in``.
 
 __ https://github.com/jazzband/pip-tools#workflow-for-layered-requirements
 
@@ -127,8 +111,9 @@ uninstalling packages as necessary. You may also pass specific *reqs-txt*\ s as
 arguments to match only those.
 
 Often, you'll want to do a few of these things in sequence. You can do so with
-``pipac``/``pipach`` (*add*, *compile*), ``pipacs``/``pipachs``
-(*add*, *compile*, *sync*), and ``pipus``/``pipuhs`` (*upgrade-compile*, *sync*).
+``pipac`` (*add*, *compile*), ``pipacs`` (*add*, *compile*, *sync*), and ``pipus``
+(*upgrade-compile*, *sync*). If you want hashes included in the output, use ``pipach``,
+``pipachs``, and ``pipuhs``.
 
 .. image:: https://s5.gifyu.com/images/1574712687.gif
 
@@ -167,33 +152,201 @@ Oh, and there's a mini pipx clone, ``pipz``, for installing and managing isolate
 
 But wait, there's more! Find it all at `Functions & Aliases`_.
 
-Installation
-------------
-
-Try it isolation with docker or podman, if you like:
+Functions & Aliases
+-------------------
 
 .. code-block:: bash
 
-    docker run --net=host -it quay.io/andykluger/zpy-alpine:latest
-    podman run --net=host -it quay.io/andykluger/zpy-alpine:latest
+    
+    # Print description and arguments for all or specified functions.
+    # To see actual function contents, use `which <funcname>`.
+    zpy [zpy-function...]
+    
+    # Get path of folder containing all venvs for the current folder or specified proj-dir.
+    venvs_path [proj-dir]
+    
+    # Install and upgrade packages.
+    pipi <req...>
+    
+    # Install packages according to all found or specified requirements.txt files (sync).
+    pips [reqs-txt...]
+    
+    # Compile requirements.txt files from all found or specified requirements.in files (compile).
+    pipc [reqs-in...]
+    # Compile with hashes.
+    pipch [reqs-in...]
+    #
+    # Compile, then sync.
+    pipcs [reqs-in...]
+    # Compile with hashes, then sync.
+    pipchs [reqs-in...]
+    
+    # Add loose requirements to [<category>-]requirements.in (add).
+    # pipa(|build|dev|doc|publish|test) <req...>
+    pipa <req...>
+    
+    # Add loose requirements to [<category>-]requirements.in (add).
+    pipabuild <req...>
+    pipadev <req...>
+    pipadoc <req...>
+    pipapublish <req...>
+    pipatest <req...>
+    
+    # Add to requirements.in, then compile it to requirements.txt (add, compile).
+    pipac <req...>
+    # Add to requirements.in, then compile it with hashes to requirements.txt.
+    pipach <req...>
+    #
+    # Add to requirements.in, compile it to requirements.txt, then sync to that (add, compile, sync).
+    pipacs <req...>
+    # Add, compile with hashes, sync.
+    pipachs <req...>
+    
+    # Recompile *requirements.txt with upgraded versions of all or specified packages (upgrade).
+    pipu [req...]
+    # Upgrade with hashes.
+    pipuh [req...]
+    #
+    # Upgrade, then sync.
+    pipus [req...]
+    # Upgrade with hashes, then sync.
+    pipuhs [req...]
+    
+    # Activate venv 'venv' (creating if needed) for the current folder, and sync its
+    # installed package set according to all found or specified requirements.txt files.
+    # In other words: [create, ]activate, sync.
+    # The interpreter will be whatever `python3` refers to at time of venv creation.
+    envin [reqs-txt...]
+    # Also available for 'venv2'/`python2`, 'venv-pypy'/`pypy3`, 'venv-<current pyver>'/`python`:
+    # envin(2|py|current) [reqs-txt...]
+    
+    # Like envin, but with venv 'venv2' and command `python2`.
+    envin2 [reqs-txt...]
+    
+    # Like envin, but with venv 'venv-pypy' and command `pypy3`.
+    envinpy [reqs-txt...]
+    
+    # Like envin, but with venv 'venv-<current pyver>' and command `python`.
+    # Useful if you use pyenv or similar for multiple py3 versions on the same project.
+    envincurrent [reqs-txt...]
+    
+    # If `venvs_path`/venv exists for the current or specified project folder,
+    # activate it without installing anything.
+    # Otherwise, act as `envin` (create, activate, sync).
+    activate [proj-dir]
+    # Activate `venvs_path <proj-dir>`/venv for an interactively chosen project folder.
+    activatefzf
+    #
+    # Deactivate.
+    envout  
+    
+    # Run script with its folder's associated venv 'venv'.
+    vpy <script> [script-arg...]
+    # Also available for 'venv2', 'venv-pypy', 'venv-<current pyver>':
+    # vpy(2|py|current) <script> [script-arg...]
+    
+    # Like vpy, but with venv 'venv2'.
+    vpy2 <script> [script-arg...]
+    
+    # Like vpy, but with venv 'venv-pypy'.
+    vpypy <script> [script-arg...]
+    
+    # Like vpy, but with venv 'venv-<current pyver>'.
+    vpycurrent <script> [script-arg...]
+    
+    # Get path of project for the activated venv.
+    whichpyproj
+    
+    # Prepend each script with a shebang for its folder's associated venv interpreter.
+    # If `vpy` exists in the PATH, #!/path/to/vpy will be used instead.
+    # Also ensure the script is executable.
+    vpyshebang <script...>
+    # Also available for 'venv2', 'venv-pypy', 'venv-<current pyver>':
+    # vpy(2|py|current)shebang <script...>
+    
+    # Like vpyshebang, but with venv 'venv2'.
+    vpy2shebang <script...>
+    
+    # Like vpyshebang, but with venv 'venv-pypy'.
+    vpypyshebang <script...>
+    
+    # Like vpyshebang, but with venv 'venv-<current pyver>'.
+    vpycurrentshebang <script...>
+    
+    # Run script from a given project folder's associated venv's bin folder.
+    vpyfrom <proj-dir> <script-name> [script-arg...]
+    # Also available for 'venv2', 'venv-pypy', 'venv-<current pyver>':
+    # vpy(2|py|current)from <proj-dir> <script-name> [script-arg...]
+    
+    # Like vpyfrom, but with venv 'venv2'.
+    vpy2from <proj-dir> <script-name> [script-arg...]
+    
+    # Like vpyfrom, but with venv 'venv-pypy'.
+    vpypyfrom <proj-dir> <script-name> [script-arg...]
+    
+    # Like vpyfrom, but with venv 'venv-<current pyver>'.
+    vpycurrentfrom <proj-dir> <script-name> [script-arg...]
+    
+    # Generate an external launcher for a script in a given project folder's associated venv's bin folder.
+    vpylauncherfrom <proj-dir> <script-name> <launcher-dest>
+    
+    # Delete venvs for project folders which no longer exist.
+    prunevenvs
+    
+    # `pip list -o` for all or specified projects.
+    pipcheckold [proj-dir...]
+    
+    # `pipus` (upgrade-compile, sync) for all or specified projects.
+    pipusall [proj-dir...]
+    
+    # Inject loose requirements.in dependencies into pyproject.toml.
+    # Run either from the folder housing pyproject.toml, or one below.
+    # To categorize, name files <category>-requirements.in.
+    pypc
+    
+    # Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
+    vpysublp
+    
+    # Launch a new or existing Sublime Text project, setting venv interpreter.
+    sublp [subl-arg...]
+    
+    # A basic pipx clone (py3 only).
+    # Package manager for venv-isolated scripts.
+    #
+    # pipz list
+    # pipz install <pkgspec...>
+    # pipz inject <installed-pkgname> <extra-pkgspec...>
+    # pipz (upgrade|uninstall|reinstall)-all
+    # pipz (upgrade|uninstall|reinstall) [pkgname...]   If no pkg is provided, choose interactively.
+    # pipz runpip <pkgname> <pip-arg...>
+    # pipz runpkg <pkgspec> <cmd> [cmd-arg...]
+    pipz [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
+    
 
-Install dependencies as appropriate for your platform, then:
+Installation
+------------
+
+Install dependencies as appropriate for your platform, then source ``python.zshrc``:
 
 .. code-block:: bash
 
     git clone https://github.com/andydecleyre/zpy
-    ln -s $PWD/zpy/python.zshrc ~/.python.zshrc
-    echo '. ~/.python.zshrc' >> ~/.zshrc
+    echo ". $PWD/zpy/python.zshrc" >> ~/.zshrc
 
-It doesn't have to be ``~/.python.zshrc``, it can be anywhere.
-
-If you use a fancy Zsh plugin tool, you can install with a command like one of these:
+If you use a fancy Zsh plugin tool, you can instead use a command like one of these:
 
 .. code-block:: bash
 
     antigen bundle andydecleyre/zpy python.zshrc
     antibody bundle andydecleyre/zpy path:python.zshrc
     zgen load andydecleyre/zpy python.zshrc
+
+If you want completions, make sure to load ``compinit`` beforehand:
+
+.. code-block:: bash
+
+    autoload -U compinit
+    compinit
 
 Dependencies for Popular Platforms
 ``````````````````````````````````
@@ -244,6 +397,13 @@ Fedora
 
     sudo dnf install fzf git-core highlight jq pcre-tools python3 zsh
 
+MacOS
+~~~~~
+
+.. code-block:: bash
+
+    brew install fzf git highlight jq python zsh
+
 OpenSUSE
 ~~~~~~~~
 
@@ -264,151 +424,37 @@ For example:
 
     ln -s $PWD/zpy/bin/vpy* ~/.local/bin/
 
-Functions & Aliases
--------------------
+Paths & Wording
+---------------
 
-.. code-block:: bash
+- A *project* (or *proj-dir*) is any folder containing one or more
+  ``*requirements.{in,txt}`` files, and usually some Python code.
+- Each *project* is associated with an external *venvs_path* folder,
+  at ``$VENVS_WORLD/<project path hash>``.
+- ``VENVS_WORLD`` is by default ``$XDG_DATA_HOME/venvs`` or ``~/.local/share/venvs``,
+  but can be overridden by ``export``\ ing after sourcing ``python.zshrc``.
+- Within each *venvs_path* will be generated:
 
-    
-    # pipe pythonish syntax through this to make it colorful
-    hpype  
-    
-    # print description and arguments for all or specified functions
-    # to see actual function contents, use `which <funcname>`
-    zpy  # [zpy-function]
-    
-    # get path of folder containing all venvs for the current folder or specified proj-dir
-    venvs_path  # [proj-dir]
-    
-    # start REPL
-    i  
-    i2  
-    
-    # install packages
-    pipi  # <req> [req...]
-    
-    # compile requirements.txt files from all found or specified requirements.in files (compile)
-    pipc  # [reqs-in...]
-    # compile with hashes
-    pipch  # [reqs-in...]
-    
-    # install packages according to all found or specified requirements.txt files (sync)
-    pips  # [reqs-txt...]
-    
-    # compile, then sync
-    pipcs  # [reqs-in...]
-    # compile with hashes, then sync
-    pipchs  # [reqs-in...]
-    
-    # add loose requirements to [<category>-]requirements.in (add)
-    pipa  # <req> [req...]
-    pipabuild  # <req> [req...]
-    pipadev  # <req> [req...]
-    pipadoc  # <req> [req...]
-    pipapublish  # <req> [req...]
-    pipatest  # <req> [req...]
-    
-    # add to requirements.in, then compile it to requirements.txt
-    pipac  # <req> [req...]
-    # add to requirements.in, then compile it with hashes to requirements.txt
-    pipach  # <req> [req...]
-    # add to requirements.in, compile it to requirements.txt, then sync to that
-    pipacs  # <req> [req...]
-    # add to requirements.in, compile it with hashes to requirements.txt, then sync to that
-    pipachs  # <req> [req...]
-    
-    # recompile *requirements.txt with upgraded versions of all or specified packages (upgrade)
-    pipu  # [req...]
-    # upgrade with hashes
-    pipuh  # [req...]
-    
-    # upgrade, then sync
-    pipus  # [req...]
-    pipuhs  # [req...]
-    
-    # activate venv 'venv' for the current folder and install requirements, creating venv if necessary
-    # python version will be whatever `python3` refers to at time of venv creation
-    envin  # [reqs-txt...]
-    # like envin, but with venv 'venv2' and python2
-    envin2  # [reqs-txt...]
-    # like envin, but with venv 'venv-pypy' and pypy3
-    envinpypy  # [reqs-txt...]
-    # like envin, but with venv 'venv-<pyver>' and command `python`
-    # useful if you use pyenv or similar for multiple py3 versions on the same project
-    envinpy  # [reqs-txt...]
-    
-    # activate without installing anything
-    activate  # [proj-dir]
-    activatefzf
-    # deactivate
-    envout  
-    
-    # get path of python for the given script's folder's associated venv
-    whichvpy  # <script>
-    
-    # run script with its folder's associated venv 'venv'
-    vpy  # <script> [script-arg...]
-    # like vpy, but with venv 'venv2'
-    vpy2  # <script> [script-arg...]
-    # like vpy, but with venv 'venv-pypy'
-    vpypy  # <script> [script-arg...]
-    # like vpy, but with venv 'venv-<pyver>'
-    vpyenv  # <script> [script-arg...]
-    
-    # get path of project for the activated venv
-    whichpyproj
-    
-    # prepend each script with a shebang for its folder's associated venv python
-    # if vpy exists in the PATH, #!/path/to/vpy will be used instead
-    # also ensure the script is executable
-    vpyshebang  # <script> [script...]
-    vpy2shebang  # <script> [script...]
-    vpypyshebang  # <script> [script...]
-    vpyenvshebang  # <script> [script...]
-    
-    # run script from a given project folder's associated venv's bin folder
-    vpyfrom  # <proj-dir> <script-name> [script-arg...]
-    vpy2from  # <proj-dir> <script-name> [script-arg...]
-    vpypyfrom  # <proj-dir> <script-name> [script-arg...]
-    vpyenvfrom  # <proj-dir> <script-name> [script-arg...]
-    
-    # generate an external launcher for a script in a given project folder's associated venv's bin folder
-    vpylauncherfrom  # <proj-dir> <script-name> <launcher-dest>
-    
-    # delete venvs for project folders which no longer exist
-    prunevenvs
-    
-    # pip list -o for all or specified projects
-    pipcheckold  # [proj-dir...]
-    
-    # pipus for all or specified projects
-    pipusall  # [proj-dir...]
-    
-    # inject loose requirements.in dependencies into pyproject.toml
-    # run either from the folder housing pyproject.toml, or one below
-    # to categorize, name files <category>-requirements.in
-    pypc
-    
-    # specify the venv interpreter in a new or existing sublime text project file for the working folder
-    vpysublp
-    
-    # launch a new or existing sublime text project, setting venv interpreter
-    sublp  # [subl-arg...]
-    
-    # a basic pipx clone (py3 only)
-    # if no pkg is provided to {uninstall,upgrade,reinstall}, *all* pkgs will be affected
-    # supported commands (pipx semantics):
-    # pipz install <pkg> [pkg...]
-    # pipz uninstall [pkg...]
-    # pipz upgrade [pkg...]
-    # pipz list
-    # pipz reinstall [pkg...]
-    # pipz inject <pkg> <extra-pkg> [extra-pkg...]
-    # pipz runpip <pkg> <pip-arg...>
-    # pipz runpkg <pkg> <cmd> [cmd-arg...]
-    # pipz  # show usage
-    pipz  # [install|uninstall|upgrade|list|reinstall|inject|runpip|runpkg] [subcmd-arg...]
+  + one or more named venv folders (``venv``, ``venv2``, ``venv-pypy``,
+    ``venv-<pyver>``) based on the desired Python
+  + a symlink back to the *project*
 
-Feedback welcome! Submit an issue here or reach me on Telegram__.
+- As this project thinly wraps pip-tools__, *compile* means to generate version-locked
+  ``*requirements.txt``\ s (*reqs-txt*\ s) from manually maintained
+  ``*requirements.in``\ s (*reqs-in*\ s), and *sync* means to ensure your current
+  environment matches a set of *reqs-txt*\ s.
+- *add* means to insert a new requirement into a *reqs-in* file.
 
-__ https://t.me/andykluger
+__ https://github.com/jazzband/pip-tools
+
+.. |repo| image:: https://img.shields.io/github/size/andydecleyre/zpy/python.zshrc?logo=github&label=Code
+   :target: https://github.com/andydecleyre/zpy
+   :alt: GitHub file size in bytes
+
+.. |container| image:: https://img.shields.io/badge/Container-Quay.io-blue?logo=red-hat
+   :target: https://quay.io/repository/andykluger/zpy-alpine
+   :alt: Demo container
+
+.. |contact| image:: https://img.shields.io/badge/Contact-Telegram-blue?logo=telegram
+   :target: https://t.me/andykluger
+   :alt: Contact developer on Telegram
