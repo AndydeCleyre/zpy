@@ -145,7 +145,7 @@ pipachs () {  # <req...>
  -zpy_pipu () {  # <hashes|nohashes> <reqsin> [req...]
      local gen_hashes=${1:#nohashes}
      local reqsin=$2
-     local reqs=(${@:3})
+     local reqs=(${@[3,-1]})
      print -rP "%F{cyan}> %F{yellow}upgrading%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
      if [[ $# -gt 2 ]]; then
          if [[ $gen_hashes ]]; then
@@ -162,26 +162,27 @@ pipachs () {  # <req...>
      fi
  }
 
-# recompile *requirements.txt with upgraded versions of all or specified packages (upgrade)
+# Recompile *requirements.txt with upgraded versions of all or specified packages (upgrade).
 pipu () {  # [req...]
     zargs -ri___ -P $ZPYPROCS -- *requirements.in(N) -- -zpy_pipu nohashes ___ $@
 }
-# upgrade with hashes
+# Upgrade with hashes.
 pipuh () {  # [req...]
     zargs -ri___ -P $ZPYPROCS -- *requirements.in(N) -- -zpy_pipu hashes ___ $@
 }
-
-# upgrade, then sync
+#
+# Upgrade, then sync.
 pipus () {  # [req...]
     pipu $@
     pips
 }
+# Upgrade with hashes, then sync.
 pipuhs () {  # [req...]
     pipuh $@
     pips
 }
 
- __pyenv_name () {
+ -zpy_pyvervenvname () {
      if (( $+commands[python] )); then
          local name=($(python -V 2>&1 | tail -n 1))
          print -rn venv-${(j:-:)name:0:2:l:gs/[/}
@@ -191,7 +192,7 @@ pipuhs () {  # [req...]
      fi
  }
 
- __envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
+ -zpy_envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
      local vpath=$(venvs_path)
      local venv=${vpath}/${1}
      print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
@@ -204,87 +205,117 @@ pipuhs () {  # [req...]
      . $venv/bin/activate
      pip install -qU pip pip-tools
      rehash
-     pips ${@:3}
+     pips ${@[3,-1]}
  }
-# activate venv 'venv' for the current folder and install requirements, creating venv if necessary
-# python version will be whatever `python3` refers to at time of venv creation
-alias envin="__envin venv 'python3 -m venv'"  # [reqs-txt...]
-# like envin, but with venv 'venv2' and python2
-alias envin2="__envin venv2 virtualenv2"  # [reqs-txt...]
-# like envin, but with venv 'venv-pypy' and pypy3
-alias envinpypy="__envin venv-pypy 'pypy3 -m venv'"  # [reqs-txt...]
-# like envin, but with venv 'venv-<pyver>' and command `python`
-# useful if you use pyenv or similar for multiple py3 versions on the same project
-envinpy () {  # [reqs-txt...]
-    if (( $+commands[python] )); then
-        __envin $(__pyenv_name) 'python -m venv' $@
-    else
-        print -rP "%F{red}> No 'python' found in path!%f" 1>&2
-        return 1
-    fi
+
+# Activate venv 'venv' (creating if needed) for the current folder, and sync its
+# installed package set according to all found or specified requirements.txt files.
+# In other words: [create, ]activate, sync.
+# The interpreter will be whatever `python3` refers to at time of venv creation.
+alias envin="-zpy_envin venv 'python3 -m venv'"  # [reqs-txt...]
+# Also available for 'venv2'/`python2`, 'venv-pypy'/`pypy3`, 'venv-<current pyver>'/`python`:
+# envin(2|py|current) [reqs-txt...]
+
+# Like envin, but with venv 'venv2' and command `python2`.
+alias envin2="-zpy_envin venv2 virtualenv2"  # [reqs-txt...]
+
+# Like envin, but with venv 'venv-pypy' and command `pypy3`.
+alias envinpy="-zpy_envin venv-pypy 'pypy3 -m venv'"  # [reqs-txt...]
+
+# Like envin, but with venv 'venv-<current pyver>' and command `python`.
+# Useful if you use pyenv or similar for multiple py3 versions on the same project.
+envincurrent () {  # [reqs-txt...]
+    local venv_name
+    venv_name=$(-zpy_pyvervenvname) \
+    && -zpy_envin "$venv_name" 'python -m venv' $@ \
+    || return 1
 }
 
 # activate without installing anything
 activate () {  # [proj-dir]
     . "$(venvs_path ${1:-${PWD}})/venv/bin/activate"
 }
+# Activate `venvs_path <proj-dir>`/venv for an interactively chosen project folder.
 activatefzf () {
     local projects=(${VENVS_WORLD}/*/project(@N-/:P))
     activate "$(print -rl $projects | fzf --reverse -0 -1)"
 }
-# deactivate
+#
+# Deactivate.
 alias envout="deactivate"
 
- __whichvpy () {  # <venv-name> <script>
+ -zpy_whichvpy () {  # <venv-name> <script>
      print -rn "$(venvs_path ${2:P:h})/$1/bin/python"
  }
-# get path of python for the given script's folder's associated venv
-alias whichvpy="__whichvpy venv"  # <script>
 
- __vpy () {  # <venv-name> <script> [script-arg...]
-     "$(__whichvpy $1 $2)" ${@:2}
+ -zpy_vpy () {  # <venv-name> <script> [script-arg...]
+     "$(-zpy_whichvpy $1 $2)" ${@[2,-1]}
  }
-# run script with its folder's associated venv 'venv'
-alias vpy="__vpy venv"  # <script> [script-arg...]
-# like vpy, but with venv 'venv2'
-alias vpy2="__vpy venv2"  # <script> [script-arg...]
-# like vpy, but with venv 'venv-pypy'
-alias vpypy="__vpy venv-pypy"  # <script> [script-arg...]
-# like vpy, but with venv 'venv-<pyver>'
-vpyenv () { __vpy $(__pyenv_name) $@ }  # <script> [script-arg...]
 
-# get path of project for the activated venv
+# Run script with its folder's associated venv 'venv'.
+alias vpy="-zpy_vpy venv"  # <script> [script-arg...]
+# Also available for 'venv2', 'venv-pypy', 'venv-<current pyver>':
+# vpy(2|py|current) <script> [script-arg...]
+
+# Like vpy, but with venv 'venv2'.
+alias vpy2="-zpy_vpy venv2"  # <script> [script-arg...]
+
+# Like vpy, but with venv 'venv-pypy'.
+alias vpypy="-zpy_vpy venv-pypy"  # <script> [script-arg...]
+
+# Like vpy, but with venv 'venv-<current pyver>'.
+vpycurrent () { -zpy_vpy $(-zpy_pyvervenvname) $@ }  # <script> [script-arg...]
+
+# Get path of project for the activated venv.
 whichpyproj () {
     print -rn ${"$(which python)":h:h:h}/project(@N:P)
 }
 
- __vpyshebang () {  # <venv-name> <script> [script...]
+ -zpy_vpyshebang () {  # <venv-name> <script...>
      local vpybin
      local vpyscript=$(whence -p vpy)
-     for script in ${@:2}; do
+     for script in ${@[2,-1]}; do
          chmod +x $script
-         vpybin="${vpyscript:-$(__whichvpy $1 $script)}"
+         vpybin="${vpyscript:-$(-zpy_whichvpy $1 $script)}"
          print -rl "#!${vpybin}" "$(<${script})" >! $script
      done
  }
-# prepend each script with a shebang for its folder's associated venv python
-# if vpy exists in the PATH, #!/path/to/vpy will be used instead
-# also ensure the script is executable
-alias vpyshebang="__vpyshebang venv"  # <script> [script...]
-alias vpy2shebang="__vpyshebang venv2"  # <script> [script...]
-alias vpypyshebang="__vpyshebang venv-pypy"  # <script> [script...]
-vpyenvshebang () { __vpyshebang $(__pyenv_name) $@ }  # <script> [script...]
 
- __vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
-     "$(venvs_path $2)/$1/bin/$3" ${@:4}
+# Prepend each script with a shebang for its folder's associated venv interpreter.
+# If `vpy` exists in the PATH, #!/path/to/vpy will be used instead.
+# Also ensure the script is executable.
+alias vpyshebang="-zpy_vpyshebang venv"  # <script...>
+# Also available for 'venv2', 'venv-pypy', 'venv-<current pyver>':
+# vpy(2|py|current)shebang <script...>
+
+# Like vpyshebang, but with venv 'venv2'.
+alias vpy2shebang="-zpy_vpyshebang venv2"  # <script...>
+
+# Like vpyshebang, but with venv 'venv-pypy'.
+alias vpypyshebang="-zpy_vpyshebang venv-pypy"  # <script...>
+
+# Like vpyshebang, but with venv 'venv-<current pyver>'.
+vpycurrentshebang () { -zpy_vpyshebang $(-zpy_pyvervenvname) $@ }  # <script...>
+
+ -zpy_vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
+     "$(venvs_path $2)/$1/bin/$3" ${@[4,-1]}
  }
-# run script from a given project folder's associated venv's bin folder
-alias vpyfrom="__vpyfrom venv"  # <proj-dir> <script-name> [script-arg...]
-alias vpy2from="__vpyfrom venv2"  # <proj-dir> <script-name> [script-arg...]
-alias vpypyfrom="__vpyfrom venv-pypy"  # <proj-dir> <script-name> [script-arg...]
-vpyenvfrom () { __vpyfrom $(__pyenv_name) $@ }  # <proj-dir> <script-name> [script-arg...]
 
-# generate an external launcher for a script in a given project folder's associated venv's bin folder
+# Run script from a given project folder's associated venv's bin folder.
+alias vpyfrom="-zpy_vpyfrom venv"  # <proj-dir> <script-name> [script-arg...]
+# Also available for 'venv2', 'venv-pypy', 'venv-<current pyver>':
+# vpy(2|py|current)from <proj-dir> <script-name> [script-arg...]
+
+# Like vpyfrom, but with venv 'venv2'.
+alias vpy2from="-zpy_vpyfrom venv2"  # <proj-dir> <script-name> [script-arg...]
+
+# Like vpyfrom, but with venv 'venv-pypy'.
+alias vpypyfrom="-zpy_vpyfrom venv-pypy"  # <proj-dir> <script-name> [script-arg...]
+
+# Like vpyfrom, but with venv 'venv-<current pyver>'.
+vpycurrentfrom () { -zpy_vpyfrom $(-zpy_pyvervenvname) $@ }  # <proj-dir> <script-name> [script-arg...]
+
+# Generate an external launcher for a script in a given project folder's associated venv's bin folder.
 vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
     if [[ -d $3 ]]; then
         vpylauncherfrom $1 $2 $3/$2
@@ -296,7 +327,7 @@ vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
     fi
 }
 
-# delete venvs for project folders which no longer exist
+# Delete venvs for project folders which no longer exist.
 prunevenvs () {
     local orphaned_venv
     for proj in ${VENVS_WORLD}/*/project(@N:P); do
@@ -314,7 +345,7 @@ prunevenvs () {
      local proj=${1:P}
      if (( $+commands[jq] )); then
          local cells=($(
-             vpyfrom $proj pip --disable-pip-version-check list -o --format json \
+             -zpy_vpyfrom venv $proj pip --disable-pip-version-check list -o --format json \
              | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
          ))
          #    (package, version, latest)
@@ -324,7 +355,7 @@ prunevenvs () {
          done
      else
          local cells=($(
-             vpyfrom $proj pip --disable-pip-version-check list -o \
+             -zpy_vpyfrom venv $proj pip --disable-pip-version-check list -o \
              | tail -n +3 \
              | grep -Ev '^(setuptools|six|pip|pip-tools) ' \
              | awk '{print $1,$2,$3,$4}'
@@ -337,7 +368,8 @@ prunevenvs () {
      fi
      print -rl $cells
  }
-# pip list -o for all or specified projects
+
+# `pip list -o` for all or specified projects.
 pipcheckold () {  # [proj-dir...]
     local cells=("%F{cyan}%BPackage%b%f" "%F{cyan}%BVersion%b%f" "%F{cyan}%BLatest%b%f" "%F{cyan}%BProject%b%f")
     cells+=(${(f)"$(zargs -rl -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/)} -- -zpy_pipcheckoldcells)"})
@@ -357,9 +389,9 @@ pipusall () {  # [proj-dir...]
     zargs -ri___ -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- -zpy_pipusproj ___ | grep '::'
 }
 
-# inject loose requirements.in dependencies into pyproject.toml
-# run either from the folder housing pyproject.toml, or one below
-# to categorize, name files <category>-requirements.in
+# Inject loose requirements.in dependencies into pyproject.toml.
+# Run either from the folder housing pyproject.toml, or one below.
+# To categorize, name files <category>-requirements.in.
 pypc () {
     pip install -q tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#~/~}%f"
     python -c "
@@ -440,17 +472,17 @@ sublp () {  # [subl-arg...]
      if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
          if (( $+commands[jq] )); then
              local piplistline=($(
-                 vpyfrom $pdir pip list --format json \
-                 | jq -r '.[] | select(.name=="'${${pdir:t}//[^[:alnum:].]##/-}'") | .name,.version'
+                 -zpy_vpyfrom venv $pdir pip list --format json \
+                 | jq -r '.[] | .name |= ascii_downcase | select(.name=="'${${pdir:t}//[^[:alnum:].]##/-}'") | .name,.version'
              ))
          else
              local piplistline=($(
-                 vpyfrom $pdir pip list \
-                 | grep "^${${pdir:t}//[^[:alnum:].]##/-} "
+                 -zpy_vpyfrom venv $pdir pip list \
+                 | grep -i "^${${pdir:t}//[^[:alnum:].]##/-} "
              ))
          fi
          piplistline+=('????')
-         print -rl "${bin:t}" "${piplistline[1,2]}" "$(vpyfrom $pdir python -V)"
+         print -rl "${bin:t}" "${piplistline[1,2]}" "$(-zpy_vpyfrom venv $pdir python -V)"
      fi
  }
 
@@ -463,7 +495,7 @@ sublp () {  # [subl-arg...]
      rm -f requirements.{in,txt}
      activate 2>/dev/null || envin
      pipacs $pkg
-     envout
+     deactivate
  }
 
  __pipzchoosepkgs () {  # <projects_home> [header='Packages:']
@@ -473,21 +505,20 @@ sublp () {  # [subl-arg...]
     )"})
 }
 
-# a basic pipx clone (py3 only)
-# if no pkg is provided to {uninstall,upgrade,reinstall}, fzf will be invoked
-# supported commands (pipx semantics):
-# pipz install <pkg> [pkg...]
-# pipz uninstall [pkg...]
-# pipz uninstall-all
-# pipz upgrade [pkg...]
-# pipz upgrade-all
+# A basic pipx clone (py3 only).
+# Package manager for venv-isolated scripts.
+#
 # pipz list
-# pipz reinstall [pkg...]
+# pipz install <pkgspec...>
+# pipz inject <installed-pkgname> <extra-pkgspec...>
+# pipz upgrade-all
+# pipz uninstall-all
 # pipz reinstall-all
-# pipz inject <pkg> <extra-pkg> [extra-pkg...]
-# pipz runpip <pkg> <pip-arg...>
-# pipz runpkg <pkg> <cmd> [cmd-arg...]
-# pipz  # show usage
+# pipz upgrade [pkgname...]    # If no pkg is provided, choose interactively.
+# pipz uninstall [pkgname...]  # If no pkg is provided, choose interactively.
+# pipz reinstall [pkgspec...]  # If no pkg is provided, choose interactively.
+# pipz runpip <pkgname> <pip-arg...>
+# pipz runpkg <pkgspec> <cmd> [cmd-arg...]
 pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
     trap "cd $PWD" EXIT
     local projects_home=${XDG_DATA_HOME:-~/.local/share}/python
@@ -510,8 +541,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         done
     ;;
     'uninstall')
-        if [[ ${@:2} ]]; then
-            local pkgs=(${@:2})
+        if [[ ${@[2,-1]} ]]; then
+            local pkgs=(${@[2,-1]})
         else
             __pipzchoosepkgs $projects_home 'Uninstalling . . .'
             [[ $REPLY ]] || return 1
@@ -530,8 +561,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         pipz uninstall $projects_home/*(/:t)
     ;;
     'upgrade')
-        if [[ ${@:2} ]]; then
-            local pkgs=(${@:2})
+        if [[ ${@[2,-1]} ]]; then
+            local pkgs=(${@[2,-1]})
         else
             __pipzchoosepkgs $projects_home 'Upgrading . . .'
             [[ $REPLY ]] || return 1
@@ -559,8 +590,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         fi
     ;;
     'reinstall')
-        if [[ ${@:2} ]]; then
-            local pkgs=(${@:2})
+        if [[ ${@[2,-1]} ]]; then
+            local pkgs=(${@[2,-1]})
         else
             __pipzchoosepkgs $projects_home 'Reinstalling . . .'
             [[ $REPLY ]] || return 1
@@ -576,9 +607,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         cd $projects_home/$2 || return 1
         local vbinpath="$(venvs_path)/venv/bin/"
         local blacklist=(${vbinpath}*(N:t))
-        envin
-        pipacs ${@:3}
-        envout
+        -zpy_envin venv 'python3 -m venv'
+        pipacs ${@[3,-1]}
+        deactivate
         local bins=(${vbinpath}*(N:t))
         bins=(${bins:|blacklist})
         bins=(${(f)"$(
@@ -588,7 +619,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
     'runpip')
-        vpyfrom $projects_home/$2 pip ${@:3}
+        -zpy_vpyfrom venv $projects_home/${2:l} pip ${@[3,-1]}
     ;;
     'runpkg')
         local pkg=$2
@@ -596,13 +627,13 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local projdir=${TMPPREFIX}_pipz/${pkg}
         local vpath=$(venvs_path $projdir)
         local venv=${vpath}/venv
-        local bin=${venv}/bin/$cmd[1]
+        local bin=${venv}/bin/${cmd[1]}
         if [[ ! -f $bin || ! -x $bin ]]; then
             [[ -d $venv ]] || python3 -m venv $venv
             ln -sfn $projdir ${vpath}/project
             . $venv/bin/activate
-            pipi $pkg -q
-            envout
+            pip --disable-pip-version-check install -U $pkg -q
+            deactivate
         fi
         ${venv}/bin/${cmd}
     ;;
