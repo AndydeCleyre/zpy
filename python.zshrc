@@ -203,7 +203,7 @@ pipuhs () {  # [req...]
      fi
      ln -sfn $PWD ${vpath}/project
      . $venv/bin/activate
-     pip install -qU pip pip-tools
+     pip install -qU pip pip-tools wheel
      rehash
      pips ${@[3,-1]}
  }
