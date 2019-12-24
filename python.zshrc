@@ -7,45 +7,46 @@
  # path of folder containing all project-venv (venvs_path) folders
  # each project is linked to one or more of:
  # $VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venv-pypy,venv-<pyver>}
- # which is also accessible as:
- # `venvs_path <proj-dir>`/{venv,venv2,venv-pypy,venv-<pyver>}
+ # which is also:
+ # $(venvs_path <proj-dir>)/{venv,venv2,venv-pypy,venv-<pyver>}
 
- # syntax highlighter, reading stdin
- __hlt () {  # <syntax>
-     # recommended highlight themes: aiseered, base16/flat, moria, oxygenated
-     ((( $+commands[bat]       )) && bat --paging never -l $1 -p)           ||
-     ((( $+commands[highlight] )) && highlight -O truecolor -s moria -S $1) ||
-                                     cat -
+ # Syntax highlighter, reading stdin.
+ -zpy_hlt () {  # <syntax>
+     if (( $+commands[bat] )); then
+         BAT_THEME=${BAT_THEME:-ansi-dark} bat --color always --paging never -p -l $1
+         # recommended: ansi-dark, zenburn
+     elif (( $+commands[highlight] )); then
+         HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} highlight -O truecolor -S $1
+         # recommended: aiseered, darkplus, oxygenated
+     else
+         cat -
+     fi
  }
-# pipe pythonish syntax through this to make it colorful
-alias hpype="__hlt py"
 
-# print description and arguments for all or specified functions
-# to see actual function contents, use `which <funcname>`
-zpy () {  # [zpy-function]
-    if [[ $# -gt 0 ]]; then
-        pcregrep -Mh '(^[^\n]+\n)*^(alias '$1'=|('$1' \(\)))\n?([^\n]+\n)*' $ZPYSRC \
-        | grep -Ev '^( |})' \
-        | uniq \
-        | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
-        | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g' \
-        | __hlt zsh
-    else
-        pcregrep '^(alias|([^ \n]+ \(\))|#|$)' $ZPYSRC \
-        | uniq \
-        | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
-        | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g' \
-        | __hlt zsh
-    fi
+ # zpy (below), but never highlight
+ -zpy () {  # [zpy-function...]
+     if [[ $# -gt 0 ]]; then
+         -zpy | pcregrep -Mh '(^[^\n]+\n)*(^'$1'( |$))[^\n]*(\n[^\n]+)*'
+         for zpyfn in ${@[2,-1]}; do
+             print -rl '' "$(
+                 -zpy | pcregrep -Mh '(^[^\n]+\n)*(^'$zpyfn'( |$))[^\n]*(\n[^\n]+)*'
+             )"
+         done
+     else
+         pcregrep '^(alias|([^ \n]+ \(\))|#|$)' $ZPYSRC \
+         | uniq \
+         | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
+         | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g'
+     fi
+ }
+
+# Print description and arguments for all or specified functions.
+# To see actual function contents, use `which <funcname>`.
+zpy () {  # [zpy-function...]
+    -zpy $@ | -zpy_hlt zsh
 }
 
- _zpy () {
-     _message -r "$(zpy zpy)"
-     _alternative "arguments:zpy functions:($(zpy | grep -Eo '^[^ |#]+'))"
- }
- compdef _zpy zpy
-
-# get path of folder containing all venvs for the current folder or specified proj-dir
+# Get path of folder containing all venvs for the current folder or specified proj-dir.
  if (( $+commands[md5sum] )); then
 venvs_path () {  # [proj-dir]
     print -rn "${VENVS_WORLD}/${$(print -rn ${${1:-${PWD}}:P} | md5sum)%% *}"
@@ -103,8 +104,8 @@ pipchs () {  # [reqs-in...]
  __pipa () {  # <category> <req> [req...]
      local reqsin=${1:+${1}-}requirements.in
      print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
-     print -rl ${@:2} >>! $reqsin
-     hpype < $reqsin
+     print -rl ${@[2,-1]} >>! $reqsin
+     -zpy_hlt py < $reqsin
  }
 # add loose requirements to [<category>-]requirements.in (add)
 alias pipa="__pipa ''"  # <req> [req...]
@@ -142,16 +143,16 @@ pipachs () {  # <req> [req...]
      print -rP "%F{cyan}> %F{yellow}upgrading%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
      if [[ $# -gt 2 ]]; then
          if [[ $gen_hashes ]]; then
-             pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
+             pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | -zpy_hlt py
              pipch $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
          else
-             pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | hpype
+             pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | -zpy_hlt py
              pipc $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
          fi
      elif [[ $gen_hashes ]]; then
-         pip-compile --no-header -U --generate-hashes $reqsin 2>&1 | hpype
+         pip-compile --no-header -U --generate-hashes $reqsin 2>&1 | -zpy_hlt py
      else
-         pip-compile --no-header -U $reqsin 2>&1 | hpype
+         pip-compile --no-header -U $reqsin 2>&1 | -zpy_hlt py
      fi
  }
 
