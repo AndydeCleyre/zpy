@@ -1,7 +1,7 @@
  ZPYSRC=${0:P}
 
  autoload -Uz zargs
- PROCS="${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}"
+ ZPYPROCS="${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}"
 
  export VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
  # path of folder containing all project-venv (venvs_path) folders
@@ -56,28 +56,14 @@ venvs_path () {  # [proj-dir]
      }
  fi
 
-# start REPL
+# Start REPL; Python 3 or 2.
 alias i="ipython"
 alias i2="ipython2"
 
-# install packages
-alias pipi="pip --disable-pip-version-check install -U"  # <req> [req...]
+# Install and upgrade packages.
+alias pipi="pip --disable-pip-version-check install -U"  # <req...>
 
- __pipc () {  # <reqs-in> [pip-compile option...]
-     print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${PWD:P}/#~/~}%f"
-     pip-compile --no-header ${@:2} $1 2>&1 | hpype
- }
-
-# compile requirements.txt files from all found or specified requirements.in files (compile)
-pipc () {  # [reqs-in...]
-    zargs -rl -P $PROCS -- ${@:-*requirements.in(N)} -- __pipc
-}
-# compile with hashes
-pipch () {  # [reqs-in...]
-    zargs -ri___ -P $PROCS -- ${@:-*requirements.in(N)} -- __pipc ___ --generate-hashes
-}
-
-# install packages according to all found or specified requirements.txt files (sync)
+# Install packages according to all found or specified requirements.txt files (sync).
 pips () {  # [reqs-txt...]
     local reqstxts=(${@:-*requirements.txt(N)})
     if [[ $reqstxts ]]; then
@@ -89,7 +75,21 @@ pips () {  # [reqs-txt...]
     fi
 }
 
-# compile, then sync
+ -zpy_pipc () {  # <reqs-in> [pip-compile option...]
+     print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${PWD:P}/#~/~}%f"
+     pip-compile --no-header ${@[2,-1]} $1 2>&1 | -zpy_hlt py
+ }
+
+# Compile requirements.txt files from all found or specified requirements.in files (compile).
+pipc () {  # [reqs-in...]
+    zargs -rl -P $ZPYPROCS -- ${@:-*requirements.in(N)} -- -zpy_pipc
+}
+# Compile with hashes.
+pipch () {  # [reqs-in...]
+    zargs -ri___ -P $ZPYPROCS -- ${@:-*requirements.in(N)} -- -zpy_pipc ___ --generate-hashes
+}
+#
+# Compile, then sync.
 pipcs () {  # [reqs-in...]
     pipc $@
     pips ${^@:r}.txt
@@ -135,7 +135,7 @@ pipachs () {  # <req> [req...]
     pips requirements.txt
 }
 
- __pipu () {  # <hashes|nohashes> <reqsin> [req...]
+ -zpy_pipu () {  # <hashes|nohashes> <reqsin> [req...]
      local gen_hashes=${1:#nohashes}
      local reqsin=$2
      local reqs=(${@:3})
@@ -157,11 +157,11 @@ pipachs () {  # <req> [req...]
 
 # recompile *requirements.txt with upgraded versions of all or specified packages (upgrade)
 pipu () {  # [req...]
-    zargs -ri___ -P $PROCS -- *requirements.in(N) -- __pipu nohashes ___ $@
+    zargs -ri___ -P $ZPYPROCS -- *requirements.in(N) -- -zpy_pipu nohashes ___ $@
 }
 # upgrade with hashes
 pipuh () {  # [req...]
-    zargs -ri___ -P $PROCS -- *requirements.in(N) -- __pipu hashes ___ $@
+    zargs -ri___ -P $ZPYPROCS -- *requirements.in(N) -- -zpy_pipu hashes ___ $@
 }
 
 # upgrade, then sync
@@ -303,7 +303,7 @@ prunevenvs () {
     done
 }
 
- __pipcheckoldcells () {  # <proj-dir>
+ -zpy_pipcheckoldcells () {  # <proj-dir>
      local proj=${1:P}
      if (( $+commands[jq] )); then
          local cells=($(
@@ -333,11 +333,11 @@ prunevenvs () {
 # pip list -o for all or specified projects
 pipcheckold () {  # [proj-dir...]
     local cells=("%F{cyan}%BPackage%b%f" "%F{cyan}%BVersion%b%f" "%F{cyan}%BLatest%b%f" "%F{cyan}%BProject%b%f")
-    cells+=(${(f)"$(zargs -rl -P $PROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/)} -- __pipcheckoldcells)"})
+    cells+=(${(f)"$(zargs -rl -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/)} -- -zpy_pipcheckoldcells)"})
     if [[ $#cells -gt 4 ]]; then print -rPaC 4 $cells; fi
 }
 
- __pipusproj () {  # <proj-dir>
+ -zpy_pipusproj () {  # <proj-dir>
      trap "cd $PWD" EXIT
      cd $1
      activate
@@ -345,9 +345,9 @@ pipcheckold () {  # [proj-dir...]
      deactivate
  }
 
-# pipus for all or specified projects
+# `pipus` (upgrade-compile, sync) for all or specified projects.
 pipusall () {  # [proj-dir...]
-    zargs -ri___ -P $PROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- __pipusproj ___ | grep '::'
+    zargs -ri___ -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- -zpy_pipusproj ___ | grep '::'
 }
 
 # inject loose requirements.in dependencies into pyproject.toml
@@ -424,7 +424,7 @@ sublp () {  # [subl-arg...]
     subl --project "$(__get_sublp)" $@
 }
 
- __pipzlistrow () {  # <projects_home> <bin>
+ -zpy_pipzlistrow () {  # <projects_home> <bin>
      setopt localoptions extendedglob
      local projects_home=$1
      local bin=$2
@@ -447,7 +447,7 @@ sublp () {  # [subl-arg...]
      fi
  }
 
- __pipzinstallpkg () {  # <projects_home> <pkg>
+ -zpy_pipzinstallpkg () {  # <projects_home> <pkg>
      trap "cd $PWD" EXIT
      local projects_home=$1
      local pkg=$2
@@ -487,7 +487,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
     local bins_home=${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin
     case $1 in
     'install')
-        zargs -rl -P $PROCS -- ${@:2} -- __pipzinstallpkg $projects_home
+        zargs -rl -P $ZPYPROCS -- ${@[2,-1]} -- -zpy_pipzinstallpkg $projects_home
         mkdir -p $bins_home
         local bins
         for pkg in ${@:2}; do
@@ -545,7 +545,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         print -r ${(i)bins:t}
         print
         local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
-        cells+=(${(f)"$(zargs -rl -P $PROCS -- $bins -- __pipzlistrow $projects_home)"})
+        cells+=(${(f)"$(zargs -rl -P $ZPYPROCS -- $bins -- -zpy_pipzlistrow $projects_home)"})
         if [[ $#cells -gt 3 ]]; then
             print -rPaC 3 $cells | head -n 1
             print -rPaC 3 $cells | tail -n +2 | sort
