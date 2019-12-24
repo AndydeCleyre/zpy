@@ -531,6 +531,7 @@ sublp () {  # [subl-arg...]
 # pipz runpkg <pkgspec> <cmd> [cmd-arg...]
 pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
     trap "cd $PWD" EXIT
+    setopt localoptions nopromptsubst
     local projects_home=${XDG_DATA_HOME:-~/.local/share}/python
     local bins_home=${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin
     case $1 in
@@ -590,7 +591,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
     'list')
         print -rP "projects are in %F{cyan}${projects_home/#~/~}%f"
         print -rP "venvs are in %F{cyan}${${VENVS_WORLD}/#~/~}%f"
-        print -rP "apps are exposed at %F{cyan}${bins_home/#~/~}%f"
+        print -rP "apps are exposed at %F{cyan}${bins_home/#~/~}%f [ %F{blue}export path=(${bins_home/#~/~} \$path)%f ]"
         local bins=($bins_home/*(@N:P))
         bins=(${(M)bins:#${VENVS_WORLD}/*})
         print
