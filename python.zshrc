@@ -3,9 +3,9 @@
  autoload -Uz zargs
  ZPYPROCS="${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}"
 
+ # Folder containing all project-venvs (venvs_path) folders.
  export VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
- # path of folder containing all project-venv (venvs_path) folders
- # each project is linked to one or more of:
+ # Each project is linked to one or more of:
  # $VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venv-pypy,venv-<pyver>}
  # which is also:
  # $(venvs_path <proj-dir>)/{venv,venv2,venv-pypy,venv-<pyver>}
@@ -26,17 +26,22 @@
  # zpy (below), but never highlight
  -zpy () {  # [zpy-function...]
      if [[ $# -gt 0 ]]; then
-         -zpy | pcregrep -Mh '(^[^\n]+\n)*(^'$1'( |$))[^\n]*(\n[^\n]+)*'
+         -zpy \
+         | pcregrep -Mh '(^[^\n]+\n)*(^'$1'( |$))[^\n]*(\n[^\n]+)*' \
+         | sed 's/  # / /g'
          for zpyfn in ${@[2,-1]}; do
              print -rl '' "$(
-                 -zpy | pcregrep -Mh '(^[^\n]+\n)*(^'$zpyfn'( |$))[^\n]*(\n[^\n]+)*'
+                 -zpy \
+                 | pcregrep -Mh '(^[^\n]+\n)*(^'$zpyfn'( |$))[^\n]*(\n[^\n]+)*' \
+                 | sed 's/  # / /g'
              )"
          done
      else
          pcregrep '^(alias|([^ \n]+ \(\))|#|$)' $ZPYSRC \
          | uniq \
          | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
-         | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g'
+         | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g' \
+         | sed 's/  # / /g'
      fi
  }
 
