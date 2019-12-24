@@ -507,8 +507,8 @@ sublp () {  # [subl-arg...]
      deactivate
  }
 
- __pipzchoosepkgs () {  # <projects_home> [header='Packages:']
-    REPLY=(${(f)"$(
+ -zpy_pipzchoosepkgs () {  # <projects_home> [header='Packages:']
+    reply=(${(f)"$(
         print -rl $1/*(/:t) \
         | fzf --reverse -m -0 --header="${2:-Packages:}" --prompt='Which packages? Select more than one with <tab>. Filter: '
     )"})
@@ -556,9 +556,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         if [[ ${@[2,-1]} ]]; then
             local pkgs=(${@[2,-1]})
         else
-            __pipzchoosepkgs $projects_home 'Uninstalling . . .'
-            [[ $REPLY ]] || return 1
-            local pkgs=($REPLY)
+            -zpy_pipzchoosepkgs $projects_home 'Uninstalling . . .'
+            [[ $reply ]] || return 1
+            local pkgs=($reply)
         fi
         local vpath
         for pkg in ${pkgs:l}; do
@@ -576,9 +576,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         if [[ ${@[2,-1]} ]]; then
             local pkgs=(${@[2,-1]})
         else
-            __pipzchoosepkgs $projects_home 'Upgrading . . .'
-            [[ $REPLY ]] || return 1
-            local pkgs=($REPLY)
+            -zpy_pipzchoosepkgs $projects_home 'Upgrading . . .'
+            [[ $reply ]] || return 1
+            local pkgs=($reply)
         fi
         pipusall $projects_home/${^pkgs:l}
     ;;
@@ -605,9 +605,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         if [[ ${@[2,-1]} ]]; then
             local pkgs=(${@[2,-1]})
         else
-            __pipzchoosepkgs $projects_home 'Reinstalling . . .'
-            [[ $REPLY ]] || return 1
-            local pkgs=($REPLY)
+            -zpy_pipzchoosepkgs $projects_home 'Reinstalling . . .'
+            [[ $reply ]] || return 1
+            local pkgs=($reply)
         fi
         local pkgnames=(${${pkgs:l}%%[ \[<>=#;]*})
         pipz uninstall $pkgnames
