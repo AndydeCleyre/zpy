@@ -498,8 +498,9 @@ sublp () {  # [subl-arg...]
      trap "cd $PWD" EXIT
      local projects_home=$1
      local pkg=$2
-     mkdir -p $projects_home/$pkg
-     cd $projects_home/$pkg
+     local pkgname=${${pkg:l}%%[ \[<>=#;]*}
+     mkdir -p $projects_home/$pkgname
+     cd $projects_home/$pkgname
      rm -f requirements.{in,txt}
      activate
      pipacs $pkg
@@ -536,11 +537,14 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         zargs -rl -P $ZPYPROCS -- ${@[2,-1]} -- -zpy_pipzinstallpkg $projects_home
         mkdir -p $bins_home
         local bins
-        for pkg in ${@:2}; do
-            cd $projects_home/$pkg
+        local pkgname
+        for pkg in ${@[2,-1]}; do
+            pkgname=${${pkg:l}%%[ \[<>=#;]*}
+            cd $projects_home/$pkgname
             bins=("$(venvs_path)/venv/bin/"*(N:t))
             bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|pip(|<->*)|python(|<->*))})
-            [[ $pkg != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
+            [[ $pkgname != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
+            [[ $pkgname != wheel ]] && bins=(${bins:#wheel})
             bins=(${(f)"$(
                 print -rl $bins \
                 | fzf --reverse -m -0 -1 --header="Installing $pkg . . ." --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
@@ -557,7 +561,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             local pkgs=($REPLY)
         fi
         local vpath
-        for pkg in $pkgs; do
+        for pkg in ${pkgs:l}; do
             vpath=$(venvs_path $projects_home/$pkg)
             rm -rf $projects_home/$pkg $vpath
             for bin in $bins_home/*(@N); do
@@ -576,7 +580,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $REPLY ]] || return 1
             local pkgs=($REPLY)
         fi
-        pipusall $projects_home/${^pkgs}
+        pipusall $projects_home/${^pkgs:l}
     ;;
     'upgrade-all')
         pipusall $projects_home/*(/)
@@ -605,14 +609,15 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $REPLY ]] || return 1
             local pkgs=($REPLY)
         fi
-        pipz uninstall $pkgs
+        local pkgnames=(${${pkgs:l}%%[ \[<>=#;]*})
+        pipz uninstall $pkgnames
         pipz install $pkgs
     ;;
     'reinstall-all')
         pipz reinstall $projects_home/*(/N:t)
     ;;
     'inject')
-        cd $projects_home/$2 || return 1
+        cd $projects_home/${2:l} || return 1
         local vbinpath="$(venvs_path)/venv/bin/"
         local blacklist=(${vbinpath}*(N:t))
         -zpy_envin venv 'python3 -m venv'
@@ -631,8 +636,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
     ;;
     'runpkg')
         local pkg=$2
-        local cmd=(${@:3})
-        local projdir=${TMPPREFIX}_pipz/${pkg}
+        local pkgname=${${pkg:l}%%[ \[<>=#;]*}
+        local cmd=(${@[3,-1]})
+        local projdir=${TMPPREFIX}_pipz/${pkgname}
         local vpath=$(venvs_path $projdir)
         local venv=${vpath}/venv
         local bin=${venv}/bin/${cmd[1]}
