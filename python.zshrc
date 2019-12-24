@@ -62,10 +62,6 @@ venvs_path () {  # [proj-dir]
      }
  fi
 
-# Start REPL; Python 3 or 2.
-alias i="ipython"
-alias i2="ipython2"
-
 # Install and upgrade packages.
 alias pipi="pip --disable-pip-version-check install -U"  # <req...>
 
