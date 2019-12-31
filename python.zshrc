@@ -541,7 +541,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             pkgname=${${pkg:l}%%[ \[<>=#;]*}
             cd $projects_home/$pkgname
             bins=("$(venvs_path)/venv/bin/"*(N:t))
-            bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|pip(|<->*)|python(|<->*))})
+            bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|(pip|python|pypy)(|<->*)|*.so)})
             [[ $pkgname != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
             [[ $pkgname != wheel ]] && bins=(${bins:#wheel})
             bins=(${(f)"$(
