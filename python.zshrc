@@ -490,7 +490,8 @@ sublp () {  # [subl-arg...]
              ))
          fi
          piplistline+=('????')
-         print -rl "${bin:t}" "${piplistline[1,2]}" "$(-zpy_vpyfrom venv $pdir python -V)"
+         local pyverlines=(${(f)"$(-zpy_vpyfrom venv $pdir python -V)"})
+         print -rl "${bin:t}" "${piplistline[1,2]}" "${pyverlines[-1]}"
      fi
  }
 
