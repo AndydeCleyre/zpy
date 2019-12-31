@@ -523,7 +523,7 @@ sublp () {  # [subl-arg...]
 # pipz install <pkgspec...>
 # pipz inject <installed-pkgname> <extra-pkgspec...>
 # pipz (upgrade|uninstall|reinstall)-all
-# pipz (upgrade|uninstall|reinstall) [pkgname...]    # If no pkg is provided, choose interactively.
+# pipz (upgrade|uninstall|reinstall) [pkgname...]    ## If no pkg is provided, choose interactively.
 # pipz runpip <pkgname> <pip-arg...>
 # pipz runpkg <pkgspec> <cmd> [cmd-arg...]
 pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
