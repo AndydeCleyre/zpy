@@ -580,9 +580,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $reply ]] || return 1
             local pkgs=($reply)
         fi
-        pipz list > ${TMPPREFIX}_pipz_list_before
+        pipz list >! ${TMPPREFIX}_pipz_list_before
         pipusall $projects_home/${^pkgs:l}
-        pipz list > ${TMPPREFIX}_pipz_list_after
+        pipz list >! ${TMPPREFIX}_pipz_list_after
         diff ${TMPPREFIX}_pipz_list_before ${TMPPREFIX}_pipz_list_after
     ;;
     'upgrade-all')
