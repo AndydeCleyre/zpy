@@ -63,7 +63,7 @@ venvs_path () {  # [proj-dir]
  fi
 
 # Install and upgrade packages.
-alias pipi="pip --disable-pip-version-check install -U"  # <req...>
+alias pipi="python -m pip --disable-pip-version-check install -U"  # <req...>
 
 # Install packages according to all found or specified requirements.txt files (sync).
 pips () {  # [reqs-txt...]
@@ -72,7 +72,7 @@ pips () {  # [reqs-txt...]
         print -rP "%F{cyan}> %F{blue}syncing%F{cyan} env %B<-%b $reqstxts %B::%b ${${PWD:P}/#~/~}%f"
         pip-sync -q $reqstxts
         for reqstxt in $reqstxts; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
-            pip install -qr $reqstxt  # AND
+            python -m pip install -qr $reqstxt  # AND
         done                          # https://github.com/jazzband/pip-tools/issues/925 is resolved (by merging https://github.com/jazzband/pip-tools/pull/927)
     fi
 }
@@ -203,7 +203,7 @@ pipuhs () {  # [req...]
      fi
      ln -sfn $PWD ${vpath}/project
      . $venv/bin/activate
-     pip install -qU pip pip-tools wheel
+     python -m pip install -qU pip pip-tools wheel
      rehash
      pips ${@[3,-1]}
  }
@@ -353,7 +353,7 @@ prunevenvs () {
      local proj=${1:P}
      if (( $+commands[jq] )); then
          local cells=($(
-             -zpy_vpyfrom venv $proj pip --disable-pip-version-check list -o --format json \
+             -zpy_vpyfrom venv $proj python -m pip --disable-pip-version-check list -o --format json \
              | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
          ))
          #    (package, version, latest)
@@ -363,7 +363,7 @@ prunevenvs () {
          done
      else
          local cells=($(
-             -zpy_vpyfrom venv $proj pip --disable-pip-version-check list -o \
+             -zpy_vpyfrom venv $proj python -m pip --disable-pip-version-check list -o \
              | tail -n +3 \
              | grep -Ev '^(setuptools|six|pip|pip-tools) ' \
              | awk '{print $1,$2,$3,$4}'
@@ -401,7 +401,7 @@ pipusall () {  # [proj-dir...]
 # Run either from the folder housing pyproject.toml, or one below.
 # To categorize, name files <category>-requirements.in.
 pypc () {
-    pip install -q tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#~/~}%f"
+    python -m pip install -q tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#~/~}%f"
     python -c "
 from pathlib import Path
 import tomlkit
@@ -480,12 +480,12 @@ sublp () {  # [subl-arg...]
      if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
          if (( $+commands[jq] )); then
              local piplistline=($(
-                 -zpy_vpyfrom venv $pdir pip list --format json \
+                 -zpy_vpyfrom venv $pdir python -m pip list --format json \
                  | jq -r '.[] | .name |= ascii_downcase | select(.name=="'${${pdir:t}//[^[:alnum:].]##/-}'") | .name,.version'
              ))
          else
              local piplistline=($(
-                 -zpy_vpyfrom venv $pdir pip list \
+                 -zpy_vpyfrom venv $pdir python -m pip list \
                  | grep -i "^${${pdir:t}//[^[:alnum:].]##/-} "
              ))
          fi
@@ -636,7 +636,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
     'runpip')
-        -zpy_vpyfrom venv $projects_home/${2:l} pip ${@[3,-1]}
+        -zpy_vpyfrom venv $projects_home/${2:l} python -m pip ${@[3,-1]}
     ;;
     'runpkg')
         local pkg=$2
@@ -650,7 +650,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ -d $venv ]] || python3 -m venv $venv
             ln -sfn $projdir ${vpath}/project
             . $venv/bin/activate
-            pip --disable-pip-version-check install -U $pkg -q
+            python -m pip --disable-pip-version-check install -U $pkg -q
             deactivate
         fi
         ${venv}/bin/${cmd}
