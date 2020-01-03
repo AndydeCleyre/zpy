@@ -1,18 +1,22 @@
-================================================
-zpy: Zsh helpers for Python venvs with pip-tools
-================================================
+=================================================
+zpy: Zsh helpers for Python venvs, with pip-tools
+=================================================
 
 |repo| |container| |contact|
 
-These functions aim to help with your workflows, without being restrictive.
+Here are ~50 Zsh convenience functions to manage Python venvs and packages,
+with the excellent pip-tools__. At least a few are very handy.
+None of them should get in your way.
 
-They can generally replace usage of pipenv, poetry [#]_, pipx, pipsi, virtualenvwrapper, etc.
+__ https://github.com/jazzband/pip-tools
+
+They can generally replace pipenv, poetry [#]_, pipx, pipsi, virtualenvwrapper, etc.
 
 .. [#] when used with flit__
 
 __ https://flit.readthedocs.io/en/latest/
 
-.. image:: https://i.imgur.com/QjUQvlR.png
+.. image:: https://i.imgur.com/EkXzucP.png
 
 .. contents::
    :depth: 1
@@ -20,26 +24,39 @@ __ https://flit.readthedocs.io/en/latest/
 Guiding Ideas
 -------------
 
-- You should not have to manually specify the requirements anywhere other than
-  ``*requirements.in`` files.
+- Your workflow should be yours (as you want it) and yours (alone)
+- You should not have to manually specify the dependencies anywhere other than
+  ``*requirements.in`` files
 - Folks who want to use your code shouldn't have to install any new-fangled
-  less-standard tools (pipenv, poetry, pip-tools, zpy, etc.).
-  ``pip install -r requirements.txt`` ought to be sufficient.
-- Your workflow should be transparent and personal. Run ``zpy <function>`` to see its
-  documentation, and ``which <function>`` to see its entire content.
-  Modify it. Add your own.
+  less-standard tools (pipenv, poetry, pip-tools, zpy, etc.);
+  ``pip install -r requirements.txt`` ought to be sufficient
+
+- These functions **don't**:
+
+  - need to be used continuously, contiguously, exclusively, unanimously, or comprehensively
+  - require homogeneous workflows among developers
+  - do what pyenv__ or flit__ do best (but do work with them if you choose)
+  - *conflict* with anything else your team cares to do with your code;
+    If they can be a friendlier neighbor to your workflows, file an issue__
+
+__ https://github.com/pyenv/pyenv
+
+__ https://flit.readthedocs.io/en/latest/
+
+__ https://github.com/AndydeCleyre/zpy/issues
 
 Preview
 -------
 
-.. image:: https://s5.gifyu.com/images/1574710326.gif
+.. image:: https://s5.gifyu.com/images/1578089177.gif
 
-Try it in isolation with docker or podman, if you like:
+Try it in isolation with docker, podman, or buildah if you like:
 
 .. code-block:: bash
 
     docker run --net=host -it quay.io/andykluger/zpy-alpine:latest
     podman run --net=host -it quay.io/andykluger/zpy-alpine:latest
+    buildah run -t $(buildah from quay.io/andykluger/zpy-alpine:latest) zsh
 
 Run ``zpy`` to see a full reference of `Functions & Aliases`_.
 
@@ -59,8 +76,6 @@ and ``envout``. Extra helpers are available for alternate Python interpreters.
 - ensure pip-tools is installed in the venv
 - install and uninstall packages as necessary to exactly match those specified in all
   *reqs-txt*\ s in the folder (*sync*)
-
-.. image:: https://s5.gifyu.com/images/1574710894.gif
 
 You may also pass as many specific *reqs-txt*\ s as you want to ``envin``,
 in which case it will ensure your environment matches those and only those.
@@ -114,8 +129,6 @@ Often, you'll want to do a few of these things in sequence. You can do so with
 ``pipac`` (*add*, *compile*), ``pipacs`` (*add*, *compile*, *sync*), and ``pipus``
 (*upgrade-compile*, *sync*). If you want hashes included in the output, use ``pipach``,
 ``pipachs``, and ``pipuhs``.
-
-.. image:: https://s5.gifyu.com/images/1574712687.gif
 
 You can see exactly what a command will do with ``which <command>``, and get
 explanations and accepted arguments with ``zpy <command>``. Running ``zpy`` alone will
@@ -313,11 +326,11 @@ Functions & Aliases
     # A basic pipx clone (py3 only).
     # Package manager for venv-isolated scripts.
     #
-    # pipz list
+    # pipz list [pkgname...]  ## If no pkg is provided, list all installed.
     # pipz install <pkgspec...>
     # pipz inject <installed-pkgname> <extra-pkgspec...>
     # pipz (upgrade|uninstall|reinstall)-all
-    # pipz (upgrade|uninstall|reinstall) [pkgname...]   If no pkg is provided, choose interactively.
+    # pipz (upgrade|uninstall|reinstall) [pkgname...]    ## If no pkg is provided, choose interactively.
     # pipz runpip <pkgname> <pip-arg...>
     # pipz runpkg <pkgspec> <cmd> [cmd-arg...]
     pipz [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
@@ -351,11 +364,11 @@ If you want completions, make sure to load ``compinit`` beforehand:
 Dependencies for Popular Platforms
 ``````````````````````````````````
 
-To make use of this project, you'll need ``zsh``, ``python``, and
+To make any use of this project, you'll need ``zsh``, ``python``, and
 ``busybox``/``coreutils`` or similar.
 
-``pcregrep`` is only needed for the ``zpy`` function, and is already a dependency of
-``zsh`` on Arch Linux and MacOS (via Homebrew__).
+``pcregrep`` is needed for the ``zpy`` function(and completions), and is already a
+dependency of ``zsh`` on Arch Linux and MacOS (via Homebrew__).
 
 __ https://brew.sh/
 
@@ -447,14 +460,15 @@ Paths & Wording
 
 __ https://github.com/jazzband/pip-tools
 
+
 .. |repo| image:: https://img.shields.io/github/size/andydecleyre/zpy/python.zshrc?logo=github&label=Code
-   :target: https://github.com/andydecleyre/zpy
    :alt: GitHub file size in bytes
+   :target: https://github.com/andydecleyre/zpy
 
 .. |container| image:: https://img.shields.io/badge/Container-Quay.io-blue?logo=red-hat
-   :target: https://quay.io/repository/andykluger/zpy-alpine
    :alt: Demo container
+   :target: https://quay.io/repository/andykluger/zpy-alpine
 
 .. |contact| image:: https://img.shields.io/badge/Contact-Telegram-blue?logo=telegram
-   :target: https://t.me/andykluger
    :alt: Contact developer on Telegram
+   :target: https://t.me/andykluger
