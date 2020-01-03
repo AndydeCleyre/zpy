@@ -51,16 +51,29 @@ zpy () {  # [zpy-function...]
     -zpy $@ | -zpy_hlt zsh
 }
 
-# Get path of folder containing all venvs for the current folder or specified proj-dir.
  if (( $+commands[md5sum] )); then
-venvs_path () {  # [proj-dir]
-    print -rn "${VENVS_WORLD}/${$(print -rn ${${1:-${PWD}}:P} | md5sum)%% *}"
-}
+     -zpy_venvs_path () {  # [proj-dir]
+         REPLY="${VENVS_WORLD}/${$(md5sum =(<<<${${1:-${PWD}}:P}))%% *}"
+     }
  else
-     venvs_path () {  # [proj-dir]
-         print -rn "${VENVS_WORLD}/$(md5 -qs ${${1:-${PWD}}:P})"
+     -zpy_venvs_path () {  # [proj-dir]
+         REPLY="${VENVS_WORLD}/$(md5 -qs ${${1:-${PWD}}:P})"
      }
  fi
+
+ -zpy_venvs_paths () {  # <proj-dir...>
+     reply=()
+     for projdir in $@; do
+         -zpy_venvs_path $projdir
+         reply+=($REPLY)
+     done
+ }
+
+# Get path of folder containing all venvs for the current folder or specified proj-dir.
+venvs_path () {  # [proj-dir]
+    -zpy_venvs_path $@
+    print -rn $REPLY
+}
 
 # Install and upgrade packages.
 alias pipi="python -m pip --disable-pip-version-check install -U"  # <req...>
@@ -193,7 +206,8 @@ pipuhs () {  # [req...]
  }
 
  -zpy_envin () {  # <venv-name> <venv-init-cmd> [reqs-txt...]
-     local vpath=$(venvs_path)
+     -zpy_venvs_path
+     local vpath=$REPLY
      local venv=${vpath}/${1}
      print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
      [[ -d $venv ]] || eval $2 ${(q-)venv}
@@ -236,7 +250,8 @@ envincurrent () {  # [reqs-txt...]
 # Otherwise, act as `envin` (create, activate, sync).
 activate () {  # [proj-dir]
     local projdir=${1:-${PWD}}
-    . "$(venvs_path ${projdir})/venv/bin/activate" 2>/dev/null
+    -zpy_venvs_path $projdir
+    . "$REPLY/venv/bin/activate" 2>/dev/null
     if [[ $? == 127 ]]; then
         trap "cd $PWD" EXIT
         cd "$projdir"
@@ -253,11 +268,13 @@ activatefzf () {
 alias envout="deactivate"
 
  -zpy_whichvpy () {  # <venv-name> <script>
-     print -rn "$(venvs_path ${2:P:h})/$1/bin/python"
+     -zpy_venvs_path ${2:P:h}
+     REPLY="${REPLY}/${1}/bin/python"
  }
 
  -zpy_vpy () {  # <venv-name> <script> [script-arg...]
-     "$(-zpy_whichvpy $1 $2)" ${@[2,-1]}
+     -zpy_whichvpy $1 $2
+     "$REPLY" ${@[2,-1]}
  }
 
 # Run script with its folder's associated venv 'venv'.
@@ -280,12 +297,11 @@ whichpyproj () {
 }
 
  -zpy_vpyshebang () {  # <venv-name> <script...>
-     local vpybin
      local vpyscript=$(whence -p vpy)
      for script in ${@[2,-1]}; do
          chmod +x $script
-         vpybin="${vpyscript:-$(-zpy_whichvpy $1 $script)}"
-         print -rl "#!${vpybin}" "$(<${script})" >! $script
+         -zpy_whichvpy $1 $script
+         print -rl "#!${vpyscript:-${REPLY}}" "$(<${script})" >! $script
      done
  }
 
@@ -306,7 +322,8 @@ alias vpypyshebang="-zpy_vpyshebang venv-pypy"  # <script...>
 vpycurrentshebang () { -zpy_vpyshebang $(-zpy_pyvervenvname) $@ }  # <script...>
 
  -zpy_vpyfrom () {  # <venv-name> <proj-dir> <script-name> [script-arg...]
-     "$(venvs_path $2)/$1/bin/$3" ${@[4,-1]}
+     -zpy_venvs_path $2
+     "${REPLY}/${1}/bin/${3}" ${@[4,-1]}
  }
 
 # Run script from a given project folder's associated venv's bin folder.
@@ -326,12 +343,13 @@ vpycurrentfrom () { -zpy_vpyfrom $(-zpy_pyvervenvname) $@ }  # <proj-dir> <scrip
 # Generate an external launcher for a script in a given project folder's associated venv's bin folder.
 vpylauncherfrom () {  # <proj-dir> <script-name> <launcher-dest>
     if [[ -d $3 ]]; then
-        vpylauncherfrom $1 $2 $3/$2
+        vpylauncherfrom $1 $2 ${3}/${2}
     elif [[ -e $3 ]]; then
         print -rP "%F{red}> ${${3:a}/#~/~} exists! %B::%b ${${1:P}/#~/~}%f" 1>&2
         return 1
     else
-        ln -s "$(venvs_path $1)/venv/bin/$2" $3
+        -zpy_venvs_path $1
+        ln -s "${REPLY}/venv/bin/${2}" $3
     fi
 }
 
@@ -340,7 +358,8 @@ prunevenvs () {
     local orphaned_venv
     for proj in ${VENVS_WORLD}/*/project(@N:P); do
         if [[ ! -d $proj ]]; then
-            orphaned_venv=$(venvs_path $proj)
+            -zpy_venvs_path $proj
+            orphaned_venv=${REPLY}
             print -rl "Missing: ${proj/#~/~}" "Orphan: $(du -hs $orphaned_venv)"
             read -q "?Delete orphan [yN]? "
             [[ $REPLY == 'y' ]] && rm -rf $orphaned_venv
@@ -442,13 +461,15 @@ if pyproject.is_file():
      else
          spfile=$spfiles[1]
      fi
-     print -rn $spfile
+     REPLY=$spfile
  }
 
 # Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
 vpysublp () {
-    local stp=$(-zpy_get_sublp)
-    local pypath=$(venvs_path)/venv/bin/python
+    -zpy_get_sublp
+    local stp=$REPLY
+    -zpy_venvs_path
+    local pypath=${REPLY}/venv/bin/python
     print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~/~} %B->%b ${stp/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
     if (( $+commands[jq] )); then
         print -r "$(jq --arg py $pypath '.settings+={python_interpreter: $py}' $stp)" >! $stp
@@ -468,7 +489,8 @@ spfile.write_text(dumps(sp, indent=4))
 # Launch a new or existing Sublime Text project, setting venv interpreter.
 sublp () {  # [subl-arg...]
     vpysublp
-    subl --project "$(-zpy_get_sublp)" $@
+    -zpy_get_sublp
+    subl --project "$REPLY" $@
 }
 
  -zpy_pipzlistrow () {  # <projects_home> <bin>
@@ -500,8 +522,8 @@ sublp () {  # [subl-arg...]
      local projects_home=$1
      local pkg=$2
      local pkgname=${${pkg:l}%%[ \[<>=#;]*}
-     mkdir -p $projects_home/$pkgname
-     cd $projects_home/$pkgname
+     mkdir -p ${projects_home}/${pkgname}
+     cd ${projects_home}/${pkgname}
      rm -f requirements.{in,txt}
      activate
      pipacs $pkg
@@ -519,7 +541,7 @@ sublp () {  # [subl-arg...]
 # A basic pipx clone (py3 only).
 # Package manager for venv-isolated scripts.
 #
-# pipz list
+# pipz list [pkgname...]  ## If no pkg is provided, list all installed.
 # pipz install <pkgspec...>
 # pipz inject <installed-pkgname> <extra-pkgspec...>
 # pipz (upgrade|uninstall|reinstall)-all
@@ -539,8 +561,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local pkgname
         for pkg in ${@[2,-1]}; do
             pkgname=${${pkg:l}%%[ \[<>=#;]*}
-            cd $projects_home/$pkgname
-            bins=("$(venvs_path)/venv/bin/"*(N:t))
+            cd ${projects_home}/${pkgname}
+            -zpy_venvs_path
+            bins=("${REPLY}/venv/bin/"*(N:t))
             bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|(pip|python|pypy)(|<->*)|*.so)})
             [[ $pkgname != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
             [[ $pkgname != wheel ]] && bins=(${bins:#wheel})
@@ -562,15 +585,16 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         fi
         local vpath
         for pkg in ${pkgs:l}; do
-            vpath=$(venvs_path $projects_home/$pkg)
-            rm -rf $projects_home/$pkg $vpath
+            -zpy_venvs_path ${projects_home}/${pkg}
+            vpath=${REPLY}
+            rm -rf ${projects_home}/${pkg} $vpath
             for bin in $bins_home/*(@N); do
                 if [[ ${bin:P} =~ "^${vpath}/" ]]; then rm $bin; fi
             done
         done
     ;;
     'uninstall-all')
-        pipz uninstall $projects_home/*(/:t)
+        pipz uninstall ${projects_home}/*(/:t)
     ;;
     'upgrade')
         if [[ ${@[2,-1]} ]]; then
@@ -581,22 +605,33 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             local pkgs=($reply)
         fi
         pipz list >! ${TMPPREFIX}_pipz_list_before
-        pipusall $projects_home/${^pkgs:l}
+        pipusall ${projects_home}/${^pkgs:l}
         pipz list >! ${TMPPREFIX}_pipz_list_after
         diff ${TMPPREFIX}_pipz_list_before ${TMPPREFIX}_pipz_list_after
     ;;
     'upgrade-all')
-        pipz upgrade $projects_home/*(/:t)
+        pipz upgrade ${projects_home}/*(/:t)
     ;;
     'list')
         print -rP "projects @ %F{cyan}${projects_home/#~/~}%f"
         print -rP "venvs @ %F{cyan}${${VENVS_WORLD}/#~/~}%f"
         print -rP "apps exposed @ %F{cyan}${bins_home/#~/~}%f [ %F{blue}export path=(${bins_home/#~/~} \$path)%f ]"
-        local bins=($bins_home/*(@N:P))
-        bins=(${(M)bins:#${VENVS_WORLD}/*})
         print
-        print -rC 4 $projects_home/*(/N:t)
+        print -rC 4 ${projects_home}/*(/N:t)
         print
+        local bins=()
+        if [[ $# -gt 1 ]]; then
+            -zpy_venvs_paths ${projects_home}/${^@[2,-1]:l}
+            local venvs_path_whitelist=($reply)
+            for bin in ${bins_home}/*(@N:P); do
+                for vpath in $venvs_path_whitelist; do
+                    if [[ $bin =~ "^${vpath}/" ]]; then bins+=($bin); break; fi
+                done
+            done
+        else
+            bins=(${bins_home}/*(@N:P))
+            bins=(${(M)bins:#${VENVS_WORLD}/*})
+        fi
         local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
         cells+=(${(f)"$(zargs -rl -P $ZPYPROCS -- $bins -- -zpy_pipzlistrow $projects_home)"})
         if [[ $#cells -gt 3 ]]; then
@@ -617,11 +652,12 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         pipz install $pkgs
     ;;
     'reinstall-all')
-        pipz reinstall $projects_home/*(/N:t)
+        pipz reinstall ${projects_home}/*(/N:t)
     ;;
     'inject')
-        cd $projects_home/${2:l} || return 1
-        local vbinpath="$(venvs_path)/venv/bin/"
+        cd ${projects_home}/${2:l} || return 1
+        -zpy_venvs_path
+        local vbinpath="${REPLY}/venv/bin/"
         local blacklist=(${vbinpath}*(N:t))
         -zpy_envin venv 'python3 -m venv'
         pipacs ${@[3,-1]}
@@ -636,14 +672,15 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
     'runpip')
-        -zpy_vpyfrom venv $projects_home/${2:l} python -m pip ${@[3,-1]}
+        -zpy_vpyfrom venv ${projects_home}/${2:l} python -m pip ${@[3,-1]}
     ;;
     'runpkg')
         local pkg=$2
         local pkgname=${${pkg:l}%%[ \[<>=#;]*}
         local cmd=(${@[3,-1]})
         local projdir=${TMPPREFIX}_pipz/${pkgname}
-        local vpath=$(venvs_path $projdir)
+        -zpy_venvs_path $projdir
+        local vpath=$REPLY
         local venv=${vpath}/venv
         local bin=${venv}/bin/${cmd[1]}
         if [[ ! -f $bin || ! -x $bin ]]; then
@@ -741,17 +778,19 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
          proj_arg=2
          script_arg=3
      fi
+     -zpy_venvs_path ${(Q)words[$[proj_arg+1]]}
      _arguments \
          "${proj_arg}:Projects:(${VENVS_WORLD}/*/project(@N-/:P))" \
-         "${script_arg}:Scripts:_files -W $(venvs_path ${(Q)words[$[proj_arg+1]]})/venv/bin"
+         "${script_arg}:Scripts:_files -W ${REPLY}/venv/bin"
      _zpy_helpmsg ${0[2,-1]}
  }
  compdef _vpyfrom -zpy_vpyfrom vpycurrentfrom 2>/dev/null
 
  _vpylauncherfrom () {
+     -zpy_venvs_path ${(Q)words[2]}
      _arguments \
          "1:Projects:(${VENVS_WORLD}/*/project(@N-/:P))" \
-         "2:Scripts:_files -W $(venvs_path ${(Q)words[2]})/venv/bin" \
+         "2:Scripts:_files -W ${REPLY}/venv/bin" \
          '3:Destinations:_files -/'
      _zpy_helpmsg ${0[2,-1]}
  }
@@ -759,7 +798,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
 
  _pipz () {
      local cmds=(list install uninstall uninstall-all upgrade upgrade-all reinstall reinstall-all inject runpip runpkg)
-     if [[ ${words[2]} =~ '^((un|re)install|upgrade)$' ]]; then
+     if [[ ${words[2]} =~ '^((un|re)install|upgrade|list)$' ]]; then
          _arguments \
              "1:commands:($cmds)" \
              "*:Installed Packages:(${XDG_DATA_HOME:-~/.local/share}/python/*(/N:t))"
