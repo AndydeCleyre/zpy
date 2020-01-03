@@ -701,6 +701,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
  # -----------
 
  _zpy_helpmsg () {  # funcname
+     setopt localoptions extendedglob
      _message -r ${"$(zpy $1)"//(#m)$'\e\['[0-9;]#m/%\{$MATCH%\}}
  }
 
