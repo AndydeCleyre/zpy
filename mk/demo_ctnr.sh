@@ -4,39 +4,48 @@ user=dev
 
 alias bldr="buildah run $ctnr"
 alias bldru="buildah run --user $user $ctnr"
+alias bldfrom="buildah from --name $ctnr"
+alias bldpress="buildah commit --rm $ctnr"
 
-# start with a daily build of alpine:edge with zsh, prezto, micro, and a user
-today=$(date +%Y.%j)
-if ! buildah from --name $ctnr --pull=false localhost/prezto-alpine:$today; then
-    buildah from --name $ctnr alpine:edge
-
-    # enable testing repo
-    bldr sh -c 'echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories'
+# Start with a daily build of alpine:3.11.x + git + Zsh + Zim + $user
+today="$(date +%Y.%j)"
+if ! bldfrom --pull=false localhost/zim-alpine:$today; then
+    bldfrom alpine:3.11
     bldr apk upgrade
 
-    # non-root user, with sudo power
+    # Regular user, with sudo power
     bldr apk add sudo
     bldr adduser -G wheel -D $user
     bldr sh -c 'echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/wheel_sudo'
-    bldr sed -Ei 's-(^'$user':.*:)(.*)-\1/bin/zsh-' /etc/passwd
 
-    # practical zsh environment
-    bldr apk add git micro zsh{,-vcs}
-    bldru git clone --recursive https://github.com/sorin-ionescu/prezto /home/$user/.zprezto
-    bldru zsh -c "for rcfile in /home/$user/.zprezto/runcoms/z*; ln -s \$rcfile /home/$user/.\${rcfile:t}"
-    bldru sh -c 'echo "unalias ln ls" >> ~/.zshrc'
-    bldru sh -c 'echo "export EDITOR=micro" >> ~/.zshrc'
-    bldru sh -c 'echo "path=(~/.local/bin \$path)" >> ~/.zshrc'
-    bldru rm -rf /home/$user/.zprezto/{.git,modules/prompt/{external/powerlevel10k,functions/prompt_powerlevel10k_setup}}
-    img="$(buildah commit $ctnr prezto-alpine)"
-    buildah tag "$img" "prezto-alpine:latest" "prezto-alpine:$today"
+    # git, Zsh, Zim
+    bldr apk add git zsh{,-vcs}
+    bldru git clone --recursive https://github.com/zimfw/zimfw /home/$user/.zim
+    bldru zsh -c \
+        'for template_file in /home/'$user'/.zim/templates/*; do
+            user_file="/home/'$user'/.${template_file:t}"
+            cat ${template_file} ${user_file}(.N) > ${user_file}.tmp && mv ${user_file}{.tmp,}
+        done'
+    bldru rm -rf /home/$user/.zim/.git
+    bldru sed -Ei 's/^(zprompt_theme=).*$/\1"eriner"/' /home/$user/.zimrc
+
+    buildah tag "$(bldpress localhost/zim-alpine)" \
+        "localhost/zim-alpine:latest" \
+        "localhost/zim-alpine:$today"
+    bldfrom localhost/zim-alpine:$today
 fi
 
 # zpy
-bldr apk add bat fzf jq pcre-tools python3
-bldru git clone https://github.com/andydecleyre/zpy /home/$user/zpy
-bldru sh -c 'echo ". ~/zpy/python.zshrc" >> ~/.zshrc'
+bldr apk add fzf highlight jq nano pcre-tools python3
+bldru git clone --branch develop https://github.com/andydecleyre/zpy /home/$user/zpy
+bldru sh -c 'cat >> ~/.zshrc <<EOF
+    path=(~/.local/bin \$path)
+    precmd () { rehash }
+    . ~/zpy/python.zshrc
+EOF'
 bldr ln -s /home/$user/zpy/bin/vpy{,from} /usr/local/bin
+
+bldr find /var/cache/apk -type f -delete
 
 buildah config \
     --user $user \
@@ -44,7 +53,10 @@ buildah config \
     --env TERM=xterm-256color \
     --cmd zsh \
     $ctnr
-img="$(buildah commit $ctnr zpy-alpine)"
-buildah tag "$img" \
-    "zpy-alpine:latest" "zpy-alpine:$(git describe)" \
-    "quay.io/andykluger/zpy-alpine:latest" "quay.io/andykluger/zpy-alpine:$(git describe)"
+
+zpy_version="$(bldru git -C /home/$user/zpy describe)"
+buildah tag "$(bldpress localhost/zpy-alpine)" \
+    "localhost/zpy-alpine:latest" \
+    "localhost/zpy-alpine:$zpy_version" \
+    "quay.io/andykluger/zpy-alpine:latest" \
+    "quay.io/andykluger/zpy-alpine:$zpy_version"
