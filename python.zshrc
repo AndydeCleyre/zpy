@@ -612,9 +612,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         pipz upgrade ${projects_home}/*(/:t)
     ;;
     'list')
-        print -rP "projects @ %F{cyan}${projects_home/#~/~}%f"
-        print -rP "venvs @ %F{cyan}${${VENVS_WORLD}/#~/~}%f"
-        print -rP "apps exposed @ %F{cyan}${bins_home/#~/~}%f [ %F{blue}export path=(${bins_home/#~/~} \$path)%f ]"
+        print -rP "projects %B@%b %F{cyan}${projects_home/#~/~}%f"
+        print -rP "venvs %B@%b %F{cyan}${${VENVS_WORLD}/#~/~}%f"
+        print -rP "apps exposed %B@%b %F{cyan}${bins_home/#~/~}%f [ %F{blue}export path=(${bins_home/#~/~} \$path)%f ]"
         print
         print -rC 4 ${projects_home}/*(/N:t)
         print
