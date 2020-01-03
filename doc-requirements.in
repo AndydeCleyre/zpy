@@ -1,1 +1,4 @@
-pyratemp
+pyratemp  # mk/readme.sh
+# docutils  # mk/site.sh
+# sphinx  # mk/site.sh
+# groundwork-sphinx-theme  # mk/site.sh
