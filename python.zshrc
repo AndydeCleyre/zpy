@@ -701,8 +701,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
  # -----------
 
  _zpy_helpmsg () {  # funcname
-     setopt localoptions extendedglob
-     _message -r ${"$(zpy $1)"//(#m)$'\e\['[0-9;]#m/%\{$MATCH%\}}
+     _message -r "$(.zpy $1 | sed -E 's/^([^#].*)/%B\1%b/g' | sed -E 's/^(#.*)/%F{blue}\1%f/g')"
  }
 
  # Message-only
