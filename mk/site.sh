@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/bin/sh -e
 trap "cd $PWD" EXIT
 cd "$(dirname "$0")"
+
+pip install -qr ../docs/doc-requirements.txt
 
 ./help.sh
 
@@ -10,5 +12,5 @@ pyratemp_tool.py \
     "../README.rst.t" \
 > "../docs/index.rst"
 
-# cd ../docs
-# make html
+rm -rf ../docs/site
+sphinx-build ../docs ../docs/site

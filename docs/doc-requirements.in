@@ -1,0 +1,3 @@
+pyratemp                 # mk/{readme,site}.sh
+sphinx                   # mk/site.sh
+groundwork-sphinx-theme  # mk/site.sh
