@@ -4,6 +4,7 @@ user=dev
 
 alias bldr="buildah run $ctnr"
 alias bldru="buildah run --user $user $ctnr"
+alias bldcu="buildah copy --chown $user $ctnr"
 alias bldfrom="buildah from --name $ctnr"
 alias bldpress="buildah commit --rm $ctnr"
 
@@ -20,14 +21,12 @@ if ! bldfrom --pull=false localhost/zim-alpine:$today; then
 
     # git, Zsh, Zim
     bldr apk add git zsh{,-vcs}
-    bldru git clone --recursive https://github.com/zimfw/zimfw /home/$user/.zim
-    bldru zsh -c \
-        'for template_file in /home/'$user'/.zim/templates/*; do
-            user_file="/home/'$user'/.${template_file:t}"
-            cat ${template_file} ${user_file}(.N) > ${user_file}.tmp && mv ${user_file}{.tmp,}
-        done'
-    bldru rm -rf /home/$user/.zim/.git
-    bldru sed -Ei 's/^(zprompt_theme=).*$/\1"eriner"/' /home/$user/.zimrc
+    bldcu https://raw.githubusercontent.com/zimfw/install/master/install.zsh /tmp/install-zim.zsh
+    bldru zsh /tmp/install-zim.zsh
+    bldr rm /tmp/install-zim.zsh
+    bldru zsh -ic 'echo "zmodule s1ck94" >> ~/.zimrc; zimfw install'
+    bldru sed -Ei 's/.*steeef.*//g' /home/$user/.zimrc
+    bldru zsh -ic 'zimfw uninstall'
 
     buildah tag "$(bldpress localhost/zim-alpine)" \
         "localhost/zim-alpine:latest" \
