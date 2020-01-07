@@ -135,12 +135,12 @@ alias pipatest=".zpy_pipa test"  # <req...>
 
 # Add to requirements.in, then compile it to requirements.txt (add, compile).
 pipac () {  # <req...>
-    .zpy_pipa '' $@
+    pipa $@
     pipc requirements.in
 }
 # Add to requirements.in, then compile it with hashes to requirements.txt.
 pipach () {  # <req...>
-    .zpy_pipa '' $@
+    pipa $@
     pipch requirements.in
 }
 #
@@ -255,7 +255,7 @@ activate () {  # [proj-dir]
     if [[ $? == 127 ]]; then
         trap "cd $PWD" EXIT
         cd "$projdir"
-        .zpy_envin venv 'python3 -m venv'
+        envin
     fi
 }
 # Activate `venvs_path <proj-dir>`/venv for an interactively chosen project folder.
@@ -372,7 +372,7 @@ prunevenvs () {
      local proj=${1:P}
      if (( $+commands[jq] )); then
          local cells=($(
-             .zpy_vpyfrom venv $proj python -m pip --disable-pip-version-check list -o --format json \
+             vpyfrom $proj python -m pip --disable-pip-version-check list -o --format json \
              | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
          ))
          #    (package, version, latest)
@@ -382,7 +382,7 @@ prunevenvs () {
          done
      else
          local cells=($(
-             .zpy_vpyfrom venv $proj python -m pip --disable-pip-version-check list -o \
+             vpyfrom $proj python -m pip --disable-pip-version-check list -o \
              | tail -n +3 \
              | grep -Ev '^(setuptools|six|pip|pip-tools) ' \
              | awk '{print $1,$2,$3,$4}'
@@ -502,17 +502,17 @@ sublp () {  # [subl-arg...]
      if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
          if (( $+commands[jq] )); then
              local piplistline=($(
-                 .zpy_vpyfrom venv $pdir python -m pip list --format json \
+                 vpyfrom $pdir python -m pip list --format json \
                  | jq -r '.[] | .name |= ascii_downcase | select(.name=="'${${pdir:t}//[^[:alnum:].]##/-}'") | .name,.version'
              ))
          else
              local piplistline=($(
-                 .zpy_vpyfrom venv $pdir python -m pip list \
+                 vpyfrom $pdir python -m pip list \
                  | grep -i "^${${pdir:t}//[^[:alnum:].]##/-} "
              ))
          fi
          piplistline+=('????')
-         local pyverlines=(${(f)"$(.zpy_vpyfrom venv $pdir python -V)"})
+         local pyverlines=(${(f)"$(vpyfrom $pdir python -V)"})
          print -rl "${bin:t}" "${piplistline[1,2]}" "${pyverlines[-1]}"
      fi
  }
@@ -658,7 +658,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         .zpy_venvs_path
         local vbinpath="${REPLY}/venv/bin/"
         local blacklist=(${vbinpath}*(N:t))
-        .zpy_envin venv 'python3 -m venv'
+        envin
         pipacs ${@[3,-1]}
         deactivate
         local bins=(${vbinpath}*(N:t))
@@ -671,7 +671,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
     'runpip')
-        .zpy_vpyfrom venv ${projects_home}/${2:l} python -m pip ${@[3,-1]}
+        vpyfrom ${projects_home}/${2:l} python -m pip ${@[3,-1]}
     ;;
     'runpkg')
         local pkg=$2
@@ -686,7 +686,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ -d $venv ]] || python3 -m venv $venv
             ln -sfn $projdir ${vpath}/project
             . $venv/bin/activate
-            python -m pip --disable-pip-version-check install -U $pkg -q
+            pipi $pkg -q
             deactivate
         fi
         ${venv}/bin/${cmd}
