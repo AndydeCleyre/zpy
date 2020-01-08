@@ -404,6 +404,7 @@ If you use a fancy Zsh plugin tool, you can instead use a command like one of th
   antigen bundle andydecleyre/zpy python.zshrc
   antibody bundle andydecleyre/zpy path:python.zshrc
   zgen load andydecleyre/zpy python.zshrc
+  zmodule andydecleyre/zpy -s python.zshrc
 
 If you want completions, make sure to load ``compinit`` beforehand:
 
