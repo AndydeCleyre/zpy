@@ -18,8 +18,6 @@ __ https://flit.readthedocs.io/en/latest/
 
 .. image:: https://i.postimg.cc/c1PJHQNs/Screenshot-20200107-183850.png
 
-.. contents::
-   :depth: 1
 
 Guiding Ideas
 -------------
