@@ -2,7 +2,7 @@
 zpy: Zsh helpers for Python venvs, with pip-tools
 =================================================
 
-|repo| |container| |contact|
+|repo| |docsite| |container| |contact|
 
 Here are Zsh convenience functions to manage Python venvs and packages,
 with the excellent pip-tools__. At least a few are very handy.
@@ -514,3 +514,7 @@ Paths & More Wording
 .. |contact| image:: https://img.shields.io/badge/Contact-Telegram-blue?logo=telegram
    :alt: Contact developer on Telegram
    :target: https://t.me/andykluger
+
+.. |docsite| image:: https://readthedocs.org/projects/zpy/badge/
+   :alt: Documentation Status
+   :target: https://zpy.readthedocs.io/en/latest/
