@@ -24,7 +24,7 @@ if ! bldfrom --pull=false localhost/zim-alpine:$today; then
     bldcu https://raw.githubusercontent.com/zimfw/install/master/install.zsh /tmp/install-zim.zsh
     bldru zsh /tmp/install-zim.zsh
     bldr rm /tmp/install-zim.zsh
-    bldru zsh -ic 'echo "zmodule s1ck94" >> ~/.zimrc; zimfw install'
+    bldru zsh -ic 'echo "zmodule gitster" >> ~/.zimrc; zimfw install'
     bldru sed -Ei 's/.*steeef.*//g' /home/$user/.zimrc
     bldru zsh -ic 'zimfw uninstall'
 
@@ -40,6 +40,7 @@ bldru git clone --branch develop https://github.com/andydecleyre/zpy /home/$user
 bldru sh -c 'cat >> ~/.zshrc <<EOF
     path=(~/.local/bin \$path)
     precmd () { rehash }
+    export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=7
     . ~/zpy/python.zshrc
 EOF'
 bldr ln -s /home/$user/zpy/bin/vpy{,from} /usr/local/bin
