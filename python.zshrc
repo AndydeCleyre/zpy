@@ -160,12 +160,20 @@ pipachs () {  # <req...>
      local reqsin=$2
      local reqs=(${@[3,-1]})
      print -rP "%F{cyan}> %B%F{yellow}upgrading%b%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
+
+     local reqstxt=${reqsin:r}.txt
+     local before=$(mktemp)
+     cp $reqstxt $before 2>/dev/null || true
+
      if [[ $# -gt 2 ]]; then
          .zpy_pipc $reqsin ${${@/*/-P}:^reqs} ${gen_hashes:+--generate-hashes}
          .zpy_pipc $reqsin ${gen_hashes:+--generate-hashes}  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
      else
          .zpy_pipc $reqsin -U ${gen_hashes:+--generate-hashes}
      fi
+
+     diff -u -L "${reqstxt:P} then" $before -L "${reqstxt:P} now" $reqstxt | .zpy_hlt diff
+     rm -f $before
  }
 
 # Recompile *requirements.txt with upgraded versions of all or specified packages (upgrade).
