@@ -90,9 +90,9 @@ pips () {  # [reqs-txt...]
     fi
 }
 
- .zpy_pipc () {  # <reqs-in> [pip-compile option...]
+ .zpy_pipc () {  # <reqs-in> [pip-compile-arg...]
      print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${PWD:P}/#~/~}%f"
-     pip-compile --no-header ${@[2,-1]} $1 2>&1 | .zpy_hlt py
+     pip-compile --no-header --build-isolation ${@[2,-1]} $1 2>&1 | .zpy_hlt py
  }
 
 # Compile requirements.txt files from all found or specified requirements.in files (compile).
@@ -162,16 +162,16 @@ pipachs () {  # <req...>
      print -rP "%F{cyan}> %F{yellow}upgrading%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
      if [[ $# -gt 2 ]]; then
          if [[ $gen_hashes ]]; then
-             pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | .zpy_hlt py
+             pip-compile --no-header --build-isolation --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | .zpy_hlt py
              pipch $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
          else
-             pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | .zpy_hlt py
+             pip-compile --no-header --build-isolation ${${@/*/-P}:^reqs} $reqsin 2>&1 | .zpy_hlt py
              pipc $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
          fi
      elif [[ $gen_hashes ]]; then
-         pip-compile --no-header -U --generate-hashes $reqsin 2>&1 | .zpy_hlt py
+         pip-compile --no-header --build-isolation -U --generate-hashes $reqsin 2>&1 | .zpy_hlt py
      else
-         pip-compile --no-header -U $reqsin 2>&1 | .zpy_hlt py
+         pip-compile --no-header --build-isolation -U $reqsin 2>&1 | .zpy_hlt py
      fi
  }
 
@@ -217,7 +217,7 @@ pipuhs () {  # [req...]
      fi
      ln -sfn $PWD ${vpath}/project
      . $venv/bin/activate
-     python -m pip install -qU pip pip-tools wheel
+     python -m pip install -qU pip pip-tools
      rehash
      pips ${@[3,-1]}
  }
