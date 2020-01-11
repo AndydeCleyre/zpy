@@ -161,17 +161,10 @@ pipachs () {  # <req...>
      local reqs=(${@[3,-1]})
      print -rP "%F{cyan}> %F{yellow}upgrading%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
      if [[ $# -gt 2 ]]; then
-         if [[ $gen_hashes ]]; then
-             pip-compile --no-header --build-isolation --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | .zpy_hlt py
-             pipch $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
-         else
-             pip-compile --no-header --build-isolation ${${@/*/-P}:^reqs} $reqsin 2>&1 | .zpy_hlt py
-             pipc $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
-         fi
-     elif [[ $gen_hashes ]]; then
-         pip-compile --no-header --build-isolation -U --generate-hashes $reqsin 2>&1 | .zpy_hlt py
+         .zpy_pipc $reqsin ${${@/*/-P}:^reqs} ${gen_hashes:+--generate-hashes}
+         .zpy_pipc $reqsin ${gen_hashes:+--generate-hashes}  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
      else
-         pip-compile --no-header --build-isolation -U $reqsin 2>&1 | .zpy_hlt py
+         .zpy_pipc $reqsin -U ${gen_hashes:+--generate-hashes}
      fi
  }
 
