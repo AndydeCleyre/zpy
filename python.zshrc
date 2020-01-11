@@ -82,7 +82,7 @@ alias pipi="python -m pip --disable-pip-version-check install -U"  # <req...>
 pips () {  # [reqs-txt...]
     local reqstxts=(${@:-*requirements.txt(N)})
     if [[ $reqstxts ]]; then
-        print -rP "%F{cyan}> %F{blue}syncing%F{cyan} env %B<-%b $reqstxts %B::%b ${${PWD:P}/#~/~}%f"
+        print -rP "%F{cyan}> %B%F{green}syncing%b%F{cyan} env %B<-%b $reqstxts %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
         pip-sync -q $reqstxts
         for reqstxt in $reqstxts; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
             python -m pip install -qr $reqstxt  # AND
@@ -91,7 +91,7 @@ pips () {  # [reqs-txt...]
 }
 
  .zpy_pipc () {  # <reqs-in> [pip-compile-arg...]
-     print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${PWD:P}/#~/~}%f"
+     print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
      pip-compile --no-header --build-isolation ${@[2,-1]} $1 2>&1 | .zpy_hlt py
  }
 
@@ -117,7 +117,7 @@ pipchs () {  # [reqs-in...]
 
  .zpy_pipa () {  # <category> <req...>
      local reqsin=${1:+${1}-}requirements.in
-     print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
+     print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
      print -rl ${@[2,-1]} >>! $reqsin
      .zpy_hlt py < $reqsin
  }
@@ -159,7 +159,7 @@ pipachs () {  # <req...>
      local gen_hashes=${1:#nohashes}
      local reqsin=$2
      local reqs=(${@[3,-1]})
-     print -rP "%F{cyan}> %F{yellow}upgrading%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
+     print -rP "%F{cyan}> %B%F{yellow}upgrading%b%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
      if [[ $# -gt 2 ]]; then
          .zpy_pipc $reqsin ${${@/*/-P}:^reqs} ${gen_hashes:+--generate-hashes}
          .zpy_pipc $reqsin ${gen_hashes:+--generate-hashes}  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
@@ -202,7 +202,7 @@ pipuhs () {  # [req...]
      .zpy_venvs_path
      local vpath=$REPLY
      local venv=${vpath}/${1}
-     print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
+     print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#~/~} %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
      [[ -d $venv ]] || eval $2 ${(q-)venv}
      if (( $? )); then
         print -rP "%F{red}> FAILED: $2 ${(q-)venv}" 1>&2
@@ -406,14 +406,15 @@ pipcheckold () {  # [proj-dir...]
 
 # `pipus` (upgrade-compile, sync) for all or specified projects.
 pipusall () {  # [proj-dir...]
-    zargs -ri___ -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- .zpy_pipusproj ___ | grep '::'
+    # zargs -ri___ -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- .zpy_pipusproj ___ | grep '::'
+    zargs -ri___ -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- .zpy_pipusproj ___
 }
 
 # Inject loose requirements.in dependencies into pyproject.toml.
 # Run either from the folder housing pyproject.toml, or one below.
 # To categorize, name files <category>-requirements.in.
 pypc () {
-    python -m pip install -q tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#~/~}%f"
+    python -m pip install -q tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
     python -c "
 from pathlib import Path
 import tomlkit
@@ -463,7 +464,7 @@ vpysublp () {
     local stp=$REPLY
     .zpy_venvs_path
     local pypath=${REPLY}/venv/bin/python
-    print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~/~} %B->%b ${stp/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
+    print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~/~} %B->%b ${stp/#~/~} %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
     if (( $+commands[jq] )); then
         print -r "$(jq --arg py $pypath '.settings+={python_interpreter: $py}' $stp)" >! $stp
     else
