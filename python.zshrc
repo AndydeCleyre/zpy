@@ -604,9 +604,11 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $reply ]] || return 1
             local pkgs=($reply)
         fi
-        pipz list >! ${TMPPREFIX}_pipz_list
+        local before=$(mktemp)
+        pipz list >! $before
         pipusall ${projects_home}/${^pkgs:l}
-        diff -u -L Then ${TMPPREFIX}_pipz_list -L Now =(pipz list) | .zpy_hlt diff
+        diff -u -L Then $before -L Now =(pipz list) | .zpy_hlt diff
+        rm -f $before
     ;;
     'upgrade-all')
         pipz upgrade ${projects_home}/*(/:t)
