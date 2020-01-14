@@ -530,11 +530,16 @@ sublp () {  # [subl-arg...]
      fi
  }
 
+ .zpy_pkgspec2name () {  # pkgspec
+     REPLY=${${(j: :)${${(s: :)1:l}:#-*}}%%[ \[<>=#;]*}
+ }
+
  .zpy_pipzinstallpkg () {  # <projects_home> <pkg>
      trap "cd $PWD" EXIT
      local projects_home=$1
      local pkg=$2
-     local pkgname=${${pkg:l}%%[ \[<>=#;]*}
+     .zpy_pkgspec2name $pkg
+     local pkgname=$REPLY
      mkdir -p ${projects_home}/${pkgname}
      cd ${projects_home}/${pkgname}
      rm -f requirements.{in,txt}
@@ -558,7 +563,7 @@ sublp () {  # [subl-arg...]
 # pipz install <pkgspec...>
 # pipz inject <installed-pkgname> <extra-pkgspec...>
 # pipz (upgrade|uninstall|reinstall)-all
-# pipz (upgrade|uninstall|reinstall) [pkgname...]    ## If no pkg is provided, choose interactively.
+# pipz (upgrade|uninstall|reinstall) [pkspec...]    ## If no pkg is provided, interactively choose.
 # pipz runpip <pkgname> <pip-arg...>
 # pipz runpkg <pkgspec> <cmd> [cmd-arg...]
 pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
@@ -573,7 +578,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local bins
         local pkgname
         for pkg in ${@[2,-1]}; do
-            pkgname=${${pkg:l}%%[ \[<>=#;]*}
+            .zpy_pkgspec2name $pkg
+            pkgname=$REPLY
             cd ${projects_home}/${pkgname}
             .zpy_venvs_path
             bins=("${REPLY}/venv/bin/"*(N:t))
@@ -596,11 +602,13 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $reply ]] || return 1
             local pkgs=($reply)
         fi
-        local vpath
-        for pkg in ${pkgs:l}; do
-            .zpy_venvs_path ${projects_home}/${pkg}
-            vpath=${REPLY}
-            rm -rf ${projects_home}/${pkg} $vpath
+        local vpath pkgname
+        for pkg in $pkgs; do
+            .zpy_pkgspec2name $pkg
+            pkgname=$REPLY
+            .zpy_venvs_path ${projects_home}/${pkgname}
+            vpath=$REPLY
+            rm -rf ${projects_home}/${pkgname} $vpath
             for bin in $bins_home/*(@N); do
                 if [[ ${bin:P} =~ "^${vpath}/" ]]; then rm $bin; fi
             done
@@ -611,15 +619,19 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
     ;;
     'upgrade')
         if [[ ${@[2,-1]} ]]; then
-            local pkgs=(${@[2,-1]})
+            local pkgnames=()
+            for pkg in ${@[2,-1]}; do
+                .zpy_pkgspec2name $pkg
+                pkgnames+=($REPLY)
+            done
         else
             .zpy_pipzchoosepkgs $projects_home 'Upgrading . . .'
             [[ $reply ]] || return 1
-            local pkgs=($reply)
+            local pkgnames=($reply)
         fi
         local before=$(mktemp)
         pipz list >! $before
-        pipusall ${projects_home}/${^pkgs:l}
+        pipusall ${projects_home}/${^pkgnames}
         diff -u -L Then $before -L Now =(pipz list) | .zpy_hlt diff
         rm -f $before
     ;;
@@ -661,8 +673,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $reply ]] || return 1
             local pkgs=($reply)
         fi
-        local pkgnames=(${${pkgs:l}%%[ \[<>=#;]*})
-        pipz uninstall $pkgnames
+        pipz uninstall $pkgs
         pipz install $pkgs
     ;;
     'reinstall-all')
@@ -690,7 +701,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
     ;;
     'runpkg')
         local pkg=$2
-        local pkgname=${${pkg:l}%%[ \[<>=#;]*}
+        .zpy_pkgspec2name $pkg
+        local pkgname=$REPLY
         local cmd=(${@[3,-1]})
         local projdir=${TMPPREFIX}_pipz/${pkgname}
         .zpy_venvs_path $projdir
