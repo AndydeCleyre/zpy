@@ -313,7 +313,7 @@ whichpyproj () {
      for script in ${@[2,-1]}; do
          chmod +x $script
          .zpy_whichvpy $1 $script
-         print -rl "#!${vpyscript:-${REPLY}}" "$(<${script})" >! $script
+         print -rl "#!${vpyscript:-$REPLY}" "$(<${script})" >! $script
      done
  }
 
@@ -371,7 +371,7 @@ prunevenvs () {
     for proj in ${VENVS_WORLD}/*/project(@N:P); do
         if [[ ! -d $proj ]]; then
             .zpy_venvs_path $proj
-            orphaned_venv=${REPLY}
+            orphaned_venv=$REPLY
             print -rl "Missing: ${proj/#~/~}" "Orphan: $(du -hs $orphaned_venv)"
             read -q "?Delete orphan [yN]? "
             [[ $REPLY == 'y' ]] && rm -rf $orphaned_venv
