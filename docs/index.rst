@@ -117,19 +117,18 @@ Basic Operations
   You may also pass as many specific *reqs-txt*\ s as you want to ``envin``,
   in which case it will ensure your environment matches those and only those.
 
-``activate [proj-dir]``
+``activate [-i|proj-dir]``
   If you know your venv is already in a good state, and just want to activate it
   without all that installing and uninstalling, you can save a second by running
   ``activate`` instead of ``envin``.
 
-  You may pass a *project* to ``activate``, in order to activate a specific venv
-  regardless of your current folder.
-
   If the venv doesn't already exist, this will fall back to ``envin``-like behavior
   (create, activate, *sync*).
 
-``activatefzf``
-  interactively select the *project* whose venv you wish to activate
+  You may pass a *project* to ``activate``, in order to activate a specific venv
+  regardless of your current folder.
+
+  Pass ``-i`` to interactively select an existing *project*.
 
 ``envout``
   a totally unnecessary alias for ``deactivate``
@@ -227,7 +226,8 @@ Functions & Aliases
   zpy [zpy-function...]
   
   # Get path of folder containing all venvs for the current folder or specified proj-dir.
-  venvs_path [proj-dir]
+  # Pass -i to interactively choose the project.
+  venvs_path [-i|proj-dir]
   
   # Install and upgrade packages.
   pipi <req...>
@@ -297,9 +297,8 @@ Functions & Aliases
   # If `venvs_path`/venv exists for the current or specified project folder,
   # activate it without installing anything.
   # Otherwise, act as `envin` (create, activate, sync).
-  activate [proj-dir]
-  # Activate `venvs_path <proj-dir>`/venv for an interactively chosen project folder.
-  activatefzf
+  # Pass -i to interactively choose the project.
+  activate [-i|proj-dir]
   #
   # Deactivate.
   envout  
@@ -381,7 +380,7 @@ Functions & Aliases
   # pipz install <pkgspec...>
   # pipz inject <installed-pkgname> <extra-pkgspec...>
   # pipz (upgrade|uninstall|reinstall)-all
-  # pipz (upgrade|uninstall|reinstall) [pkgname...]    ## If no pkg is provided, choose interactively.
+  # pipz (upgrade|uninstall|reinstall) [pkspec...]    ## If no pkg is provided, interactively choose.
   # pipz runpip <pkgname> <pip-arg...>
   # pipz runpkg <pkgspec> <cmd> [cmd-arg...]
   pipz [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
@@ -424,7 +423,7 @@ dependency of ``zsh`` on Arch Linux and MacOS (via Homebrew__).
 
 __ https://brew.sh/
 
-``fzf`` is only needed for the ``activatefzf`` and ``pipz`` functions.
+``fzf`` is only needed for the ``pipz``, ``activate -i``, and ``venvs_path -i``.
 
 You can enable pretty syntax highlighting by installing either highlight__ or bat__.
 
