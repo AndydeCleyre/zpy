@@ -176,10 +176,10 @@ pipachs () {  # <req...>
      cp $reqstxt $before 2>/dev/null || true
 
      if [[ $# -gt 2 ]]; then
-         .zpy_pipc $reqsin ${${@/*/-P}:^reqs} ${gen_hashes:+--generate-hashes}
-         .zpy_pipc $reqsin ${gen_hashes:+--generate-hashes}  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
+         .zpy_pipc $reqsin -q ${${@/*/-P}:^reqs} ${gen_hashes:+--generate-hashes}
+         .zpy_pipc $reqsin -q ${gen_hashes:+--generate-hashes} >/dev/null  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
      else
-         .zpy_pipc $reqsin -U ${gen_hashes:+--generate-hashes}
+         .zpy_pipc $reqsin -q -U ${gen_hashes:+--generate-hashes}
      fi
 
      diff -u -L "${reqstxt:P} then" $before -L "${reqstxt:P} now" $reqstxt | .zpy_hlt diff
