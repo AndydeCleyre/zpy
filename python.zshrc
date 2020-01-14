@@ -586,6 +586,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|(pip|python|pypy)(|<->*)|*.so|__pycache__)})
             [[ $pkgname != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
             [[ $pkgname != wheel ]] && bins=(${bins:#wheel})
+            [[ $pkgname != chardet ]] && bins=(${bins:#chardetect})
             bins=(${(f)"$(
                 print -rln -- $bins \
                 | fzf --reverse -m -0 -1 --header="Installing $pkg . . ." \
