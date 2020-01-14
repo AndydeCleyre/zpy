@@ -30,7 +30,7 @@
          | pcregrep -Mh '(^[^\n]+\n)*(^'$1'( |$))[^\n]*(\n[^\n]+)*' \
          | sed 's/  # / /g'
          for zpyfn in ${@[2,-1]}; do
-             print -rl '' "$(
+             print -rl -- '' "$(
                  .zpy \
                  | pcregrep -Mh '(^[^\n]+\n)*(^'$zpyfn'( |$))[^\n]*(\n[^\n]+)*' \
                  | sed 's/  # / /g'
@@ -128,7 +128,7 @@ pipchs () {  # [reqs-in...]
  .zpy_pipa () {  # <category> <req...>
      local reqsin=${1:+${1}-}requirements.in
      print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
-     print -rl ${@[2,-1]} >>! $reqsin
+     print -rl -- ${@[2,-1]} >>! $reqsin
      .zpy_hlt py < $reqsin
  }
 
@@ -305,7 +305,7 @@ vpycurrent () { .zpy_vpy $(.zpy_pyvervenvname) $@ }  # <script> [script-arg...]
 
 # Get path of project for the activated venv.
 whichpyproj () {
-    print -rn ${"$(which python)":h:h:h}/project(@N:P)
+    print -rn -- ${"$(which python)":h:h:h}/project(@N:P)
 }
 
  .zpy_vpyshebang () {  # <venv-name> <script...>
@@ -405,14 +405,14 @@ prunevenvs () {
              cells[i]="${proj/#~/~}"
          done
      fi
-     print -rl $cells
+     print -rl -- $cells
  }
 
 # `pip list -o` for all or specified projects.
 pipcheckold () {  # [proj-dir...]
     local cells=("%F{cyan}%BPackage%b%f" "%F{cyan}%BVersion%b%f" "%F{cyan}%BLatest%b%f" "%F{cyan}%BProject%b%f")
     cells+=(${(f)"$(zargs -rl -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/)} -- .zpy_pipcheckoldcells)"})
-    if [[ $#cells -gt 4 ]]; then print -rPaC 4 $cells; fi
+    if [[ $#cells -gt 4 ]]; then print -rPaC 4 -- $cells; fi
 }
 
  .zpy_pipusproj () {  # <proj-dir>
@@ -485,7 +485,7 @@ vpysublp () {
     local pypath=${REPLY}/venv/bin/python
     print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~/~} %B->%b ${stp/#~/~} %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
     if (( $+commands[jq] )); then
-        print -r "$(jq --arg py $pypath '.settings+={python_interpreter: $py}' $stp)" >! $stp
+        print -r -- "$(jq --arg py $pypath '.settings+={python_interpreter: $py}' $stp)" >! $stp
     else
         python -c "
 from pathlib import Path
@@ -526,7 +526,7 @@ sublp () {  # [subl-arg...]
          fi
          piplistline+=('????')
          local pyverlines=(${(f)"$(vpyfrom $pdir python -V)"})
-         print -rl "${bin:t}" "${piplistline[1,2]}" "${pyverlines[-1]}"
+         print -rl -- "${bin:t}" "${piplistline[1,2]}" "${pyverlines[-1]}"
      fi
  }
 
@@ -550,9 +550,9 @@ sublp () {  # [subl-arg...]
 
  .zpy_pipzchoosepkgs () {  # <projects_home> [header='Packages:']
     reply=(${(f)"$(
-        print -rl $1/*(/:t) \
+        print -rln -- $1/*(/:t) \
         | fzf --reverse -m -0 --header="${2:-Packages:}" \
-        --prompt='Which packages? Select more than one with <tab>. Filter: '
+        --prompt='Which packages? Choose more than one with <tab>. Filter: '
     )"})
 }
 
@@ -587,9 +587,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $pkgname != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
             [[ $pkgname != wheel ]] && bins=(${bins:#wheel})
             bins=(${(f)"$(
-                print -rl $bins \
+                print -rln -- $bins \
                 | fzf --reverse -m -0 -1 --header="Installing $pkg . . ." \
-                --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
+                --prompt='Which scripts should be added to the path? Choose more than one with <tab>. Filter: '
             )"})
             for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
         done
@@ -643,7 +643,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         print -rP "venvs %B@%b %F{cyan}${${VENVS_WORLD}/#~/~}%f"
         print -rP "apps exposed %B@%b %F{cyan}${bins_home/#~/~}%f [ %F{blue}export path=(${bins_home/#~/~} \$path)%f ]"
         print
-        print -rC 4 ${projects_home}/*(/N:t)
+        print -rC 4 -- ${projects_home}/*(/N:t)
         print
         local bins=()
         if [[ $# -gt 1 ]]; then
@@ -661,8 +661,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
         cells+=(${(f)"$(zargs -rl -P $ZPYPROCS -- $bins -- .zpy_pipzlistrow $projects_home)"})
         if [[ $#cells -gt 3 ]]; then
-            print -rPaC 3 $cells | head -n 1
-            print -rPaC 3 $cells | tail -n +2 | sort
+            print -rPaC 3 -- $cells | head -n 1
+            print -rPaC 3 -- $cells | tail -n +2 | sort
         fi
     ;;
     'reinstall')
@@ -690,9 +690,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local bins=(${vbinpath}*(N:t))
         bins=(${bins:|blacklist})
         bins=(${(f)"$(
-            print -rl $bins \
+            print -rln -- $bins \
             | fzf --reverse -m -0 --header="$2" \
-            --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
+            --prompt='Which scripts should be added to the path? Choose more than one with <tab>. Filter: '
         )"})
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
