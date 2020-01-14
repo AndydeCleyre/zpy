@@ -69,10 +69,20 @@ zpy () {  # [zpy-function...]
      done
  }
 
+ .zpy_chooseproj () {
+     REPLY=$(print -rln -- ${VENVS_WORLD}/*/project(@N-/:P) | fzf --reverse -0 -1)
+ }
+
 # Get path of folder containing all venvs for the current folder or specified proj-dir.
-venvs_path () {  # [proj-dir]
-    .zpy_venvs_path $@
-    print -rn $REPLY
+# Pass -i to interactively choose the project.
+venvs_path () {  # [-i|proj-dir]
+    if [[ "$1" == '-i' ]]; then
+        .zpy_chooseproj
+        venvs_path "$REPLY"
+    else
+        .zpy_venvs_path $@
+        print -rn -- $REPLY
+    fi
 }
 
 # Install and upgrade packages.
@@ -249,20 +259,21 @@ envincurrent () {  # [reqs-txt...]
 # If `venvs_path`/venv exists for the current or specified project folder,
 # activate it without installing anything.
 # Otherwise, act as `envin` (create, activate, sync).
-activate () {  # [proj-dir]
-    local projdir=${1:-${PWD}}
-    .zpy_venvs_path $projdir
-    . "$REPLY/venv/bin/activate" 2>/dev/null
-    if [[ $? == 127 ]]; then
-        trap "cd $PWD" EXIT
-        cd "$projdir"
-        envin
+# Pass -i to interactively choose the project.
+activate () {  # [-i|proj-dir]
+    if [[ "$1" == '-i' ]]; then
+        .zpy_chooseproj
+        activate "$REPLY"
+    else
+        local projdir=${1:-${PWD}}
+        .zpy_venvs_path $projdir
+        . "$REPLY/venv/bin/activate" 2>/dev/null
+        if [[ $? == 127 ]]; then
+            trap "cd $PWD" EXIT
+            cd "$projdir"
+            envin
+        fi
     fi
-}
-# Activate `venvs_path <proj-dir>`/venv for an interactively chosen project folder.
-activatefzf () {
-    local projects=(${VENVS_WORLD}/*/project(@N-/:P))
-    activate "$(print -rl $projects | fzf --reverse -0 -1)"
 }
 #
 # Deactivate.
@@ -709,7 +720,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
  }
 
  # Message-only
- for zpyfn in activatefzf pipa pipac pipu prunevenvs pypc sublp vpysublp whichpyproj; do
+ for zpyfn in pipa pipac pipu prunevenvs pypc sublp vpysublp whichpyproj; do
      _${zpyfn} () { _zpy_helpmsg ${0[2,-1]} }
      compdef _${zpyfn} ${zpyfn} 2>/dev/null  # Includes gratuitous compdef for pipa
  done
@@ -734,10 +745,11 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
  compdef _envin .zpy_envin envincurrent 2>/dev/null
  compdef _pips pips 2>/dev/null
 
- # Folders
+ # Potential Projects (Folders + -i)
  for zpyfn in activate venvs_path; do
      _${zpyfn} () {
-         _files -/
+         [[ ${#words} -le 2 ]] \
+         && _arguments '-i' '1:New or Existing Projects:_files -/'
          _zpy_helpmsg ${0[2,-1]}
      }
      compdef _${zpyfn} ${zpyfn} 2>/dev/null

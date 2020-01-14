@@ -121,19 +121,18 @@ Basic Operations
   You may also pass as many specific *reqs-txt*\ s as you want to ``envin``,
   in which case it will ensure your environment matches those and only those.
 
-``activate [proj-dir]``
+``activate [-i|proj-dir]``
   If you know your venv is already in a good state, and just want to activate it
   without all that installing and uninstalling, you can save a second by running
   ``activate`` instead of ``envin``.
 
-  You may pass a *project* to ``activate``, in order to activate a specific venv
-  regardless of your current folder.
-
   If the venv doesn't already exist, this will fall back to ``envin``-like behavior
   (create, activate, *sync*).
 
-``activatefzf``
-  interactively select the *project* whose venv you wish to activate
+  You may pass a *project* to ``activate``, in order to activate a specific venv
+  regardless of your current folder.
+
+  Pass ``-i`` to interactively select an existing *project*.
 
 ``envout``
   a totally unnecessary alias for ``deactivate``
@@ -266,7 +265,7 @@ dependency of ``zsh`` on Arch Linux and MacOS (via Homebrew__).
 
 __ https://brew.sh/
 
-``fzf`` is only needed for the ``activatefzf`` and ``pipz`` functions.
+``fzf`` is only needed for the ``pipz``, ``activate -i``, and ``venvs_path -i``.
 
 You can enable pretty syntax highlighting by installing either highlight__ or bat__.
 
