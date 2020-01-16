@@ -12,12 +12,12 @@
 
  # Syntax highlighter, reading stdin.
  .zpy_hlt () {  # <syntax>
-     if (( $+commands[highlight] )); then
-         HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} highlight -O truecolor -S $1
-         # recommended: aiseered, darkplus, oxygenated
-     elif (( $+commands[bat] )); then
+     if (( $+commands[bat] )); then
          BAT_THEME=${BAT_THEME:-ansi-dark} bat --color always --paging never -p -l $1
          # recommended: ansi-dark, zenburn
+     elif (( $+commands[highlight] )); then
+         HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} highlight -O truecolor -S $1
+         # recommended: aiseered, darkplus, oxygenated
      else
          cat -
      fi
