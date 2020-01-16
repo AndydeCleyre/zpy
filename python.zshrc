@@ -436,22 +436,27 @@ pypc () {
     python -m pip install -q tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
     python -c "
 from pathlib import Path
+from contextlib import suppress
+import re
+
 import tomlkit
+
+
 suffix = 'requirements.in'
-cwd = Path().absolute()
-pyproject = cwd / 'pyproject.toml'
+pyproject = Path().absolute() / 'pyproject.toml'
 if not pyproject.is_file():
-    pyproject = cwd.parent / 'pyproject.toml'
-reqsins = [*pyproject.parent.glob(f'*/*{suffix}')] + [*pyproject.parent.glob(f'*{suffix}')]
+    pyproject = pyproject.parents[1] / 'pyproject.toml'
 if pyproject.is_file():
+    reqsins = [*pyproject.parent.glob(f'*/*{suffix}')] + [*pyproject.parent.glob(f'*{suffix}')]
     toml_data = tomlkit.parse(pyproject.read_text())
     for reqsin in reqsins:
         print(f'\033[96m> injecting {reqsin} -> {pyproject}\033[0m')
-        pyproject_reqs = [
-            line
-            for line in reqsin.read_text().splitlines()
-            if line.strip() and not (line.startswith('#') or line.startswith('-r'))
-        ]
+        pyproject_reqs = []
+        for line in reqsin.read_text().splitlines():
+            with suppress(AttributeError):
+                pyproject_reqs.append(
+                    re.search(r'^(-\S+\s+)*([^#]+)', line).group(2).rstrip()
+                )
         extras_catg = reqsin.name.rsplit(suffix, 1)[0].rstrip('-.')
         if not extras_catg:
             toml_data['tool']['flit']['metadata']['requires'] = pyproject_reqs
