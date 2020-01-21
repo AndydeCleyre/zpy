@@ -48,7 +48,8 @@
 # Print description and arguments for all or specified functions.
 # To see actual function contents, use `which <funcname>`.
 zpy () {  # [zpy-function...]
-    .zpy $@ | .zpy_hlt zsh
+    local helps=(-h --help)
+    .zpy ${@:|helps} | .zpy_hlt zsh
 }
 
  if (( $+commands[md5sum] )); then
