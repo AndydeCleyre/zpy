@@ -95,9 +95,9 @@ pips () {  # [reqs-txt...]
     if [[ $reqstxts ]]; then
         print -rP "%F{cyan}> %B%F{green}syncing%b%F{cyan} env %B<-%b $reqstxts %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
         pip-sync -q $reqstxts
-        for reqstxt in $reqstxts; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
-            python -m pip install -qr $reqstxt  # AND
-        done                          # https://github.com/jazzband/pip-tools/issues/925 is resolved (by merging https://github.com/jazzband/pip-tools/pull/927)
+        for reqstxt in $reqstxts; do                                        # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
+            python -m pip --disable-pip-version-check install -qr $reqstxt  # AND
+        done                                                                # https://github.com/jazzband/pip-tools/issues/925 is resolved (by merging https://github.com/jazzband/pip-tools/pull/927)
     fi
 }
 
@@ -229,7 +229,7 @@ pipuhs () {  # [req...]
      fi
      ln -sfn $PWD ${vpath}/project
      . $venv/bin/activate
-     python -m pip install -qU pip pip-tools
+     pipi -q pip pip-tools
      rehash
      pips ${@[3,-1]}
  }
@@ -434,7 +434,8 @@ pipusall () {  # [proj-dir...]
 # Run either from the folder housing pyproject.toml, or one below.
 # To categorize, name files <category>-requirements.in.
 pypc () {
-    python -m pip install -q tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
+    python -m pip --disable-pip-version-check install -q tomlkit \
+    || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
     python -c "
 from pathlib import Path
 from contextlib import suppress
@@ -521,12 +522,12 @@ sublp () {  # [subl-arg...]
      if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
          if (( $+commands[jq] )); then
              local piplistline=($(
-                 vpyfrom $pdir python -m pip list --format json \
+                 vpyfrom $pdir python -m pip --disable-pip-version-check list --format json \
                  | jq -r '.[] | .name |= ascii_downcase | select(.name=="'${${pdir:t}//[^[:alnum:].]##/-}'") | .name,.version'
              ))
          else
              local piplistline=($(
-                 vpyfrom $pdir python -m pip list \
+                 vpyfrom $pdir python -m pip --disable-pip-version-check list \
                  | grep -i "^${${pdir:t}//[^[:alnum:].]##/-} "
              ))
          fi
