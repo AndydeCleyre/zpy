@@ -178,7 +178,6 @@ pipachs () {  # <req...>
 
      if [[ $# -gt 2 ]]; then
          .zpy_pipc $reqsin -q ${${@/*/-P}:^reqs} ${gen_hashes:+--generate-hashes}
-         .zpy_pipc $reqsin -q ${gen_hashes:+--generate-hashes} >/dev/null  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
      else
          .zpy_pipc $reqsin -q -U ${gen_hashes:+--generate-hashes}
      fi
