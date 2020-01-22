@@ -25,8 +25,12 @@ if ! bldfrom --pull=false localhost/zim-alpine:$today; then
     bldru zsh /tmp/install-zim.zsh
     bldr rm /tmp/install-zim.zsh
     bldru zsh -ic 'echo "zmodule gitster" >> ~/.zimrc; zimfw install'
-    bldru sed -Ei 's/.*steeef.*//g' /home/$user/.zimrc
-    bldru zsh -ic 'zimfw uninstall'
+    bldru zsh -ic 'sed -i "/steeef/d" ~/.zimrc; zimfw uninstall'
+    bldru sh -c 'cat >> ~/.zshrc <<EOF
+path=(~/.local/bin \$path)
+precmd () { rehash }
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=7
+EOF'
 
     buildah tag "$(bldpress localhost/zim-alpine)" \
         "localhost/zim-alpine:latest" \
@@ -36,14 +40,8 @@ fi
 
 # zpy
 bldr apk add fzf highlight jq nano pcre-tools python3
-bldru git clone --branch develop https://github.com/andydecleyre/zpy /home/$user/zpy
-bldru sh -c 'cat >> ~/.zshrc <<EOF
-    path=(~/.local/bin \$path)
-    precmd () { rehash }
-    export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=7
-    . ~/zpy/python.zshrc
-EOF'
-bldr ln -s /home/$user/zpy/bin/vpy{,from} /usr/local/bin
+bldru zsh -ic 'echo "zmodule andydecleyre/zpy -s python.zshrc -b develop" >> ~/.zimrc; zimfw install'
+bldr ln -s /home/$user/.zim/modules/zpy/bin/vpy{,from} /usr/local/bin
 
 bldr find /var/cache/apk -type f -delete
 
@@ -54,7 +52,7 @@ buildah config \
     --cmd zsh \
     $ctnr
 
-zpy_version="$(bldru git -C /home/$user/zpy describe)"
+zpy_version="$(bldru git -C /home/$user/.zim/modules/zpy describe)"
 buildah tag "$(bldpress localhost/zpy-alpine)" \
     "localhost/zpy-alpine:latest" \
     "localhost/zpy-alpine:$zpy_version" \
