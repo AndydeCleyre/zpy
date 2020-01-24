@@ -698,7 +698,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         bins=(${bins:|blacklist})
         bins=(${(f)"$(
             print -rln -- $bins \
-            | fzf --reverse -m -0 --header="$2" \
+            | fzf --reverse -m -0 --header="Injecting [${(j:, :)@[3,-1]}] -> $2 . . ." \
             --prompt='Which scripts should be added to the path? Choose more than one with <tab>. Filter: '
         )"})
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
