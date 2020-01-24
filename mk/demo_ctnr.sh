@@ -32,7 +32,7 @@ precmd () { rehash }
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=7
 EOF'
 
-    buildah tag "$(bldpress localhost/zim-alpine)" \
+    buildah tag "$(bldpress zim-alpine)" \
         "localhost/zim-alpine:latest" \
         "localhost/zim-alpine:$today"
     bldfrom localhost/zim-alpine:$today
@@ -53,7 +53,7 @@ buildah config \
     $ctnr
 
 zpy_version="$(bldru git -C /home/$user/.zim/modules/zpy describe)"
-buildah tag "$(bldpress localhost/zpy-alpine)" \
+buildah tag "$(bldpress zpy-alpine)" \
     "localhost/zpy-alpine:latest" \
     "localhost/zpy-alpine:$zpy_version" \
     "quay.io/andykluger/zpy-alpine:latest" \

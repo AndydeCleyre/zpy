@@ -16,7 +16,7 @@ They can generally replace pipenv, poetry [#]_, pipx, pipsi, virtualenvwrapper, 
 
 __ https://flit.readthedocs.io/en/latest/
 
-.. image:: https://i.postimg.cc/c1PJHQNs/Screenshot-20200107-183850.png
+.. image:: https://gist.github.com/AndydeCleyre/34fd63abe8954957590224e85edf6476/raw/28ba8c4a77f17f56fdb83726733e89ac01e2a068/demo_intro.svg?sanitize=true
 
 .. contents::
    :depth: 1
