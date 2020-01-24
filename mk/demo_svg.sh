@@ -19,7 +19,7 @@ if ! bldfrom --pull=false localhost/$ctnr:$today; then
 fi
 
 # Interactive recording session:
-urun zsh -ic 'read "?Hit enter when ready to begin recording session . . ."; termtosvg demo.svg -t window_frame -g 86x15 -M 2000 -c "zsh -i"'
+urun zsh -ic "read '?Hit enter when ready to begin recording session . . .'; termtosvg demo.svg -t window_frame -g ${1:-86}x${2:-15} -M 2000 -c 'zsh -i'"
 cp "$(buildah mount $ctnr)/home/$user/demo.svg" ./
 buildah unmount $ctnr
 

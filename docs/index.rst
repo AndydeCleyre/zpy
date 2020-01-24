@@ -65,7 +65,7 @@ Run ``zpy`` to see a full reference of `Functions & Aliases`_.
           before installing ``pillow``, run
           ``sudo apk add gcc {jpeg,musl,python3,zlib}-dev``.
 
-.. image:: https://i.postimg.cc/vmLCfwjY/1578443570.gif
+.. image:: https://gist.github.com/AndydeCleyre/aa9dc4d86c43903a0350def66fa62af0/raw/05f61ae09b16ef77c2eaac39ab3f3f17c60c30f0/demo_pipz_install.svg?sanitize=true
 
 Wording
 -------
