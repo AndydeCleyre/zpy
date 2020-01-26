@@ -425,7 +425,7 @@ dependency of ``zsh`` on Arch Linux and MacOS (via Homebrew__).
 
 __ https://brew.sh/
 
-``fzf`` is only needed for the ``pipz``, ``activate -i``, and ``venvs_path -i``.
+``fzf`` is only needed for ``pipz``, ``activate -i``, and ``venvs_path -i``.
 
 You can enable pretty syntax highlighting by installing either highlight__ or bat__.
 
