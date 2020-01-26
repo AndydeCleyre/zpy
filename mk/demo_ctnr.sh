@@ -26,10 +26,10 @@ if ! bldfrom --pull=false localhost/zim-alpine:$today; then
     bldr rm /tmp/install-zim.zsh
     bldru zsh -ic 'echo "zmodule gitster" >> ~/.zimrc; zimfw install'
     bldru zsh -ic 'sed -i "/steeef/d" ~/.zimrc; zimfw uninstall'
-    bldru sh -c 'cat >> ~/.zshrc <<EOF
-path=(~/.local/bin \$path)
-precmd () { rehash }
-export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=7
+    bldru sh -c 'cat >> ~/.zshrc <<-EOF
+        path=(~/.local/bin \$path)
+        precmd () { rehash }
+        export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=7
 EOF'
 
     buildah tag "$(bldpress zim-alpine)" \
