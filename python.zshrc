@@ -637,7 +637,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local before=$(mktemp)
         pipz list >! $before
         pipusall ${projects_home}/${^pkgnames}
-        diff -u -L Then $before -L Now =(pipz list) | .zpy_hlt diff
+        diff -u -L 'pipz then' $before -L 'pipz now' =(pipz list) | .zpy_hlt diff
         rm -f $before
     ;;
     'upgrade-all')
