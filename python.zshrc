@@ -424,8 +424,7 @@ pipcheckold () {  # [proj-dir...]
 
 # `pipus` (upgrade-compile, sync) for all or specified projects.
 pipusall () {  # [proj-dir...]
-    # zargs -ri___ -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- .zpy_pipusproj ___ | grep '::'
-    zargs -ri___ -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- .zpy_pipusproj ___
+    zargs -rl -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- .zpy_pipusproj
 }
 
 # Inject loose requirements.in dependencies into pyproject.toml.
