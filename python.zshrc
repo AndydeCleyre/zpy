@@ -181,7 +181,7 @@ pipachs () {  # <req...>
          .zpy_pipc $reqsin -q -U ${gen_hashes:+--generate-hashes}
      fi
 
-     diff -u -L "${reqstxt:P} then" $before -L "${reqstxt:P} now" $reqstxt | .zpy_hlt diff
+     diff -u -L "${${reqstxt:P}/#~/~} then" $before -L "${${reqstxt:P}/#~/~} now" $reqstxt | .zpy_hlt diff
      rm -f $before
  }
 
