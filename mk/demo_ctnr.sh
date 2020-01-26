@@ -16,7 +16,7 @@ if ! bldfrom --pull=false localhost/zim-alpine:$today; then
 
     # Regular user, with sudo power
     bldr apk add sudo
-    bldr adduser -G wheel -D $user
+    bldr adduser -G wheel -D -s /bin/zsh $user
     bldr sh -c 'echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/wheel_sudo'
 
     # git, Zsh, Zim
