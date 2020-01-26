@@ -170,7 +170,6 @@ pipachs () {  # <req...>
      local gen_hashes=${1:#nohashes}
      local reqsin=$2
      local reqs=(${@[3,-1]})
-     print -rP "%F{cyan}> %B%F{yellow}upgrading%b%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
 
      local reqstxt=${reqsin:r}.txt
      local before=$(mktemp)
