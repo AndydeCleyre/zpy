@@ -556,7 +556,7 @@ sublp () {  # [subl-arg...]
     reply=(${(f)"$(
         print -rln -- $1/*(/:t) \
         | fzf --reverse -m -0 --header="${2:-Packages:}" \
-        --prompt='Which packages? Choose more than one with <tab>. Filter: '
+        --prompt='Which packages? Choose more than one with <tab>.'
     )"})
 }
 
@@ -594,7 +594,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             bins=(${(f)"$(
                 print -rln -- $bins \
                 | fzf --reverse -m -0 -1 --header="Installing $pkg . . ." \
-                --prompt='Which scripts should be added to the path? Choose more than one with <tab>. Filter: '
+                --prompt='Which scripts should be added to the path? Choose more than one with <tab>.'
             )"})
             for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
         done
@@ -697,7 +697,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         bins=(${(f)"$(
             print -rln -- $bins \
             | fzf --reverse -m -0 --header="Injecting [${(j:, :)@[3,-1]}] -> $2 . . ." \
-            --prompt='Which scripts should be added to the path? Choose more than one with <tab>. Filter: '
+            --prompt='Which scripts should be added to the path? Choose more than one with <tab>.'
         )"})
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
