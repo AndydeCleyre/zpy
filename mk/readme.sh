@@ -2,7 +2,7 @@
 trap "cd $PWD" EXIT
 cd "$(dirname "$0")"
 
-pip install -qr ../docs/doc-requirements.txt
+pip install -qr ../doc/doc-requirements.txt
 
 ./help.sh
 
