@@ -1,0 +1,35 @@
+version: v1.0
+name: Build and push {zim,zpy}-alpine containers to quay.io
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+
+blocks:
+  - name: Build and push {zim,zpy}-alpine containers to quay.io
+    run:
+      when: "branch = 'develop'"
+    task:
+      secrets:
+        - name: quay creds
+      jobs:
+        - name: Install buildah; build images; push images to quay.io
+          commands:
+            # Cramming this all into one job to avoid tedious cache-passing
+            # Install buildah:
+            - . /etc/os-release
+            - sudo apt-get -qq update
+            - sudo apt-get -qq install wget gpg
+            - sudo sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/x${NAME}_${VERSION_ID}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
+            - wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/x${NAME}_${VERSION_ID}/Release.key -O - | sudo apt-key add -
+            - sudo apt-get -qq update
+            - sudo apt-get -qq install buildah
+            # Build containers:
+            - checkout
+            - sudo ./mk/demo_ctnr.sh
+            # Push containers:
+            - sudo buildah login -u $QUAY_NAME -p $QUAY_TOKEN quay.io
+            - sudo buildah push quay.io/andykluger/zim-alpine:$(date +%Y.%j)
+            - sudo buildah push quay.io/andykluger/zim-alpine:latest || true
+            - sudo buildah push quay.io/andykluger/zpy-alpine:$(git describe)
+            - sudo buildah push quay.io/andykluger/zpy-alpine:latest
