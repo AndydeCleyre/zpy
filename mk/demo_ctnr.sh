@@ -10,7 +10,7 @@ alias bldpress="buildah commit --rm $ctnr"
 
 # Start with a daily build of alpine:3.11.x + git + Zsh + Zim + $user
 today="$(date +%Y.%j)"
-if ! bldfrom --pull=false localhost/zim-alpine:$today; then
+if ! bldfrom quay.io/andykluger/zim-alpine:$today; then
     bldfrom alpine:3.11
     bldr apk upgrade
 
@@ -32,10 +32,9 @@ if ! bldfrom --pull=false localhost/zim-alpine:$today; then
         export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=7
 EOF'
 
-    buildah tag "$(bldpress zim-alpine)" \
-        "localhost/zim-alpine:latest" \
-        "localhost/zim-alpine:$today"
-    bldfrom localhost/zim-alpine:$today
+    buildah tag "$(bldpress quay.io/andykluger/zim-alpine)" \
+                           "quay.io/andykluger/zim-alpine:$today"
+    bldfrom quay.io/andykluger/zim-alpine:$today
 fi
 
 # zpy
@@ -53,8 +52,5 @@ buildah config \
     $ctnr
 
 zpy_version="$(bldru git -C /home/$user/.zim/modules/zpy describe)"
-buildah tag "$(bldpress zpy-alpine)" \
-    "localhost/zpy-alpine:latest" \
-    "localhost/zpy-alpine:$zpy_version" \
-    "quay.io/andykluger/zpy-alpine:latest" \
-    "quay.io/andykluger/zpy-alpine:$zpy_version"
+buildah tag "$(bldpress quay.io/andykluger/zpy-alpine)" \
+                       "quay.io/andykluger/zpy-alpine:$zpy_version"
