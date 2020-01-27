@@ -12,15 +12,15 @@ alias bldpress="buildah commit --rm $ctnr"
 today="$(date +%Y.%j)"
 if ! bldfrom quay.io/andykluger/zim-alpine:$today; then
     bldfrom alpine:3.11
-    bldr apk upgrade
+    bldr apk upgrade --no-progress -q
 
     # Regular user, with sudo power
-    bldr apk add sudo
+    bldr apk add --no-progress -q sudo
     bldr adduser -G wheel -D -s /bin/zsh $user
     bldr sh -c 'echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/wheel_sudo'
 
     # git, Zsh, Zim
-    bldr apk add git zsh{,-vcs}
+    bldr apk add --no-progress -q git zsh{,-vcs}
     bldcu https://raw.githubusercontent.com/zimfw/install/master/install.zsh /tmp/install-zim.zsh
     bldru zsh /tmp/install-zim.zsh
     bldr rm /tmp/install-zim.zsh
@@ -38,7 +38,7 @@ EOF'
 fi
 
 # zpy
-bldr apk add fzf highlight jq nano pcre-tools python3
+bldr apk add --no-progress -q fzf highlight jq nano pcre-tools python3
 bldru zsh -ic 'echo "zmodule andydecleyre/zpy -s python.zshrc -b develop" >> ~/.zimrc; zimfw install'
 bldr ln -s /home/$user/.zim/modules/zpy/bin/vpy{,from} /usr/local/bin
 

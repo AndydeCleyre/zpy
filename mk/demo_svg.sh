@@ -11,8 +11,8 @@ buildah rm $ctnr 2>/dev/null || true
 today="$(date +%Y.%j)"
 if ! bldfrom --pull=false localhost/$ctnr:$today; then
     bldfrom quay.io/andykluger/zpy-alpine:latest
-    rrun apk upgrade
-    rrun apk add gcc {libxml2,libxslt,musl,python3}-dev
+    rrun apk upgrade --no-progress -q
+    rrun apk add --no-progress -q gcc {libxml2,libxslt,musl,python3}-dev
     urun zsh -ic 'pipz install termtosvg'
     buildah tag "$(buildah commit --rm $ctnr $ctnr)" "localhost/$ctnr:$today"
     bldfrom localhost/$ctnr:$today
