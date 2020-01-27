@@ -274,6 +274,7 @@ activate () {  # [-i|proj-dir]
         fi
     fi
 }
+alias a8="activate"  # [-i|proj-dir]
 #
 # Deactivate.
 alias envout="deactivate"
