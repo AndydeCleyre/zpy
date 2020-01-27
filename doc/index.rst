@@ -2,7 +2,7 @@
 zpy: Zsh helpers for Python venvs, with pip-tools
 =================================================
 
-|repo| |docsite| |container| |contact|
+|repo| |docsite| |container| |container-ci| |contact|
 
 Here are Zsh convenience functions to manage Python venvs and packages,
 with the excellent pip-tools__. At least a few are very handy.
@@ -299,6 +299,7 @@ Functions & Aliases
   # Otherwise, act as `envin` (create, activate, sync).
   # Pass -i to interactively choose the project.
   activate [-i|proj-dir]
+  a8 [-i|proj-dir]
   #
   # Deactivate.
   envout  
@@ -510,6 +511,10 @@ Paths & More Wording
 .. |container| image:: https://img.shields.io/badge/Container-Quay.io-green?logo=red-hat
    :alt: Demo container
    :target: https://quay.io/repository/andykluger/zpy-alpine
+
+.. |container-ci| image:: https://andydecleyre.semaphoreci.com/badges/zpy/branches/develop.svg
+   :alt: Demo container - Semaphore CI
+   :target: https://andydecleyre.semaphoreci.com/projects/zpy
 
 .. |contact| image:: https://img.shields.io/badge/Contact-Telegram-blue?logo=telegram
    :alt: Contact developer on Telegram
