@@ -27,4 +27,4 @@ blocks:
             - sudo ./mk/demo_ctnr.sh $SEMAPHORE_GIT_BRANCH
             # Push containers:
             - sudo buildah login -u $QUAY_NAME -p $QUAY_TOKEN quay.io
-            - sudo sh -c 'for img in $(buildah images --json | jq \'.[].names[]|select(.|contains("quay.io/andykluger/"))\'); do buildah push $img; done'
+            - for img in $(buildah images --json | jq '.[].names[]|select(.|contains("quay.io/andykluger/"))'); do sudo buildah push $img; done
