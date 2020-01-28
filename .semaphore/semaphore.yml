@@ -7,8 +7,6 @@ agent:
 
 blocks:
   - name: Build and push {zim,zpy}-alpine containers to quay.io
-    run:
-      when: "branch = 'develop'"
     task:
       secrets:
         - name: quay creds
@@ -19,17 +17,14 @@ blocks:
             # Install buildah:
             - . /etc/os-release
             - sudo apt-get -qq update
-            - sudo apt-get -qq install wget gpg
+            - sudo apt-get -qq install wget gpg jq
             - sudo sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/x${NAME}_${VERSION_ID}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
             - wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/x${NAME}_${VERSION_ID}/Release.key -O - | sudo apt-key add -
             - sudo apt-get -qq update
             - sudo apt-get -qq install buildah
             # Build containers:
             - checkout
-            - sudo ./mk/demo_ctnr.sh
+            - sudo ./mk/demo_ctnr.sh $SEMAPHORE_GIT_BRANCH
             # Push containers:
             - sudo buildah login -u $QUAY_NAME -p $QUAY_TOKEN quay.io
-            - sudo buildah push quay.io/andykluger/zim-alpine:$(date +%Y.%j)
-            - sudo buildah push quay.io/andykluger/zim-alpine:latest || true
-            - sudo buildah push quay.io/andykluger/zpy-alpine:$(git describe)
-            - sudo buildah push quay.io/andykluger/zpy-alpine:latest
+            - for img in $(buildah images --json | jq '.[].names[]|select(.|contains("quay.io/andykluger/"))'); do sudo buildah push $img; done

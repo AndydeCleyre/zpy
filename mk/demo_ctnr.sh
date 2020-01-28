@@ -1,8 +1,9 @@
 #!/bin/sh -e
+zpy_branch=${1:-develop}
 ctnr=zpy-alpine
 user=dev
 
-alias bldr="buildah run $ctnr"
+alias bldr="buildah run --user root $ctnr"
 alias bldru="buildah run --user $user $ctnr"
 alias bldcu="buildah copy --chown $user $ctnr"
 alias bldfrom="buildah from --name $ctnr"
@@ -32,6 +33,13 @@ if ! bldfrom quay.io/andykluger/zim-alpine:$today; then
         export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=7
 EOF'
 
+    buildah config \
+        --user $user \
+        --workingdir /home/$user \
+        --env TERM=xterm-256color \
+        --cmd zsh \
+        $ctnr
+
     buildah tag "$(bldpress quay.io/andykluger/zim-alpine)" \
                            "quay.io/andykluger/zim-alpine:$today"
     bldfrom quay.io/andykluger/zim-alpine:$today
@@ -39,7 +47,7 @@ fi
 
 # zpy
 bldr apk add --no-progress -q fzf highlight jq nano pcre-tools python3
-bldru zsh -ic 'echo "zmodule andydecleyre/zpy -s python.zshrc -b develop" >> ~/.zimrc; zimfw install'
+bldru zsh -ic "echo 'zmodule andydecleyre/zpy -s python.zshrc -b $zpy_branch' >> .zimrc; zimfw install"
 bldr ln -s /home/$user/.zim/modules/zpy/bin/vpy{,from} /usr/local/bin
 
 bldr find /var/cache/apk -type f -delete
@@ -53,4 +61,5 @@ buildah config \
 
 zpy_version="$(bldru git -C /home/$user/.zim/modules/zpy describe)"
 buildah tag "$(bldpress quay.io/andykluger/zpy-alpine)" \
-                       "quay.io/andykluger/zpy-alpine:$zpy_version"
+                       "quay.io/andykluger/zpy-alpine:$zpy_version" \
+                       "quay.io/andykluger/zpy-alpine:$zpy_branch"
