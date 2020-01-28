@@ -3,17 +3,12 @@ trap "cd $PWD" EXIT
 cd "$(dirname "$0")"
 
 pcregrep \
-    '^(alias|([^ \n]+ \(\))|#|$)' "${1:-$(dirname "$0")/../python.zshrc}" \
-    | uniq \
-    | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g' \
-    | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g' \
-    | sed 's/  # / /g' \
+    '^(alias|([^ \n]+ \(\))|#|$)' "${1:-../python.zshrc}"  `# select leading comments, aliases, function openers, and empty lines`\
+    | uniq                                                 `# squeeze repeats (blank lines)`\
+    | sed -E 's/(^[^ ]+) \(\) \{(.*\})?(.*)/\1\3/g'        `# drop any function content other than name and comment`\
+    | sed -E 's/^alias ([^=]+)[^#]+(# .+)?/\1  \2/g'       `# drop any alias content other than name and comment`\
+    | sed 's/  # / /g'                                     `# strip out '  #' separators`\
 > help.txt
-# select leading comments, aliases & function openers, and empty lines
-# squeeze repeats (newlines)
-# drop any function content other than name and comment
-# drop any commented alias content other than name and comment
-# strip out '  #' separators
 
 python3 -c "
 from json import loads, dumps
