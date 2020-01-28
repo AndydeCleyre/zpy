@@ -12,7 +12,7 @@ alias bldpress="buildah commit --rm $ctnr"
 # Start with a daily build of alpine:3.11.x + git + Zsh + Zim + $user
 today="$(date +%Y.%j)"
 if ! bldfrom quay.io/andykluger/zim-alpine:$today; then
-    bldfrom alpine:3.11
+    bldfrom docker.io/library/alpine:3.11
     bldr apk upgrade --no-progress -q
 
     # Regular user, with sudo power
@@ -21,7 +21,7 @@ if ! bldfrom quay.io/andykluger/zim-alpine:$today; then
     bldr sh -c 'echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/wheel_sudo'
 
     # git, Zsh, Zim
-    bldr apk add --no-progress -q git zsh{,-vcs}
+    bldr apk add --no-progress -q git zsh zsh-vcs
     bldcu https://raw.githubusercontent.com/zimfw/install/master/install.zsh /tmp/install-zim.zsh
     bldru zsh /tmp/install-zim.zsh
     bldr rm /tmp/install-zim.zsh
@@ -48,7 +48,10 @@ fi
 # zpy
 bldr apk add --no-progress -q fzf highlight jq nano pcre-tools python3
 bldru zsh -ic "echo 'zmodule andydecleyre/zpy -s python.zshrc -b $zpy_branch' >> .zimrc; zimfw install"
-bldr ln -s /home/$user/.zim/modules/zpy/bin/vpy{,from} /usr/local/bin
+bldr ln -s \
+    /home/$user/.zim/modules/zpy/bin/vpy \
+    /home/$user/.zim/modules/zpy/bin/vpyfrom \
+    /usr/local/bin
 
 bldr find /var/cache/apk -type f -delete
 
