@@ -120,7 +120,7 @@ Basic Operations
 ``activate [-i|proj-dir]``
   If you know your venv is already in a good state, and just want to activate it
   without all that installing and uninstalling, you can save a second by running
-  ``activate`` instead of ``envin``.
+  ``activate`` (or alias ``a8``) instead of ``envin``.
 
   If the venv doesn't already exist, this will fall back to ``envin``-like behavior
   (create, activate, *sync*).
