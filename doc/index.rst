@@ -57,6 +57,8 @@ Try it in isolation with docker, podman, or buildah if you like:
   podman run --net=host -it quay.io/andykluger/zpy-alpine:latest
   buildah run -t $(buildah from quay.io/andykluger/zpy-alpine:latest) zsh
 
+.. image:: https://gist.github.com/AndydeCleyre/aa9dc4d86c43903a0350def66fa62af0/raw/05f61ae09b16ef77c2eaac39ab3f3f17c60c30f0/demo_pipz_install.svg?sanitize=true
+
 Run ``zpy`` to see a full reference of `Functions & Aliases`_.
 
 .. note:: You may need to install extra system packages if your pip packages need
@@ -66,8 +68,6 @@ Run ``zpy`` to see a full reference of `Functions & Aliases`_.
           ``sudo apk add gcc {musl,python3}-dev``;
           before installing ``pillow``, run
           ``sudo apk add gcc {jpeg,musl,python3,zlib}-dev``.
-
-.. image:: https://gist.github.com/AndydeCleyre/aa9dc4d86c43903a0350def66fa62af0/raw/05f61ae09b16ef77c2eaac39ab3f3f17c60c30f0/demo_pipz_install.svg?sanitize=true
 
 Wording
 -------
@@ -396,6 +396,7 @@ Install dependencies as appropriate for your platform, then source ``python.zshr
 
 .. code-block:: bash
 
+  # cd /wherever/you/want/to/keep/zpy
   git clone https://github.com/andydecleyre/zpy
   echo ". $PWD/zpy/python.zshrc" >> ~/.zshrc
 
