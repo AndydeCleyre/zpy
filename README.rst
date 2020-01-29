@@ -4,6 +4,8 @@ zpy: Zsh helpers for Python venvs, with pip-tools
 
 |repo| |docsite| |container| |container-ci| |contact|
 
+In a hurry? Jump to Installation_.
+
 Here are Zsh convenience functions to manage Python venvs and packages,
 with the excellent pip-tools__. At least a few are very handy.
 None of them should get in your way.
@@ -380,8 +382,8 @@ Functions & Aliases
   # Package manager for venv-isolated scripts.
   #
   # pipz list [pkgname...]  ## If no pkg is provided, list all installed.
-  # pipz install <pkgspec...>
-  # pipz inject <installed-pkgname> <extra-pkgspec...>
+  # pipz install [--bins <bin-name>[,<bin-name>...]] <pkgspec...>    ## If no bin-names are provided and the correct one isn't obvious, interactively choose.
+  # pipz inject [--bins <bin-name>[,<bin-name>...]] <installed-pkgname> <extra-pkgspec...>    ## If no bin-names are provided and the correct one isn't obvious, interactively choose.
   # pipz (upgrade|uninstall|reinstall)-all
   # pipz (upgrade|uninstall|reinstall) [pkspec...]    ## If no pkg is provided, interactively choose.
   # pipz runpip <pkgname> <pip-arg...>

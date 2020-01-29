@@ -4,6 +4,8 @@ zpy: Zsh helpers for Python venvs, with pip-tools
 
 |repo| |docsite| |container| |container-ci| |contact|
 
+In a hurry? Jump to Installation_.
+
 Here are Zsh convenience functions to manage Python venvs and packages,
 with the excellent pip-tools__. At least a few are very handy.
 None of them should get in your way.
