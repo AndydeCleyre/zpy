@@ -6,8 +6,8 @@ user=dev
 alias bldr="buildah run --user root $ctnr"
 alias bldru="buildah run --user $user $ctnr"
 alias bldcu="buildah copy --chown $user $ctnr"
-alias bldfrom="buildah from --name $ctnr"
-alias bldpress="buildah commit --rm $ctnr"
+alias bldfrom="buildah from -q --name $ctnr"
+alias bldpress="buildah commit --quiet --rm $ctnr"
 
 # Start with a daily build of alpine:3.11.x + git + Zsh + Zim + $user
 today="$(date +%Y.%j)"
