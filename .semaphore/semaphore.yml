@@ -1,0 +1,30 @@
+version: v1.0
+name: Build and push {zim,zpy}-alpine containers to quay.io
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+
+blocks:
+  - name: Build and push {zim,zpy}-alpine containers to quay.io
+    task:
+      secrets:
+        - name: quay creds
+      jobs:
+        - name: Install buildah; build images; push images to quay.io
+          commands:
+            # Cramming this all into one job to avoid tedious cache-passing
+            # Install buildah:
+            - . /etc/os-release
+            - sudo apt-get -qq update
+            - sudo apt-get -qq install wget gpg jq
+            - sudo sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/x${NAME}_${VERSION_ID}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
+            - wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/x${NAME}_${VERSION_ID}/Release.key -O - | sudo apt-key add -
+            - sudo apt-get -qq update
+            - sudo apt-get -qq install buildah
+            # Build containers:
+            - checkout
+            - sudo ./mk/demo_ctnr.sh $SEMAPHORE_GIT_BRANCH
+            # Push containers:
+            - sudo buildah login -u $QUAY_NAME -p $QUAY_TOKEN quay.io
+            - for img in $(sudo buildah images --json | jq -r '.[].names[]|select(.|contains("quay.io/andykluger/"))'); do sudo buildah push -q $img; done

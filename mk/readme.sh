@@ -2,7 +2,9 @@
 trap "cd $PWD" EXIT
 cd "$(dirname "$0")"
 
-pip install -qr ../docs/doc-requirements.txt
+[[ $VIRTUAL_ENV ]] \
+    || echo -e "You may want to activate a venv first in order to install and use the build tools.\nTrying anyway . . ."
+pip install -qr ../doc/doc-requirements.txt
 
 ./help.sh
 

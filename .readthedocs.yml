@@ -3,4 +3,4 @@ formats:
   - epub
 python:
   install:
-    - requirements: docs/doc-requirements.txt
+    - requirements: doc/doc-requirements.txt

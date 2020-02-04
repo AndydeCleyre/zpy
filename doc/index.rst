@@ -2,7 +2,9 @@
 zpy: Zsh helpers for Python venvs, with pip-tools
 =================================================
 
-|repo| |container| |contact|
+|repo| |docsite| |container| |container-ci| |contact|
+
+In a hurry? Jump to Installation_.
 
 Here are Zsh convenience functions to manage Python venvs and packages,
 with the excellent pip-tools__. At least a few are very handy.
@@ -16,7 +18,7 @@ They can generally replace pipenv, poetry [#]_, pipx, pipsi, virtualenvwrapper, 
 
 __ https://flit.readthedocs.io/en/latest/
 
-.. image:: https://i.postimg.cc/c1PJHQNs/Screenshot-20200107-183850.png
+.. image:: https://gist.github.com/AndydeCleyre/34fd63abe8954957590224e85edf6476/raw/28ba8c4a77f17f56fdb83726733e89ac01e2a068/demo_intro.svg?sanitize=true
 
 
 Guiding Ideas
@@ -55,6 +57,8 @@ Try it in isolation with docker, podman, or buildah if you like:
   podman run --net=host -it quay.io/andykluger/zpy-alpine:latest
   buildah run -t $(buildah from quay.io/andykluger/zpy-alpine:latest) zsh
 
+.. image:: https://gist.github.com/AndydeCleyre/aa9dc4d86c43903a0350def66fa62af0/raw/05f61ae09b16ef77c2eaac39ab3f3f17c60c30f0/demo_pipz_install.svg?sanitize=true
+
 Run ``zpy`` to see a full reference of `Functions & Aliases`_.
 
 .. note:: You may need to install extra system packages if your pip packages need
@@ -64,8 +68,6 @@ Run ``zpy`` to see a full reference of `Functions & Aliases`_.
           ``sudo apk add gcc {musl,python3}-dev``;
           before installing ``pillow``, run
           ``sudo apk add gcc {jpeg,musl,python3,zlib}-dev``.
-
-.. image:: https://i.postimg.cc/vmLCfwjY/1578443570.gif
 
 Wording
 -------
@@ -117,19 +119,18 @@ Basic Operations
   You may also pass as many specific *reqs-txt*\ s as you want to ``envin``,
   in which case it will ensure your environment matches those and only those.
 
-``activate [proj-dir]``
+``activate [-i|proj-dir]``
   If you know your venv is already in a good state, and just want to activate it
   without all that installing and uninstalling, you can save a second by running
-  ``activate`` instead of ``envin``.
-
-  You may pass a *project* to ``activate``, in order to activate a specific venv
-  regardless of your current folder.
+  ``activate`` (or alias ``a8``) instead of ``envin``.
 
   If the venv doesn't already exist, this will fall back to ``envin``-like behavior
   (create, activate, *sync*).
 
-``activatefzf``
-  interactively select the *project* whose venv you wish to activate
+  You may pass a *project* to ``activate``, in order to activate a specific venv
+  regardless of your current folder.
+
+  Pass ``-i`` to interactively select an existing *project*.
 
 ``envout``
   a totally unnecessary alias for ``deactivate``
@@ -227,7 +228,8 @@ Functions & Aliases
   zpy [zpy-function...]
   
   # Get path of folder containing all venvs for the current folder or specified proj-dir.
-  venvs_path [proj-dir]
+  # Pass -i to interactively choose the project.
+  venvs_path [-i|proj-dir]
   
   # Install and upgrade packages.
   pipi <req...>
@@ -297,9 +299,9 @@ Functions & Aliases
   # If `venvs_path`/venv exists for the current or specified project folder,
   # activate it without installing anything.
   # Otherwise, act as `envin` (create, activate, sync).
-  activate [proj-dir]
-  # Activate `venvs_path <proj-dir>`/venv for an interactively chosen project folder.
-  activatefzf
+  # Pass -i to interactively choose the project.
+  activate [-i|proj-dir]
+  a8 [-i|proj-dir]
   #
   # Deactivate.
   envout  
@@ -378,10 +380,10 @@ Functions & Aliases
   # Package manager for venv-isolated scripts.
   #
   # pipz list [pkgname...]  ## If no pkg is provided, list all installed.
-  # pipz install <pkgspec...>
-  # pipz inject <installed-pkgname> <extra-pkgspec...>
+  # pipz install [--bins <bin-name>[,<bin-name>...]] <pkgspec...>    ## If no bin-names are provided and the correct one isn't obvious, interactively choose.
+  # pipz inject [--bins <bin-name>[,<bin-name>...]] <installed-pkgname> <extra-pkgspec...>    ## If no bin-names are provided and the correct one isn't obvious, interactively choose.
   # pipz (upgrade|uninstall|reinstall)-all
-  # pipz (upgrade|uninstall|reinstall) [pkgname...]    ## If no pkg is provided, choose interactively.
+  # pipz (upgrade|uninstall|reinstall) [pkspec...]    ## If no pkg is provided, interactively choose.
   # pipz runpip <pkgname> <pip-arg...>
   # pipz runpkg <pkgspec> <cmd> [cmd-arg...]
   pipz [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
@@ -394,6 +396,7 @@ Install dependencies as appropriate for your platform, then source ``python.zshr
 
 .. code-block:: bash
 
+  # cd /wherever/you/want/to/keep/zpy
   git clone https://github.com/andydecleyre/zpy
   echo ". $PWD/zpy/python.zshrc" >> ~/.zshrc
 
@@ -404,6 +407,7 @@ If you use a fancy Zsh plugin tool, you can instead use a command like one of th
   antigen bundle andydecleyre/zpy python.zshrc
   antibody bundle andydecleyre/zpy path:python.zshrc
   zgen load andydecleyre/zpy python.zshrc
+  zmodule andydecleyre/zpy -s python.zshrc
 
 If you want completions, make sure to load ``compinit`` beforehand:
 
@@ -423,7 +427,7 @@ dependency of ``zsh`` on Arch Linux and MacOS (via Homebrew__).
 
 __ https://brew.sh/
 
-``fzf`` is only needed for the ``activatefzf`` and ``pipz`` functions.
+``fzf`` is only needed for ``pipz``, ``activate -i``, and ``venvs_path -i``.
 
 You can enable pretty syntax highlighting by installing either highlight__ or bat__.
 
@@ -511,6 +515,14 @@ Paths & More Wording
    :alt: Demo container
    :target: https://quay.io/repository/andykluger/zpy-alpine
 
+.. |container-ci| image:: https://andydecleyre.semaphoreci.com/badges/zpy/branches/develop.svg
+   :alt: Demo container - Semaphore CI
+   :target: https://andydecleyre.semaphoreci.com/projects/zpy
+
 .. |contact| image:: https://img.shields.io/badge/Contact-Telegram-blue?logo=telegram
    :alt: Contact developer on Telegram
    :target: https://t.me/andykluger
+
+.. |docsite| image:: https://readthedocs.org/projects/zpy/badge/
+   :alt: Documentation Status
+   :target: https://zpy.readthedocs.io/en/latest/

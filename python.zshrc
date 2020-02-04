@@ -12,12 +12,12 @@
 
  # Syntax highlighter, reading stdin.
  .zpy_hlt () {  # <syntax>
-     if (( $+commands[highlight] )); then
-         HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} highlight -O truecolor -S $1
-         # recommended: aiseered, darkplus, oxygenated
-     elif (( $+commands[bat] )); then
+     if (( $+commands[bat] )); then
          BAT_THEME=${BAT_THEME:-ansi-dark} bat --color always --paging never -p -l $1
          # recommended: ansi-dark, zenburn
+     elif (( $+commands[highlight] )); then
+         HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} highlight -O truecolor -S $1
+         # recommended: aiseered, darkplus, oxygenated
      else
          cat -
      fi
@@ -30,7 +30,7 @@
          | pcregrep -Mh '(^[^\n]+\n)*(^'$1'( |$))[^\n]*(\n[^\n]+)*' \
          | sed 's/  # / /g'
          for zpyfn in ${@[2,-1]}; do
-             print -rl '' "$(
+             print -rl -- '' "$(
                  .zpy \
                  | pcregrep -Mh '(^[^\n]+\n)*(^'$zpyfn'( |$))[^\n]*(\n[^\n]+)*' \
                  | sed 's/  # / /g'
@@ -48,7 +48,8 @@
 # Print description and arguments for all or specified functions.
 # To see actual function contents, use `which <funcname>`.
 zpy () {  # [zpy-function...]
-    .zpy $@ | .zpy_hlt zsh
+    local helps=(-h --help)
+    .zpy ${@:|helps} | .zpy_hlt zsh
 }
 
  if (( $+commands[md5sum] )); then
@@ -69,10 +70,20 @@ zpy () {  # [zpy-function...]
      done
  }
 
+ .zpy_chooseproj () {
+     REPLY=$(print -rln -- ${VENVS_WORLD}/*/project(@N-/:P) | fzf --reverse -0 -1)
+ }
+
 # Get path of folder containing all venvs for the current folder or specified proj-dir.
-venvs_path () {  # [proj-dir]
-    .zpy_venvs_path $@
-    print -rn $REPLY
+# Pass -i to interactively choose the project.
+venvs_path () {  # [-i|proj-dir]
+    if [[ "$1" == '-i' ]]; then
+        .zpy_chooseproj
+        venvs_path "$REPLY"
+    else
+        .zpy_venvs_path $@
+        print -rn -- $REPLY
+    fi
 }
 
 # Install and upgrade packages.
@@ -82,17 +93,17 @@ alias pipi="python -m pip --disable-pip-version-check install -U"  # <req...>
 pips () {  # [reqs-txt...]
     local reqstxts=(${@:-*requirements.txt(N)})
     if [[ $reqstxts ]]; then
-        print -rP "%F{cyan}> %F{blue}syncing%F{cyan} env %B<-%b $reqstxts %B::%b ${${PWD:P}/#~/~}%f"
+        print -rP "%F{cyan}> %B%F{green}syncing%b%F{cyan} env %B<-%b $reqstxts %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
         pip-sync -q $reqstxts
-        for reqstxt in $reqstxts; do  # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
-            python -m pip install -qr $reqstxt  # AND
-        done                          # https://github.com/jazzband/pip-tools/issues/925 is resolved (by merging https://github.com/jazzband/pip-tools/pull/927)
+        for reqstxt in $reqstxts; do                                        # can remove if https://github.com/jazzband/pip-tools/issues/896 is resolved (by merging https://github.com/jazzband/pip-tools/pull/907)
+            python -m pip --disable-pip-version-check install -qr $reqstxt  # AND
+        done                                                                # https://github.com/jazzband/pip-tools/issues/925 is resolved (by merging https://github.com/jazzband/pip-tools/pull/927)
     fi
 }
 
- .zpy_pipc () {  # <reqs-in> [pip-compile option...]
-     print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${PWD:P}/#~/~}%f"
-     pip-compile --no-header ${@[2,-1]} $1 2>&1 | .zpy_hlt py
+ .zpy_pipc () {  # <reqs-in> [pip-compile-arg...]
+     print -rP "%F{cyan}> %F{yellow}compiling%F{cyan} $1 %B->%b ${1:r}.txt %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
+     pip-compile --no-header --build-isolation ${@[2,-1]} $1 2>&1 | .zpy_hlt py
  }
 
 # Compile requirements.txt files from all found or specified requirements.in files (compile).
@@ -117,8 +128,8 @@ pipchs () {  # [reqs-in...]
 
  .zpy_pipa () {  # <category> <req...>
      local reqsin=${1:+${1}-}requirements.in
-     print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
-     print -rl ${@[2,-1]} >>! $reqsin
+     print -rP "%F{cyan}> %F{magenta}appending%F{cyan} %B->%b $reqsin %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
+     print -rl -- ${@[2,-1]} >>! $reqsin
      .zpy_hlt py < $reqsin
  }
 
@@ -159,20 +170,19 @@ pipachs () {  # <req...>
      local gen_hashes=${1:#nohashes}
      local reqsin=$2
      local reqs=(${@[3,-1]})
-     print -rP "%F{cyan}> %F{yellow}upgrading%F{cyan} ${reqsin:r}.txt %B<-%b $reqsin %B::%b ${${PWD:P}/#~/~}%f"
+
+     local reqstxt=${reqsin:r}.txt
+     local before=$(mktemp)
+     cp $reqstxt $before 2>/dev/null || true
+
      if [[ $# -gt 2 ]]; then
-         if [[ $gen_hashes ]]; then
-             pip-compile --no-header --generate-hashes ${${@/*/-P}:^reqs} $reqsin 2>&1 | .zpy_hlt py
-             pipch $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
-         else
-             pip-compile --no-header ${${@/*/-P}:^reqs} $reqsin 2>&1 | .zpy_hlt py
-             pipc $reqsin  # can remove if https://github.com/jazzband/pip-tools/issues/759 gets fixed
-         fi
-     elif [[ $gen_hashes ]]; then
-         pip-compile --no-header -U --generate-hashes $reqsin 2>&1 | .zpy_hlt py
+         .zpy_pipc $reqsin -q ${${@/*/-P}:^reqs} ${gen_hashes:+--generate-hashes}
      else
-         pip-compile --no-header -U $reqsin 2>&1 | .zpy_hlt py
+         .zpy_pipc $reqsin -q -U ${gen_hashes:+--generate-hashes}
      fi
+
+     diff -u -L "${${reqstxt:P}/#~/~} then" $before -L "${${reqstxt:P}/#~/~} now" $reqstxt | .zpy_hlt diff
+     rm -f $before
  }
 
 # Recompile *requirements.txt with upgraded versions of all or specified packages (upgrade).
@@ -209,7 +219,7 @@ pipuhs () {  # [req...]
      .zpy_venvs_path
      local vpath=$REPLY
      local venv=${vpath}/${1}
-     print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
+     print -rP "%F{cyan}> %F{green}entering%F{cyan} venv %B@%b ${venv/#~/~} %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
      [[ -d $venv ]] || eval $2 ${(q-)venv}
      if (( $? )); then
         print -rP "%F{red}> FAILED: $2 ${(q-)venv}" 1>&2
@@ -217,7 +227,7 @@ pipuhs () {  # [req...]
      fi
      ln -sfn $PWD ${vpath}/project
      . $venv/bin/activate
-     python -m pip install -qU pip pip-tools wheel
+     pipi -q pip pip-tools
      rehash
      pips ${@[3,-1]}
  }
@@ -248,21 +258,23 @@ envincurrent () {  # [reqs-txt...]
 # If `venvs_path`/venv exists for the current or specified project folder,
 # activate it without installing anything.
 # Otherwise, act as `envin` (create, activate, sync).
-activate () {  # [proj-dir]
-    local projdir=${1:-${PWD}}
-    .zpy_venvs_path $projdir
-    . "$REPLY/venv/bin/activate" 2>/dev/null
-    if [[ $? == 127 ]]; then
-        trap "cd $PWD" EXIT
-        cd "$projdir"
-        envin
+# Pass -i to interactively choose the project.
+activate () {  # [-i|proj-dir]
+    if [[ "$1" == '-i' ]]; then
+        .zpy_chooseproj
+        activate "$REPLY"
+    else
+        local projdir=${1:-${PWD}}
+        .zpy_venvs_path $projdir
+        . "$REPLY/venv/bin/activate" 2>/dev/null
+        if [[ $? == 127 ]]; then
+            trap "cd $PWD" EXIT
+            cd "$projdir"
+            envin
+        fi
     fi
 }
-# Activate `venvs_path <proj-dir>`/venv for an interactively chosen project folder.
-activatefzf () {
-    local projects=(${VENVS_WORLD}/*/project(@N-/:P))
-    activate "$(print -rl $projects | fzf --reverse -0 -1)"
-}
+alias a8="activate"  # [-i|proj-dir]
 #
 # Deactivate.
 alias envout="deactivate"
@@ -293,7 +305,7 @@ vpycurrent () { .zpy_vpy $(.zpy_pyvervenvname) $@ }  # <script> [script-arg...]
 
 # Get path of project for the activated venv.
 whichpyproj () {
-    print -rn ${"$(which python)":h:h:h}/project(@N:P)
+    print -rn -- ${"$(which python)":h:h:h}/project(@N:P)
 }
 
  .zpy_vpyshebang () {  # <venv-name> <script...>
@@ -301,7 +313,7 @@ whichpyproj () {
      for script in ${@[2,-1]}; do
          chmod +x $script
          .zpy_whichvpy $1 $script
-         print -rl "#!${vpyscript:-${REPLY}}" "$(<${script})" >! $script
+         print -rl "#!${vpyscript:-$REPLY}" "$(<${script})" >! $script
      done
  }
 
@@ -359,7 +371,7 @@ prunevenvs () {
     for proj in ${VENVS_WORLD}/*/project(@N:P); do
         if [[ ! -d $proj ]]; then
             .zpy_venvs_path $proj
-            orphaned_venv=${REPLY}
+            orphaned_venv=$REPLY
             print -rl "Missing: ${proj/#~/~}" "Orphan: $(du -hs $orphaned_venv)"
             read -q "?Delete orphan [yN]? "
             [[ $REPLY == 'y' ]] && rm -rf $orphaned_venv
@@ -393,14 +405,14 @@ prunevenvs () {
              cells[i]="${proj/#~/~}"
          done
      fi
-     print -rl $cells
+     print -rl -- $cells
  }
 
 # `pip list -o` for all or specified projects.
 pipcheckold () {  # [proj-dir...]
     local cells=("%F{cyan}%BPackage%b%f" "%F{cyan}%BVersion%b%f" "%F{cyan}%BLatest%b%f" "%F{cyan}%BProject%b%f")
     cells+=(${(f)"$(zargs -rl -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/)} -- .zpy_pipcheckoldcells)"})
-    if [[ $#cells -gt 4 ]]; then print -rPaC 4 $cells; fi
+    if [[ $#cells -gt 4 ]]; then print -rPaC 4 -- $cells; fi
 }
 
  .zpy_pipusproj () {  # <proj-dir>
@@ -413,32 +425,38 @@ pipcheckold () {  # [proj-dir...]
 
 # `pipus` (upgrade-compile, sync) for all or specified projects.
 pipusall () {  # [proj-dir...]
-    zargs -ri___ -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- .zpy_pipusproj ___ | grep '::'
+    zargs -rl -P $ZPYPROCS -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} -- .zpy_pipusproj
 }
 
 # Inject loose requirements.in dependencies into pyproject.toml.
 # Run either from the folder housing pyproject.toml, or one below.
 # To categorize, name files <category>-requirements.in.
 pypc () {
-    python -m pip install -q tomlkit || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${PWD:P}/#~/~}%f"
+    python -m pip --disable-pip-version-check install -q tomlkit \
+    || print -rP "%F{yellow}> You probably want to activate a venv with 'envin', first %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
     python -c "
 from pathlib import Path
+from contextlib import suppress
+import re
+
 import tomlkit
+
+
 suffix = 'requirements.in'
-cwd = Path().absolute()
-pyproject = cwd / 'pyproject.toml'
+pyproject = Path().absolute() / 'pyproject.toml'
 if not pyproject.is_file():
-    pyproject = cwd.parent / 'pyproject.toml'
-reqsins = [*pyproject.parent.glob(f'*/*{suffix}')] + [*pyproject.parent.glob(f'*{suffix}')]
+    pyproject = pyproject.parents[1] / 'pyproject.toml'
 if pyproject.is_file():
+    reqsins = [*pyproject.parent.glob(f'*/*{suffix}')] + [*pyproject.parent.glob(f'*{suffix}')]
     toml_data = tomlkit.parse(pyproject.read_text())
     for reqsin in reqsins:
         print(f'\033[96m> injecting {reqsin} -> {pyproject}\033[0m')
-        pyproject_reqs = [
-            line
-            for line in reqsin.read_text().splitlines()
-            if line.strip() and not (line.startswith('#') or line.startswith('-r'))
-        ]
+        pyproject_reqs = []
+        for line in reqsin.read_text().splitlines():
+            with suppress(AttributeError):
+                pyproject_reqs.append(
+                    re.search(r'^(-\S+\s+)*([^#]+)', line).group(2).rstrip()
+                )
         extras_catg = reqsin.name.rsplit(suffix, 1)[0].rstrip('-.')
         if not extras_catg:
             toml_data['tool']['flit']['metadata']['requires'] = pyproject_reqs
@@ -470,9 +488,9 @@ vpysublp () {
     local stp=$REPLY
     .zpy_venvs_path
     local pypath=${REPLY}/venv/bin/python
-    print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~/~} %B->%b ${stp/#~/~} %B::%b ${${PWD:P}/#~/~}%f"
+    print -rP "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~/~} %B->%b ${stp/#~/~} %B::%b ${${${PWD:P}/#~/~}/%${PWD:t}/%B${PWD:t}%b}%f"
     if (( $+commands[jq] )); then
-        print -r "$(jq --arg py $pypath '.settings+={python_interpreter: $py}' $stp)" >! $stp
+        print -r -- "$(jq --arg py $pypath '.settings+={python_interpreter: $py}' $stp)" >! $stp
     else
         python -c "
 from pathlib import Path
@@ -502,26 +520,31 @@ sublp () {  # [subl-arg...]
      if [[ -h $plink && $pdir =~ "^${projects_home}/" ]]; then
          if (( $+commands[jq] )); then
              local piplistline=($(
-                 vpyfrom $pdir python -m pip list --format json \
+                 vpyfrom $pdir python -m pip --disable-pip-version-check list --format json \
                  | jq -r '.[] | .name |= ascii_downcase | select(.name=="'${${pdir:t}//[^[:alnum:].]##/-}'") | .name,.version'
              ))
          else
              local piplistline=($(
-                 vpyfrom $pdir python -m pip list \
+                 vpyfrom $pdir python -m pip --disable-pip-version-check list \
                  | grep -i "^${${pdir:t}//[^[:alnum:].]##/-} "
              ))
          fi
          piplistline+=('????')
          local pyverlines=(${(f)"$(vpyfrom $pdir python -V)"})
-         print -rl "${bin:t}" "${piplistline[1,2]}" "${pyverlines[-1]}"
+         print -rl -- "${bin:t}" "${piplistline[1,2]}" "${pyverlines[-1]}"
      fi
+ }
+
+ .zpy_pkgspec2name () {  # pkgspec
+     REPLY=${${(j: :)${${(s: :)1:l}:#-*}}%%[ \[<>=#;]*}
  }
 
  .zpy_pipzinstallpkg () {  # <projects_home> <pkg>
      trap "cd $PWD" EXIT
      local projects_home=$1
      local pkg=$2
-     local pkgname=${${pkg:l}%%[ \[<>=#;]*}
+     .zpy_pkgspec2name $pkg
+     local pkgname=$REPLY
      mkdir -p ${projects_home}/${pkgname}
      cd ${projects_home}/${pkgname}
      rm -f requirements.{in,txt}
@@ -532,9 +555,9 @@ sublp () {  # [subl-arg...]
 
  .zpy_pipzchoosepkgs () {  # <projects_home> [header='Packages:']
     reply=(${(f)"$(
-        print -rl $1/*(/:t) \
+        print -rln -- $1/*(/:t) \
         | fzf --reverse -m -0 --header="${2:-Packages:}" \
-        --prompt='Which packages? Select more than one with <tab>. Filter: '
+        --prompt='Which packages? Choose more than one with <tab>.'
     )"})
 }
 
@@ -545,7 +568,7 @@ sublp () {  # [subl-arg...]
 # pipz install <pkgspec...>
 # pipz inject <installed-pkgname> <extra-pkgspec...>
 # pipz (upgrade|uninstall|reinstall)-all
-# pipz (upgrade|uninstall|reinstall) [pkgname...]    ## If no pkg is provided, choose interactively.
+# pipz (upgrade|uninstall|reinstall) [pkspec...]    ## If no pkg is provided, interactively choose.
 # pipz runpip <pkgname> <pip-arg...>
 # pipz runpkg <pkgspec> <cmd> [cmd-arg...]
 pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|runpkg] [subcmd-arg...]
@@ -560,17 +583,19 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local bins
         local pkgname
         for pkg in ${@[2,-1]}; do
-            pkgname=${${pkg:l}%%[ \[<>=#;]*}
+            .zpy_pkgspec2name $pkg
+            pkgname=$REPLY
             cd ${projects_home}/${pkgname}
             .zpy_venvs_path
             bins=("${REPLY}/venv/bin/"*(N:t))
             bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|(pip|python|pypy)(|<->*)|*.so|__pycache__)})
             [[ $pkgname != pip-tools ]] && bins=(${bins:#pip-(compile|sync)})
             [[ $pkgname != wheel ]] && bins=(${bins:#wheel})
+            [[ $pkgname != chardet ]] && bins=(${bins:#chardetect})
             bins=(${(f)"$(
-                print -rl $bins \
+                print -rln -- $bins \
                 | fzf --reverse -m -0 -1 --header="Installing $pkg . . ." \
-                --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
+                --prompt='Which scripts should be added to the path? Choose more than one with <tab>.'
             )"})
             for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
         done
@@ -583,11 +608,13 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $reply ]] || return 1
             local pkgs=($reply)
         fi
-        local vpath
-        for pkg in ${pkgs:l}; do
-            .zpy_venvs_path ${projects_home}/${pkg}
-            vpath=${REPLY}
-            rm -rf ${projects_home}/${pkg} $vpath
+        local vpath pkgname
+        for pkg in $pkgs; do
+            .zpy_pkgspec2name $pkg
+            pkgname=$REPLY
+            .zpy_venvs_path ${projects_home}/${pkgname}
+            vpath=$REPLY
+            rm -rf ${projects_home}/${pkgname} $vpath
             for bin in $bins_home/*(@N); do
                 if [[ ${bin:P} =~ "^${vpath}/" ]]; then rm $bin; fi
             done
@@ -598,15 +625,21 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
     ;;
     'upgrade')
         if [[ ${@[2,-1]} ]]; then
-            local pkgs=(${@[2,-1]})
+            local pkgnames=()
+            for pkg in ${@[2,-1]}; do
+                .zpy_pkgspec2name $pkg
+                pkgnames+=($REPLY)
+            done
         else
             .zpy_pipzchoosepkgs $projects_home 'Upgrading . . .'
             [[ $reply ]] || return 1
-            local pkgs=($reply)
+            local pkgnames=($reply)
         fi
-        pipz list >! ${TMPPREFIX}_pipz_list
-        pipusall ${projects_home}/${^pkgs:l}
-        diff -u -L Then ${TMPPREFIX}_pipz_list -L Now =(pipz list) | .zpy_hlt diff
+        local before=$(mktemp)
+        pipz list >! $before
+        pipusall ${projects_home}/${^pkgnames}
+        diff -u -L 'pipz then' $before -L 'pipz now' =(pipz list) | .zpy_hlt diff
+        rm -f $before
     ;;
     'upgrade-all')
         pipz upgrade ${projects_home}/*(/:t)
@@ -616,7 +649,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         print -rP "venvs %B@%b %F{cyan}${${VENVS_WORLD}/#~/~}%f"
         print -rP "apps exposed %B@%b %F{cyan}${bins_home/#~/~}%f [ %F{blue}export path=(${bins_home/#~/~} \$path)%f ]"
         print
-        print -rC 4 ${projects_home}/*(/N:t)
+        print -rC 4 -- ${projects_home}/*(/N:t)
         print
         local bins=()
         if [[ $# -gt 1 ]]; then
@@ -634,8 +667,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local cells=("%F{cyan}%BCommand%b%f" "%F{cyan}%BPackage%b%f" "%F{cyan}%BRuntime%b%f")
         cells+=(${(f)"$(zargs -rl -P $ZPYPROCS -- $bins -- .zpy_pipzlistrow $projects_home)"})
         if [[ $#cells -gt 3 ]]; then
-            print -rPaC 3 $cells | head -n 1
-            print -rPaC 3 $cells | tail -n +2 | sort
+            print -rPaC 3 -- $cells | head -n 1
+            print -rPaC 3 -- $cells | tail -n +2 | sort
         fi
     ;;
     'reinstall')
@@ -646,8 +679,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
             [[ $reply ]] || return 1
             local pkgs=($reply)
         fi
-        local pkgnames=(${${pkgs:l}%%[ \[<>=#;]*})
-        pipz uninstall $pkgnames
+        pipz uninstall $pkgs
         pipz install $pkgs
     ;;
     'reinstall-all')
@@ -664,9 +696,9 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
         local bins=(${vbinpath}*(N:t))
         bins=(${bins:|blacklist})
         bins=(${(f)"$(
-            print -rl $bins \
-            | fzf --reverse -m -0 --header="$2" \
-            --prompt='Which scripts should be added to the path? Select more than one with <tab>. Filter: '
+            print -rln -- $bins \
+            | fzf --reverse -m -0 --header="Injecting [${(j:, :)@[3,-1]}] -> $2 . . ." \
+            --prompt='Which scripts should be added to the path? Choose more than one with <tab>.'
         )"})
         for bin in $bins; do vpylauncherfrom . $bin $bins_home; done
     ;;
@@ -675,7 +707,8 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
     ;;
     'runpkg')
         local pkg=$2
-        local pkgname=${${pkg:l}%%[ \[<>=#;]*}
+        .zpy_pkgspec2name $pkg
+        local pkgname=$REPLY
         local cmd=(${@[3,-1]})
         local projdir=${TMPPREFIX}_pipz/${pkgname}
         .zpy_venvs_path $projdir
@@ -705,7 +738,7 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
  }
 
  # Message-only
- for zpyfn in activatefzf pipa pipac pipu prunevenvs pypc sublp vpysublp whichpyproj; do
+ for zpyfn in pipa pipac pipu prunevenvs pypc sublp vpysublp whichpyproj; do
      _${zpyfn} () { _zpy_helpmsg ${0[2,-1]} }
      compdef _${zpyfn} ${zpyfn} 2>/dev/null  # Includes gratuitous compdef for pipa
  done
@@ -730,10 +763,11 @@ pipz () {  # [list|install|(uninstall|upgrade|reinstall)(|-all)|inject|runpip|ru
  compdef _envin .zpy_envin envincurrent 2>/dev/null
  compdef _pips pips 2>/dev/null
 
- # Folders
+ # Potential Projects (Folders + -i)
  for zpyfn in activate venvs_path; do
      _${zpyfn} () {
-         _files -/
+         [[ ${#words} -le 2 ]] \
+         && _arguments '-i' '1:New or Existing Projects:_files -/'
          _zpy_helpmsg ${0[2,-1]}
      }
      compdef _${zpyfn} ${zpyfn} 2>/dev/null
