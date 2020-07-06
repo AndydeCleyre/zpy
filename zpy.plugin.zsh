@@ -1495,8 +1495,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 .zpy_mkbin () {  # <func> <dest>
     emulate -L zsh
     [[ $2 && $1 ]] || return 1
-    local lines=("${(@f)$(<$ZPYSRC)}")
-    print -rl -- '#!/bin/zsh' "${(@)lines}" "$1 \$@" > ${2:P}
+    print -rl -- '#!/bin/zsh' "$(<$ZPYSRC)" "$1 \$@" > ${2:P}
     chmod +x ${2:P}
 }
 
