@@ -33,17 +33,9 @@ export VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
             fi
         done
     fi
-    local recent_highlight
     if (( $+commands[highlight] )); then
-        local lines=(${(f)"$(highlight --version)"})
-        local version_words=(${(z)lines[1]})
-        if [[ $version_words[-1] -ge 3.56 ]]; then
-            recent_highlight=1
-        fi
-    fi
-    if [[ $recent_highlight ]]; then
         HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} \
-        highlight --no-trailing-nl=empty-file -O truecolor --stdout -S $1
+        highlight -O truecolor --stdout -S $1
         # recommended themes: aiseered, darkplus, oxygenated
     elif (( $+commands[bat] )); then
         BAT_THEME=${BAT_THEME:-ansi-dark} \
@@ -53,12 +45,7 @@ export VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
         BAT_THEME=${BAT_THEME:-ansi-dark} \
         batcat --color always --paging never -p -l $1
         # recommended themes: ansi-dark, zenburn
-    elif (( $+commands[highlight] )); then
-        HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} \
-        highlight -O truecolor --stdout -S $1
-        # recommended themes: aiseered, darkplus, oxygenated
     else
-        # cat -
         >&1
     fi
 }
@@ -247,27 +234,25 @@ pips () {  # [<reqs-txt>...]
     local reqstxt_hash=$REPLY
 
     # See comment below
-    # local output
-    # output="$(
-    #     PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
-    #     pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1
-    # )"
-    # local ret=$?
-    # (( ret )) && [[ $faildir ]] && touch $faildir/${PWD:t}
-    # [[ $output ]] && .zpy_hlt py <<<$output
-    # return $ret
+    local output="$(
+        PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
+        pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1
+    )"
+    local ret=$?
+    (( ret )) && [[ $faildir ]] && touch $faildir/${PWD:t}
+    [[ $output ]] && .zpy_hlt py <<<$output
+    return $ret
 
     # If we do as below instead of as above, and highlighter is highlight,
-    # will we get unwanted blank lines, unless we pass --no-trailing-nl=empty-file,
-    # which only works without error on highlight >= 3.56
+    # will we get unwanted blank lines, even if we pass --no-trailing-nl=empty-file,
+    # which is incidentally only available in highlight >= 3.56.
     # These will be especially noticeable during pipz-upgrade --all
-    # https://repology.org/project/highlight/versions
 
-    PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
-    pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1 | .zpy_hlt py
-    local rets=(${pipestatus:#0})
-    [[ $rets ]] && [[ $faildir ]] && touch $faildir/${PWD:t}
-    return $rets[1]
+    # PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
+    # pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1 | .zpy_hlt py
+    # local rets=(${pipestatus:#0})
+    # [[ $rets ]] && [[ $faildir ]] && touch $faildir/${PWD:t}
+    # return $rets[1]
 }
 
 .zpy_pipu () {  # [--faildir <faildir>] <reqsin> [<pkgspec>...] [-- <pip-compile-arg>...]
@@ -296,8 +281,10 @@ pips () {  # [<reqs-txt>...]
             -L "${${reqstxt:P}/#~\//~/} then" $before \
             -L "${${reqstxt:P}/#~\//~/} now" $reqstxt \
         )"})
-        lines=(${(M)lines:#(-|+|@)*})
-        .zpy_hlt diff <<<${(F)lines}
+        if (( $? )); then
+            lines=(${(M)lines:#(-|+|@)*})
+            .zpy_hlt diff <<<${(F)lines}
+        fi
     fi
     rm -f $before
     return $ret
@@ -1337,8 +1324,10 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             -L 'pipz then' $before \
             -L 'pipz now' =(pipz list $pkgnames) \
         )"})
-        lines=(${(M)lines:#(-|+|@)*})
-        .zpy_hlt diff <<<${(F)lines}
+        if (( $? )); then
+            lines=(${(M)lines:#(-|+|@)*})
+            .zpy_hlt diff <<<${(F)lines}
+        fi
         rm -f $before
         if (( ret )); then
             print -rPu2 "%F{red}> FAILED: $0 upgrade $@%f"
