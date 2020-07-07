@@ -33,18 +33,27 @@ export VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
             fi
         done
     fi
-    if (( $+commands[highlight] )); then
-        HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} \
-        highlight -O truecolor --stdout -S $1
-        # recommended themes: aiseered, darkplus, oxygenated
-    elif (( $+commands[bat] )); then
+    if (( $+commands[highlight] )); then  # recommended themes: aiseered, darkplus, oxygenated
+        local lines=(${(f)"$(highlight --version)"})
+        local version_words=(${(z)lines[1]})
+        if [[ $version_words[-1] -ge 3.56 ]]; then
+            HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} \
+            highlight --no-trailing-nl=empty-file -O truecolor --stdout -S $1
+        else
+            # Consider eventually dropping this workaround and the version check
+            # whenever most distros package a recent version of highlight
+            local content=$(<&0)
+            if [[ $content ]]; then
+                HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} \
+                highlight -O truecolor --stdout -S $1 <<<$content
+            fi
+        fi
+    elif (( $+commands[bat] )); then  # recommended themes: ansi-dark, zenburn
         BAT_THEME=${BAT_THEME:-ansi-dark} \
         bat --color always --paging never -p -l $1
-        # recommended themes: ansi-dark, zenburn
     elif (( $+commands[batcat] )); then
         BAT_THEME=${BAT_THEME:-ansi-dark} \
         batcat --color always --paging never -p -l $1
-        # recommended themes: ansi-dark, zenburn
     else
         >&1
     fi
@@ -167,8 +176,6 @@ pipi () {  # [--no-upgrade] <pkgspec>...
     local upgrade=-U
     if [[ $1 == --no-upgrade ]]; then unset upgrade; shift; fi
     if [[ ! $1 ]]; then zpy $0; return 1; fi
-    # pip --disable-pip-version-check install $upgrade $@
-    # can change to 'python -m pip...' when pip > 20.0.2 (pip #6558 fixed in #7955)
     python -m pip --disable-pip-version-check install $upgrade $@
     local ret=$?
     rehash
@@ -233,26 +240,11 @@ pips () {  # [<reqs-txt>...]
     .zpy_path_hash $reqstxt
     local reqstxt_hash=$REPLY
 
-    # See comment below
-    local output="$(
-        PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
-        pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1
-    )"
-    local ret=$?
-    (( ret )) && [[ $faildir ]] && touch $faildir/${PWD:t}
-    [[ $output ]] && .zpy_hlt py <<<$output
-    return $ret
-
-    # If we do as below instead of as above, and highlighter is highlight,
-    # will we get unwanted blank lines, even if we pass --no-trailing-nl=empty-file,
-    # which is incidentally only available in highlight >= 3.56.
-    # These will be especially noticeable during pipz-upgrade --all
-
-    # PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
-    # pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1 | .zpy_hlt py
-    # local rets=(${pipestatus:#0})
-    # [[ $rets ]] && [[ $faildir ]] && touch $faildir/${PWD:t}
-    # return $rets[1]
+    PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
+    pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1 | .zpy_hlt cfg
+    local badrets=(${pipestatus:#0})
+    [[ $badrets ]] && [[ $faildir ]] && touch $faildir/${PWD:t}
+    return $badrets[1]
 }
 
 .zpy_pipu () {  # [--faildir <faildir>] <reqsin> [<pkgspec>...] [-- <pip-compile-arg>...]
