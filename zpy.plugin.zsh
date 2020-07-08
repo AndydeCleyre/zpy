@@ -40,8 +40,8 @@ export VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
             HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} \
             highlight --no-trailing-nl=empty-file -O truecolor --stdout -S $1
         else
-            # Consider eventually dropping this workaround and the version check
-            # whenever most distros package a recent version of highlight
+            # TODO: Consider dropping this workaround and the version check
+            # whenever most distros package highlight >=3.56
             local content=$(<&0)
             if [[ $content ]]; then
                 HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} \
@@ -241,7 +241,7 @@ pips () {  # [<reqs-txt>...]
     local reqstxt_hash=$REPLY
 
     PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
-    pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1 | .zpy_hlt cfg
+    pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1 | .zpy_hlt ini
     local badrets=(${pipestatus:#0})
     [[ $badrets ]] && [[ $faildir ]] && touch $faildir/${PWD:t}
     return $badrets[1]
@@ -411,7 +411,7 @@ reqshow () {  # [<folder>...]
         for reqsfile in $folderfiles; do
             if [[ $reqsfile != ${folderfiles[1]} ]]; then print; fi
             print -r -- '==>' $reqsfile '<=='
-            .zpy_hlt py <$reqsfile
+            .zpy_hlt ini <$reqsfile
         done
         if [[ $1 != ${@[-1]} ]]; then print; fi
     done
