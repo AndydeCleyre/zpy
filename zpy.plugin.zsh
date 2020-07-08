@@ -354,7 +354,7 @@ pipa () {  # [-c <category>] <pkgspec>...
         "%F{cyan}%B->%b $reqsin" \
         "%B::%b ${${${PWD:P}/#~\//~/}/%${PWD:t}/%B${PWD:t}%b}%f"
     print -rl -- $@ >> $reqsin
-    .zpy_hlt py <$reqsin
+    .zpy_hlt ini <$reqsin
 }
 
 # Add to requirements.in, then compile it to requirements.txt (add, compile).
@@ -404,7 +404,7 @@ reqshow () {  # [<folder>...]
     if [[ $1 == --help ]]; then zpy $0; return; fi
     [[ $1 ]] || 1=$PWD
     # for reqsfile in $1/*requirements*.{in,txt}(N); do
-        # tail -n +1 $1/*requirements*.{in,txt} | .zpy_hlt py
+        # tail -n +1 $1/*requirements*.{in,txt} | .zpy_hlt ini
     local reqsfile folderfiles
     for 1; do
         folderfiles=($1/*requirements*.{in,txt}(N))
