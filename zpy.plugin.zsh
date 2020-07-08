@@ -869,7 +869,7 @@ pypc () {
     local pyproject=${${:-pyproject.toml}:a}
     [[ -e $pyproject ]] || pyproject=${pyproject:h:h}/pyproject.toml
 
-    python -c "
+    python3 -c "
 from pathlib import Path
 from contextlib import suppress
 import os
@@ -954,7 +954,7 @@ vpysublp () {
             jq --arg py $pypath '.settings+={python_interpreter: $py}' $stp
         )" > $stp
     else
-        python -c "
+        python3 -c "
 from pathlib import Path
 from json import loads, dumps
 
@@ -1955,7 +1955,7 @@ unset _zpyfn
         elif (( $+commands[jello] )); then
             jello -lr '[p["project"] for p in _["rows"]]' <$json >$txt
         else
-            python -c "
+            python3 -c "
 from pathlib import Path
 from json import loads
 
