@@ -1470,11 +1470,19 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     esac
 }
 
+# Make a standalone script for any zpy function.
 .zpy_mkbin () {  # <func> <dest>
     emulate -L zsh
-    [[ $2 && $1 ]] || return 1
-    print -rl -- '#!/bin/zsh' "$(<$ZPYSRC)" "$1 \$@" > ${2:P}
-    chmod +x ${2:P}
+    if [[ $1 == --help ]]; then zpy $0; return; fi
+    if ! [[ $2 && $1 ]]; then zpy $0; return 1; fi
+    local dest=${2:a}
+    [[ -d $dest ]] && dest=$dest/$1
+    if [[ -e $dest ]]; then
+        print -rPu2 "%F{red}> ${dest/#~\//~/} exists!%f"
+        return 1
+    fi
+    print -rl -- '#!/bin/zsh' "$(<$ZPYSRC)" "$1 \$@" > $dest
+    chmod +x $dest
 }
 
 ## TODO: is there a standard/common way to include zsh completions in pypi packages?
@@ -1500,6 +1508,23 @@ _zpy_helpmsg () {  # funcname
     # grep -q '\S' <<<$msg || return 1
     _message -r ${(F)msg}
 }
+
+_.zpy_mkbin () {
+    _zpy_helpmsg ${0[2,-1]}
+    local lines=(${(f)"$(.zpy)"})
+    local cmds=(${${(M)lines:#[^# ]*}/ *})
+    local pipz_cmd
+    local -A rEpLy
+    pipz subcommands
+    for pipz_cmd in ${(k)rEpLy}; do
+        cmds+=(${(q-):-"pipz $pipz_cmd"})
+    done
+    _arguments \
+        '(:)--help[Show usage information]' \
+        "(--help)1:Function:($cmds)" \
+        '(--help)2:Destination:_files'
+}
+compdef _.zpy_mkbin .zpy_mkbin 2>/dev/null
 
 _activate () {
     _zpy_helpmsg ${0[2,-1]}
