@@ -131,7 +131,7 @@ zpy () {  # [<zpy-function>...]
 .zpy_venvs_path () {  # [<proj-dir>]
     emulate -L zsh
     unset REPLY
-    .zpy_path_hash ${${1:-${PWD}}:P}
+    .zpy_path_hash ${${1:-$PWD}:P}
     REPLY="${VENVS_WORLD}/${REPLY}"
 }
 
@@ -705,8 +705,8 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
     [[ -d $dest ]] && dest=$dest/$cmd
     if [[ -e $dest ]]; then
         print -rPu2 \
-            "%F{red}> ${${dest}/#~\//~/} exists!" \
-            "%B::%b ${${projdir}/#~\//~/}%f"
+            "%F{red}> ${dest/#~\//~/} exists!" \
+            "%B::%b ${projdir/#~\//~/}%f"
         return 1
     fi
     local REPLY
@@ -718,7 +718,7 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
         if [[ ! -x $cmdpath ]]; then
             print -rPu2 \
                 "%F{red}> ${cmdpath/#~\//~/} is not an existing executable!" \
-                "%B::%b ${${projdir}/#~\//~/}%f"
+                "%B::%b ${projdir/#~\//~/}%f"
             return 1
         fi
         ln -s "${cmdpath}" $dest
@@ -1271,7 +1271,6 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         if [[ $@ ]]; then
             pkgs=($@)
         else
-            # .zpy_pipzchoosepkgs $projects_home 'Uninstalling . . .' || return 1
             .zpy_pipzchoosepkg --multi --header 'Uninstalling . . .' $projects_home || return 1
             pkgs=($reply)
         fi
@@ -1280,12 +1279,11 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         local projdir ret=0
         for pkg in $pkgs; do
             .zpy_pkgspec2name $pkg || return 1
-            # rm -rf ${projects_home}/${REPLY}
             projdir=${projects_home}/${REPLY}
             if [[ -d $projdir ]]; then
                 rm -r $projdir
             else
-                print -rPu2 "%F{red}> Project not found %B::%b ${${projdir}/#~\//~/}%f"
+                print -rPu2 "%F{red}> Project not found %B::%b ${projdir/#~\//~/}%f"
                 ret=1
             fi
         done
@@ -1306,7 +1304,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         fi
         print -rPu2 \
             '%F{cyan}> creating pipz-list snapshot for post-comparison' \
-            "%B::%b ${${projects_home:P}/#~\//~/}%f"
+            "%B::%b ${projects_home/#~\//~/}%f"
         local before=$(mktemp)
         pipz list $pkgnames > $before
         pipup ${projects_home}/${^pkgnames}
@@ -1331,7 +1329,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
         shift
         print -rP "projects %B@%b %F{cyan}${projects_home/#~\//~/}%f"
-        print -rP "venvs %B@%b %F{cyan}${${VENVS_WORLD}/#~\//~/}%f"
+        print -rP "venvs %B@%b %F{cyan}${VENVS_WORLD/#~\//~/}%f"
         print -rP "apps exposed %B@%b %F{cyan}${bins_home/#~\//~/}%f"
         (( ${path[(I)$bins_home]} )) \
         || print -rP "suggestion%B:%b add %F{blue}path=(${bins_home/#~\//~/} \$path)%f to %F{cyan}~/.zshrc%f"
@@ -1380,7 +1378,6 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         elif [[ $@ ]]; then
             pkgs=($@)
         else
-            # .zpy_pipzchoosepkgs $projects_home 'Reinstalling . . .' || return 1
             .zpy_pipzchoosepkg --multi --header 'Reinstalling . . .' $projects_home || return 1
             pkgs=($reply)
         fi
