@@ -1709,7 +1709,7 @@ _sublp () {
     else
         _arguments \
             '(- *)--help[Show usage information]' \
-            '*:File or Folder:_files'
+            '(--help)*:File or Folder:_files'
     fi
 }
 compdef _sublp sublp 2>/dev/null
@@ -1818,7 +1818,7 @@ _zpy () {
     done
     _arguments \
         '(*)--help[Show usage information]' \
-        "*:Function:($cmds)"
+        "(--help)*:Function:($cmds)"
 }
 compdef _zpy zpy 2>/dev/null
 
