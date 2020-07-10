@@ -186,7 +186,7 @@ pipi () {  # [--no-upgrade] <pkgspec>...
         else
             print
         fi
-        return $ret
+        return ret
     fi
 }
 
@@ -211,7 +211,7 @@ pips () {  # [<reqs-txt>...]
         rehash
         if (( ret )); then
             print -rPu2 "%F{red}> FAILED: $0 $@%f"
-            return $ret
+            return ret
         fi
     fi
 }
@@ -279,7 +279,7 @@ pips () {  # [<reqs-txt>...]
         fi
     fi
     rm -f $before
-    return $ret
+    return ret
 }
 
 # Compile requirements.txt files from all found or specified requirements.in files (compile).
@@ -328,7 +328,7 @@ pipcs () {  # [-h] [-U|-u <pkgspec>,...] [<reqs-in>...] [-- <pip-compile-arg>...
     local ret=$?
     if (( ret )); then
         print -rPu2 "%F{red}> FAILED: $0 $@%f"
-        return $ret
+        return ret
     fi
     while [[ $1 == -h || $1 == -U || $1 == -u ]]; do
         [[ $1 == -h ]] && shift
@@ -390,7 +390,7 @@ pipacs () {  # [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
     local ret=$?
     if (( ret )); then
         print -rPu2 "%F{red}> FAILED: $0 $@%f"
-        return $ret
+        return ret
     fi
     [[ $1 == -h ]] && shift
     local reqstxt=requirements.txt
@@ -457,7 +457,7 @@ reqshow () {  # [<folder>...]
     local ret=$?
     if (( ret )); then
         print -rPu2 "%F{red}> FAILED: $venv_cmd $venv%f"
-        return $ret
+        return ret
     fi
     ln -sfn $PWD ${vpath}/project
     . $venv/bin/activate
@@ -570,7 +570,7 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
     # cat $activation_err >&2
     <$activation_err >&2
     rm $activation_err
-    return $ret
+    return ret
 }
 
 # Alias for 'activate'.
@@ -831,7 +831,7 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
     )
     local ret=$?
     (( ret )) && [[ $faildir ]] && touch $faildir/${1:t}
-    return $ret
+    return ret
 }
 
 # 'pipcs -U' (upgrade-compile, sync) for all or specified projects.
@@ -917,7 +917,7 @@ if pyproject.is_file():
     "
     ret=$?
     .zpy_hlt toml <$pyproject
-    return $ret
+    return ret
 }
 
 ## Get a new or existing Sublime Text project file for the working folder.
@@ -1287,7 +1287,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
                 ret=1
             fi
         done
-        return $ret
+        return ret
     ;;
     upgrade)  # [--all|<pkgname>...]  ## subcmd: pipz upgrade
     # Without args, interactively choose.
@@ -1321,7 +1321,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         rm -f $before
         if (( ret )); then
             print -rPu2 "%F{red}> FAILED: $0 upgrade $@%f"
-            return $ret
+            return ret
         fi
     ;;
     list)  # [<pkgname>...]  ## subcmd: pipz list
