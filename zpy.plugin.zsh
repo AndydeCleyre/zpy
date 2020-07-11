@@ -4,9 +4,9 @@ zmodload -F zsh/files b:zf_chmod
 ZPYSRC=${0:P}
 ZPYPROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
-export VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
+export ZPY_VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
 ## Each project is associated with one or more of:
-## $VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venv-pypy,venv-<pyver>}
+## $ZPY_VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venv-pypy,venv-<pyver>}
 ## which is also:
 ## $(venvs_path <proj-dir>)/{venv,venv2,venv-pypy,venv-<pyver>}
 
@@ -134,13 +134,13 @@ zpy () {  # [<zpy-function>...]
     emulate -L zsh
     unset REPLY
     .zpy_path_hash ${${1:-$PWD}:P}
-    REPLY="${VENVS_WORLD}/${REPLY}"
+    REPLY="${ZPY_VENVS_WORLD}/${REPLY}"
 }
 
 .zpy_chooseproj () {
     emulate -L zsh
     unset REPLY
-    local projdirs=(${VENVS_WORLD}/*/project(@N-/:P))
+    local projdirs=(${ZPY_VENVS_WORLD}/*/project(@N-/:P))
     REPLY=$(print -rln -- $projdirs | fzf --reverse -0 -1)
 }
 
@@ -735,7 +735,7 @@ prunevenvs () {  # [-y]
     emulate -L zsh
     if [[ $1 == --help ]]; then zpy $0; return; fi
     local noconfirm=$1 orphaned_venv proj REPLY
-    for proj in ${VENVS_WORLD}/*/project(@N:P); do
+    for proj in ${ZPY_VENVS_WORLD}/*/project(@N:P); do
         if [[ ! -d $proj ]]; then
             .zpy_venvs_path $proj
             orphaned_venv=$REPLY
@@ -806,7 +806,7 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
     )
     cells+=(${(f)"$(
         zargs -P $ZPYPROCS -rl \
-        -- ${@:-${VENVS_WORLD}/*/project(@N-/)} \
+        -- ${@:-${ZPY_VENVS_WORLD}/*/project(@N-/)} \
         -- .zpy_pipcheckoldcells $extra_args
     )"})
     if [[ $#cells -gt 4 ]]; then
@@ -847,7 +847,7 @@ pipup () {  # [--py 2|pypy|current] [<proj-dir>...]
     fi
     local faildir=$(mktemp -d)
     zargs -P $ZPYPROCS -rl \
-    -- ${@:-${VENVS_WORLD}/*/project(@N-/:P)} \
+    -- ${@:-${ZPY_VENVS_WORLD}/*/project(@N-/:P)} \
     -- .zpy_pipup $extra_args --faildir $faildir
     local failures=($faildir/*(N:t))
     rm -rf $faildir
@@ -1335,7 +1335,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
         shift
         print -rP "projects %B@%b %F{cyan}${projects_home/#~\//~/}%f"
-        print -rP "venvs %B@%b %F{cyan}${VENVS_WORLD/#~\//~/}%f"
+        print -rP "venvs %B@%b %F{cyan}${ZPY_VENVS_WORLD/#~\//~/}%f"
         print -rP "apps exposed %B@%b %F{cyan}${bins_home/#~\//~/}%f"
         (( ${path[(I)$bins_home]} )) \
         || print -rP "suggestion%B:%b add %F{blue}path=(${bins_home/#~\//~/} \$path)%f to %F{cyan}~/.zshrc%f"
@@ -1347,7 +1347,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             .zpy_all_replies .zpy_venvs_path ${projects_home}/${^@:l}
             venvs_path_whitelist=($reply)
         else
-            venvs_path_whitelist=($VENVS_WORLD)
+            venvs_path_whitelist=($ZPY_VENVS_WORLD)
         fi
         bins=(${bins_home}/*(@Ne['.zpy_is_under ${REPLY:P} $venvs_path_whitelist']))
         local cells=(
@@ -1613,7 +1613,7 @@ for _zpyfn in pipcheckold pipup; do
         if [[ $state == projects ]]; then
             local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
             _arguments \
-                "(--help)*:Project:_path_files -F blacklist -/ -g '${VENVS_WORLD}/*/project(@N-/:P)'"
+                "(--help)*:Project:_path_files -F blacklist -/ -g '${ZPY_VENVS_WORLD}/*/project(@N-/:P)'"
         fi
     }
     compdef _${_zpyfn} ${_zpyfn} 2>/dev/null
@@ -1735,7 +1735,7 @@ _vlauncher () {
         '(- * :)--help[Show usage information]' \
         '(--help)--link-only[Only create a symlink to <venv>/bin/<cmd>]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
-        "(-)1:Project:_path_files -/ -g '${VENVS_WORLD}/*/project(@N-/:P)'" \
+        "(-)1:Project:_path_files -/ -g '${ZPY_VENVS_WORLD}/*/project(@N-/:P)'" \
         '(-)2: :->cmd' \
         '(-)3:Destination:_path_files -/'
     if [[ $state == cmd ]]; then
@@ -1776,7 +1776,7 @@ _vrun () {
         '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
         '(--help)--cd[Run the command from within the project folder]' \
         "(--help)--activate[Activate the venv (usually unnecessary for venv-installed scripts, and slower)]" \
-        "(-)1:Project:_path_files -/ -g '${VENVS_WORLD}/*/project(@N-/:P)'" \
+        "(-)1:Project:_path_files -/ -g '${ZPY_VENVS_WORLD}/*/project(@N-/:P)'" \
         '(-)*::: :->cmd'
     local vname=venv
     if (( words[(i)--py] < NORMARG )); then
