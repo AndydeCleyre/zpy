@@ -4,7 +4,7 @@ zmodload -F zsh/files b:zf_chmod
 ZPYSRC=${0:P}
 ZPYPROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
-export ZPY_VENVS_WORLD=${XDG_DATA_HOME:-~/.local/share}/venvs
+export ZPY_VENVS_WORLD=${ZPY_VENVS_WORLD:-${XDG_DATA_HOME:-~/.local/share}/venvs}
 ## Each project is associated with one or more of:
 ## $ZPY_VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venv-pypy,venv-<pyver>}
 ## which is also:
