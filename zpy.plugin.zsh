@@ -1,4 +1,6 @@
 autoload -Uz zargs
+zmodload -F zsh/files b:zf_chmod
+
 ZPYSRC=${0:P}
 ZPYPROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
@@ -568,7 +570,6 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
         # ERROR: Could not install packages due to an EnvironmentError: [Errno 2] No such file or directory: '/home/andy/.local/share/venvs/xxx/venv/bin/pip-compile'
         return
     fi
-    # cat $activation_err >&2
     <$activation_err >&2
     rm $activation_err
     return ret
@@ -617,7 +618,7 @@ vpyshebang () {  # [--py 2|pypy|current] <script>...
     local vpyscript lines shebang REPLY
     [[ $venv_name == venv ]] && vpyscript=$commands[vpy]
     for 1; do
-        chmod +x $1
+        zf_chmod 0755 $1
         if [[ $vpyscript ]]; then
             shebang="#!${vpyscript}"
         else
@@ -725,7 +726,7 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
         ln -s "${cmdpath}" $dest
     else
         print -rl -- '#!/bin/sh -e' ". ${venv}/bin/activate" "exec $cmd \$@" > $dest
-        chmod +x $dest
+        zf_chmod 0755 $dest
     fi
 }
 
@@ -1487,7 +1488,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         return 1
     fi
     print -rl -- '#!/bin/zsh' "$(<$ZPYSRC)" "$1 \$@" > $dest
-    chmod +x $dest
+    zf_chmod 0755 $dest
 }
 
 ## TODO: is there a standard/common way to include zsh completions in pypi packages?
