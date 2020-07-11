@@ -1083,7 +1083,10 @@ sublp () {  # [<subl-arg>...]
     local projects_home=${1:a}
     local pkg=$2
     local REPLY
-    .zpy_pkgspec2name $pkg || return 1
+    if ! .zpy_pkgspec2name $pkg; then
+        [[ $faildir ]] && touch $faildir/$pkgname
+        return 1
+    fi
     local pkgname=$REPLY
     mkdir -p ${projects_home}/${pkgname}
     (
