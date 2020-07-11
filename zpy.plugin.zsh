@@ -268,7 +268,8 @@ pips () {  # [<reqs-txt>...]
     local ret=$?
 
     if [[ -r $before && -r $reqstxt ]]; then
-        local lines=(${(f)"$(
+        local lines
+        lines=(${(f)"$(
             diff -wu \
             -L "${${reqstxt:P}/#~\//~/} then" $before \
             -L "${${reqstxt:P}/#~\//~/} now" $reqstxt \
@@ -1309,7 +1310,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         pipz list $pkgnames > $before
         pipup ${projects_home}/${^pkgnames}
         local ret=$?
-        local lines=(${(f)"$(
+        local lines
+        lines=(${(f)"$(
             diff -wu \
             -L 'pipz then' $before \
             -L 'pipz now' =(pipz list $pkgnames) \
@@ -1505,7 +1507,6 @@ _zpy_helpmsg () {  # funcname
     local msg=(${(f)"$(.zpy $1)"})
     msg=(${msg//#(#b)([^#]*)/%B$match[1]%b})
     msg=(${msg//#(#b)(\#*)/%F{blue}$match[1]%f})
-    # grep -q '\S' <<<$msg || return 1
     _message -r ${(F)msg}
 }
 
