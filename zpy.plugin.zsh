@@ -562,7 +562,7 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
     ret=$?
     if [[ $ret == 127 ]]; then
         rm $activation_err
-        trap "cd ${(q-)PWD}" EXIT INT
+        trap "cd ${(q-)PWD}" EXIT INT QUIT
         cd $projdir
         envin $envin_args
         return
@@ -1464,7 +1464,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}
             [[ $2 ]] && shift
         fi
-        [[ $1 ]] && trap "cd ${(q-)PWD}" EXIT INT
+        [[ $1 ]] && trap "cd ${(q-)PWD}" EXIT INT QUIT
         cd $projdir
         if [[ $1 ]]; then
             $@
@@ -1790,7 +1790,7 @@ _vrun () {
         .zpy_venvs_path $projdir
         local venv=$REPLY/$vname
         if (( words[(i)--cd] < NORMARG )); then
-            trap "cd ${(q-)PWD}" EXIT INT
+            trap "cd ${(q-)PWD}" EXIT INT QUIT
             cd $projdir
         fi
     fi
@@ -1950,7 +1950,7 @@ _pipz () {
                 "(--help)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
                 '(--help)*::: :->cmd'
             if [[ $state == cmd ]]; then
-                trap "cd ${(q-)PWD}" EXIT INT
+                trap "cd ${(q-)PWD}" EXIT INT QUIT
                 cd $ZPY_PIPZ_PROJECTS/${(Q)line[1]:l}
                 _normal -P
             fi
