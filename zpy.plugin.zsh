@@ -559,7 +559,7 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
     ret=$?
     if [[ $ret == 127 ]]; then
         rm $activation_err
-        trap "cd ${(q-)PWD}" EXIT
+        trap "cd ${(q-)PWD}" EXIT INT
         cd $projdir
         envin $envin_args
         return
@@ -1463,7 +1463,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             projdir=${projects_home}/${REPLY}
             [[ $2 ]] && shift
         fi
-        [[ $1 ]] && trap "cd ${(q-)PWD}" EXIT
+        [[ $1 ]] && trap "cd ${(q-)PWD}" EXIT INT
         cd $projdir
         if [[ $1 ]]; then
             $@
@@ -1789,7 +1789,7 @@ _vrun () {
         .zpy_venvs_path $projdir
         local venv=$REPLY/$vname
         if (( words[(i)--cd] < NORMARG )); then
-            trap "cd ${(q-)PWD}" EXIT
+            trap "cd ${(q-)PWD}" EXIT INT
             cd $projdir
         fi
     fi
@@ -1949,7 +1949,7 @@ _pipz () {
                 "(--help)1:Installed Package Name:(${XDG_DATA_HOME:-~/.local/share}/python/*(/N:t))" \
                 '(--help)*::: :->cmd'
             if [[ $state == cmd ]]; then
-                trap "cd ${(q-)PWD}" EXIT
+                trap "cd ${(q-)PWD}" EXIT INT
                 cd ${XDG_DATA_HOME:-~/.local/share}/python/${(Q)line[1]:l}
                 _normal -P
             fi
