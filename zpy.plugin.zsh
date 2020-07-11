@@ -4,11 +4,14 @@ zmodload -F zsh/files b:zf_chmod
 ZPYSRC=${0:P}
 ZPYPROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
-export ZPY_VENVS_WORLD=${ZPY_VENVS_WORLD:-${XDG_DATA_HOME:-~/.local/share}/venvs}
+## User may want to override these:
+ZPY_VENVS_WORLD=${ZPY_VENVS_WORLD:-${XDG_DATA_HOME:-~/.local/share}/venvs}
 ## Each project is associated with one or more of:
 ## $ZPY_VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venv-pypy,venv-<pyver>}
 ## which is also:
 ## $(venvs_path <proj-dir>)/{venv,venv2,venv-pypy,venv-<pyver>}
+ZPY_PIPZ_PROJECTS=${ZPY_PIPZ_PROJECTS:-${XDG_DATA_HOME:-~/.local/share}/python}
+ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
 
 ## Syntax highlighter, reading stdin.
 .zpy_hlt () {  # <syntax>
@@ -1211,8 +1214,6 @@ sublp () {  # [<subl-arg>...]
 # Package manager for venv-isolated scripts (pipx clone; py3 only).
 pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
     emulate -L zsh +o promptsubst
-    local projects_home=${XDG_DATA_HOME:-~/.local/share}/python
-    local bins_home=${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin
     local reply REPLY
     local subcmds=(
         install     "Install apps from PyPI into isolated venvs"
@@ -1244,7 +1245,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     # Without --activate, 'vlauncher --link-only' is used.
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
         shift
-        local linkbins_args=($projects_home $bins_home --auto1)
+        local linkbins_args=($ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS --auto1)
         while [[ $1 == --cmd || $1 == --activate ]]; do
             if [[ $1 == --cmd ]]; then linkbins_args+=($1 $2); shift 2; fi
             if [[ $1 == --activate ]]; then linkbins_args+=($1); shift; fi
@@ -1253,7 +1254,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         local faildir=$(mktemp -d)
         zargs -P $ZPYPROCS -rl \
         -- $@ \
-        -- .zpy_pipzinstallpkg --faildir $faildir $projects_home
+        -- .zpy_pipzinstallpkg --faildir $faildir $ZPY_PIPZ_PROJECTS
         local failures=($faildir/*(N:t))
         rm -rf $faildir
         # TODO: could skip linkbins for failures, but is that desirable?
@@ -1271,20 +1272,20 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     # Without args, interactively choose.
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
         shift
-        if [[ $1 == --all ]]; then pipz uninstall ${projects_home}/*(/:t); return; fi
+        if [[ $1 == --all ]]; then pipz uninstall ${ZPY_PIPZ_PROJECTS}/*(/:t); return; fi
         local pkgs pkg
         if [[ $@ ]]; then
             pkgs=($@)
         else
-            .zpy_pipzchoosepkg --multi --header 'Uninstalling . . .' $projects_home || return 1
+            .zpy_pipzchoosepkg --multi --header 'Uninstalling . . .' $ZPY_PIPZ_PROJECTS || return 1
             pkgs=($reply)
         fi
-        .zpy_pipzunlinkbins $projects_home $bins_home $pkgs
-        .zpy_pipzrmvenvs $projects_home $bins_home $pkgs
+        .zpy_pipzunlinkbins $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
+        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
         local projdir ret=0
         for pkg in $pkgs; do
             .zpy_pkgspec2name $pkg || return 1
-            projdir=${projects_home}/${REPLY}
+            projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}
             if [[ -d $projdir ]]; then
                 rm -r $projdir
             else
@@ -1298,21 +1299,21 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     # Without args, interactively choose.
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
         shift
-        if [[ $1 == --all ]]; then pipz upgrade ${projects_home}/*(/:t); return; fi
+        if [[ $1 == --all ]]; then pipz upgrade ${ZPY_PIPZ_PROJECTS}/*(/:t); return; fi
         local pkgnames
         if [[ $@ ]]; then
             .zpy_all_replies .zpy_pkgspec2name $@ || return 1
             pkgnames=($reply)
         else
-            .zpy_pipzchoosepkg --multi --header 'Upgrading . . .' $projects_home || return 1
+            .zpy_pipzchoosepkg --multi --header 'Upgrading . . .' $ZPY_PIPZ_PROJECTS || return 1
             pkgnames=($reply)
         fi
         print -rPu2 \
             '%F{cyan}> creating pipz-list snapshot for post-comparison' \
-            "%B::%b ${projects_home/#~\//~/}%f"
+            "%B::%b ${ZPY_PIPZ_PROJECTS/#~\//~/}%f"
         local before=$(mktemp)
         pipz list $pkgnames > $before
-        pipup ${projects_home}/${^pkgnames}
+        pipup ${ZPY_PIPZ_PROJECTS}/${^pkgnames}
         local ret=$?
         local lines
         lines=(${(f)"$(
@@ -1334,22 +1335,22 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     # Without args, list all installed.
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
         shift
-        print -rP "projects %B@%b %F{cyan}${projects_home/#~\//~/}%f"
+        print -rP "projects %B@%b %F{cyan}${ZPY_PIPZ_PROJECTS/#~\//~/}%f"
         print -rP "venvs %B@%b %F{cyan}${ZPY_VENVS_WORLD/#~\//~/}%f"
-        print -rP "apps exposed %B@%b %F{cyan}${bins_home/#~\//~/}%f"
-        (( ${path[(I)$bins_home]} )) \
-        || print -rP "suggestion%B:%b add %F{blue}path=(${bins_home/#~\//~/} \$path)%f to %F{cyan}~/.zshrc%f"
+        print -rP "apps exposed %B@%b %F{cyan}${ZPY_PIPZ_BINS/#~\//~/}%f"
+        (( ${path[(I)$ZPY_PIPZ_BINS]} )) \
+        || print -rP "suggestion%B:%b add %F{blue}path=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%f to %F{cyan}~/.zshrc%f"
         print
-        print -rC 4 -- ${projects_home}/*(/N:t)
+        print -rC 4 -- ${ZPY_PIPZ_PROJECTS}/*(/N:t)
         print
         local bins=() venvs_path_whitelist=()
         if [[ $# -gt 0 ]]; then
-            .zpy_all_replies .zpy_venvs_path ${projects_home}/${^@:l}
+            .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^@:l}
             venvs_path_whitelist=($reply)
         else
             venvs_path_whitelist=($ZPY_VENVS_WORLD)
         fi
-        bins=(${bins_home}/*(@Ne['.zpy_is_under ${REPLY:P} $venvs_path_whitelist']))
+        bins=(${ZPY_PIPZ_BINS}/*(@Ne['.zpy_is_under ${REPLY:P} $venvs_path_whitelist']))
         local cells=(
             "%F{cyan}%BCommand%b%f"
             "%F{cyan}%BPackage%b%f"
@@ -1358,7 +1359,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         cells+=(${(f)"$(
             zargs -P $ZPYPROCS -rl \
             -- $bins \
-            -- .zpy_pipzlistrow $projects_home
+            -- .zpy_pipzlistrow $ZPY_PIPZ_PROJECTS
         )"})
         if [[ $#cells -gt 3 ]]; then
             local table=(${(f)"$(print -rPaC 3 -- $cells)"})
@@ -1372,7 +1373,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     # Without --all or <pkgspec>, interactively choose.
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
         shift
-        local do_all linkbins_args=($projects_home $bins_home --auto1)
+        local do_all linkbins_args=($ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS --auto1)
         while [[ $1 == --all || $1 == --cmd || $1 == --activate ]]; do
             if [[ $1 == --all ]]; then do_all=1; shift; fi
             if [[ $1 == --cmd ]]; then linkbins_args+=($1 $2); shift 2; fi
@@ -1380,16 +1381,16 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         done
         local pkgs=()
         if [[ $do_all ]]; then
-            pkgs=(${projects_home}/*(/N:t))
+            pkgs=(${ZPY_PIPZ_PROJECTS}/*(/N:t))
         elif [[ $@ ]]; then
             pkgs=($@)
         else
-            .zpy_pipzchoosepkg --multi --header 'Reinstalling . . .' $projects_home || return 1
+            .zpy_pipzchoosepkg --multi --header 'Reinstalling . . .' $ZPY_PIPZ_PROJECTS || return 1
             pkgs=($reply)
         fi
-        .zpy_pipzunlinkbins $projects_home $bins_home $pkgs
-        .zpy_pipzrmvenvs $projects_home $bins_home $pkgs
-        rm -f ${projects_home}/${^pkgs}/requirements.txt
+        .zpy_pipzunlinkbins $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
+        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
+        rm -f ${ZPY_PIPZ_PROJECTS}/${^pkgs}/requirements.txt
         pipz upgrade $pkgs
         .zpy_pipzlinkbins $linkbins_args $pkgs
     ;;
@@ -1398,13 +1399,13 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     # Without --activate, 'vlauncher --link-only' is used.
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
         shift
-        local linkbins_args=($projects_home $bins_home)
+        local linkbins_args=($ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS)
         while [[ $1 == --cmd || $1 == --activate ]]; do
             if [[ $1 == --cmd ]]; then linkbins_args+=($1 $2); shift 2; fi
             if [[ $1 == --activate ]]; then linkbins_args+=($1); shift; fi
         done
         linkbins_args+=(--header "Injecting [${(j:, :)@[2,-1]}] ->")
-        local projdir=${projects_home}/${1:l}
+        local projdir=${ZPY_PIPZ_PROJECTS}/${1:l}
         if ! [[ $2 && $1 && -d $projdir ]]; then; zpy "$0 inject"; return 1; fi
         .zpy_venvs_path $projdir
         local vpath=$REPLY
@@ -1428,7 +1429,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         local vrun_args=()
         if [[ $1 == --cd ]]; then vrun_args+=($1); shift; fi
         if ! [[ $2 && $1 ]]; then; zpy "$0 runpip"; return 1; fi
-        vrun $vrun_args ${projects_home}/${1:l} python -m pip ${@[2,-1]}
+        vrun $vrun_args ${ZPY_PIPZ_PROJECTS}/${1:l} python -m pip ${@[2,-1]}
     ;;
     runpkg)  # <pkgspec> <cmd> [<cmd-arg>...]  ## subcmd: pipz runpkg
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
@@ -1457,10 +1458,10 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         shift
         local projdir
         if [[ $1 ]]; then
-            projdir=${projects_home}/${1:l}; shift
+            projdir=${ZPY_PIPZ_PROJECTS}/${1:l}; shift
         else
-            .zpy_pipzchoosepkg $projects_home || return 1
-            projdir=${projects_home}/${REPLY}
+            .zpy_pipzchoosepkg $ZPY_PIPZ_PROJECTS || return 1
+            projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}
             [[ $2 ]] && shift
         fi
         [[ $1 ]] && trap "cd ${(q-)PWD}" EXIT INT
@@ -1864,7 +1865,7 @@ _pipz () {
                     blacklist=($blacklist[2,-1])
                 fi
             done
-            local pkgs=(${XDG_DATA_HOME:-~/.local/share}/python/*(/N:t))
+            local pkgs=($ZPY_PIPZ_PROJECTS/*(/N:t))
             pkgs=(${pkgs:|blacklist})
             _arguments \
                 '(* -)--help[Show usage information]' \
@@ -1881,12 +1882,12 @@ _pipz () {
                 '(* - :)--help[Show usage information]' \
                 '(--help)--cmd[Specify commands to add to your path, rather than interactively choosing]:Command (comma-separated): ' \
                 '(--help)--activate[Ensure command launchers explicitly activate the venv (usually unnecessary)]' \
-                "(-)1:Installed Package Name:(${XDG_DATA_HOME:-~/.local/share}/python/*(/N:t))" \
+                "(-)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
                 "(-)*:Extra Package Spec:($pkgs)"
         ;;
         uninstall)
             local blacklist=(${(Q)words[2,-1]})
-            local pkgs=(${XDG_DATA_HOME:-~/.local/share}/python/*(/N:t))
+            local pkgs=($ZPY_PIPZ_PROJECTS/*(/N:t))
             pkgs=(${pkgs:|blacklist})
             _arguments \
                 '(* -)--help[Show usage information]' \
@@ -1895,7 +1896,7 @@ _pipz () {
         ;;
         upgrade)
             local blacklist=(${(Q)words[2,-1]})
-            local pkgs=(${XDG_DATA_HOME:-~/.local/share}/python/*(/N:t))
+            local pkgs=($ZPY_PIPZ_PROJECTS/*(/N:t))
             pkgs=(${pkgs:|blacklist})
             _arguments \
                 '(* -)--help[Show usage information]' \
@@ -1904,7 +1905,7 @@ _pipz () {
         ;;
         list)
             local blacklist=(${(Q)words[2,-1]})
-            local pkgs=(${XDG_DATA_HOME:-~/.local/share}/python/*(/N:t))
+            local pkgs=($ZPY_PIPZ_PROJECTS/*(/N:t))
             pkgs=(${pkgs:|blacklist})
             _arguments \
                 '(*)--help[Show usage information]' \
@@ -1935,7 +1936,7 @@ _pipz () {
             _arguments -n \
                 '(* - :)--help[Show usage information]' \
                 '(--help)--cd[Run pip from within the project folder]' \
-                "(-)1:Installed Package Name:(${XDG_DATA_HOME:-~/.local/share}/python/*(/N:t))" \
+                "(-)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
                 '(-)*::: :->pip_arg'
             if [[ $state == pip_arg ]]; then
                 words=(pip $words)
@@ -1946,11 +1947,11 @@ _pipz () {
         cd)
             _arguments \
                 '(* :)--help[Show usage information]' \
-                "(--help)1:Installed Package Name:(${XDG_DATA_HOME:-~/.local/share}/python/*(/N:t))" \
+                "(--help)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
                 '(--help)*::: :->cmd'
             if [[ $state == cmd ]]; then
                 trap "cd ${(q-)PWD}" EXIT INT
-                cd ${XDG_DATA_HOME:-~/.local/share}/python/${(Q)line[1]:l}
+                cd $ZPY_PIPZ_PROJECTS/${(Q)line[1]:l}
                 _normal -P
             fi
         ;;
