@@ -288,7 +288,7 @@ pips () {  # [<reqs-txt>...]
     local before=$(mktemp)
     <$reqstxt >$before 2>/dev/null || true
 
-    pipi -q pip-tools
+    pipi -q pip-tools wheel
 
     .zpy_pipc $zpypipc_args $reqsin -q ${${${reqs/*/-P}:^reqs}:--U} $pipcompile_args
     local ret=$?
@@ -480,7 +480,10 @@ reqshow () {  # [<folder>...]
         '%F{cyan}> %F{green}entering%F{cyan} venv' \
         "%B@%b ${venv/#~\//~/}" \
         "%B::%b ${${${PWD:P}/#~\//~/}/%${PWD:t}/%B${PWD:t}%b}%f"
-    [[ -d $venv ]] || $venv_cmd $venv
+    if [[ ! -r $venv/bin/activate ]]; then
+        zf_rm -rf $venv
+        $venv_cmd $venv
+    fi
     local ret=$?
     if (( ret )); then
         print -rPu2 "%F{red}> FAILED: $venv_cmd $venv%f"
@@ -488,7 +491,7 @@ reqshow () {  # [<folder>...]
     fi
     zf_ln -sfn $PWD ${vpath}/project
     . $venv/bin/activate
-    pipi -q pip-tools
+    pipi -q pip-tools wheel
     pips $reqstxts
 }
 
@@ -560,7 +563,7 @@ envin () {  # [--py 2|pypy|current] [<reqs-txt>...]
 activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
     emulate -L zsh
     if [[ $1 == --help ]]; then zpy $0; return; fi
-    local envin_args=() venv_name=venv interactive ret REPLY
+    local envin_args=() venv_name=venv interactive REPLY
     while [[ $1 == -i || $1 == --py ]]; do
         if [[ $1 == -i ]]; then interactive=1; shift; fi
         if [[ $1 == --py ]]; then
@@ -577,26 +580,17 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
         return
     fi
     local projdir=${${1:-$PWD}:P}
-    local activation_err=$(mktemp)
     .zpy_venvs_path $projdir
-    . "$REPLY/$venv_name/bin/activate" &>$activation_err
-    ret=$?
-    if [[ $ret == 127 ]]; then
-        rm $activation_err
+    local activator=$REPLY/$venv_name/bin/activate
+    if [[ ! -r $activator ]]; then
         trap "cd ${(q-)PWD}" EXIT INT QUIT
         cd $projdir
         envin $envin_args
-        return
-    elif (( ! $ret )); then
-        rm $activation_err
-        pipi -q pip-tools
-        # TODO: solve occasional:
-        # ERROR: Could not install packages due to an EnvironmentError: [Errno 2] No such file or directory: '/home/andy/.local/share/venvs/xxx/venv/bin/pip-compile'
+    elif . $activator; then
+        pipi -q pip-tools wheel
+    else
         return
     fi
-    <$activation_err >&2
-    rm $activation_err
-    return ret
 }
 
 # Alias for 'activate'.
