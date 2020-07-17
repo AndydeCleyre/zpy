@@ -44,14 +44,14 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
         local lines=(${(f)"$(highlight --version)"})
         local version_words=(${(z)lines[1]})
         if [[ $version_words[-1] -ge 3.56 ]]; then
-            HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} \
+            HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s aiseered'} \
             highlight --no-trailing-nl=empty-file -O truecolor --stdout -S $1
         else
             # TODO: Consider dropping this workaround and the version check
             # whenever most distros package highlight >=3.56
             local content=$(<&0)
             if [[ $content ]]; then
-                HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s darkplus'} \
+                HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-'-s aiseered'} \
                 highlight -O truecolor --stdout -S $1 <<<$content
             fi
         fi
