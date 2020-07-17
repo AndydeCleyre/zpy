@@ -1,5 +1,6 @@
 autoload -Uz zargs
-zmodload -F zsh/files b:zf_chmod
+zmodload -mF zsh/files 'b:zf_(chmod|ln|mkdir|rm)'
+zmodload zsh/pcre 2>/dev/null
 
 ZPYSRC=${0:P}
 ZPYPROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
@@ -65,9 +66,25 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
     fi
 }
 
+.zpy_zpcregrep () {  # <output> <pattern> <file>
+    emulate -L zsh
+    # <output> like: '$1$4$5$7'
+    local backrefs=(${(s:$:)1}) pattern=$2 body="$(<$3)"
+    local result_parts=("\$match[${(@)^backrefs}]")
+    local result_template=${(j::)result_parts}  # '$match[1]$match[4]$match[5]$match[7]'
+
+    local all_results=() ZPCRE_OP
+    pcre_compile -m $pattern
+    pcre_match -b -- $body
+    while (( ! $? )); do
+        all_results+="${(e)result_template}"
+        pcre_match -b -n ${${(z)ZPCRE_OP}[-1]} -- $body
+    done
+    print -r -- ${(F)all_results}
+}
+
 ## zpy, but never highlight
 .zpy () {  # [<zpy-function>...]
-    # TODO: pure zsh implementation, without pcregrep/pcre2grep/rg?
     emulate -L zsh -o extendedglob
     local cmds_pattern='^(?P<predoc>\n?(# .*\n)*)(alias (?P<aname>[^=]+)="[^"]+"|(?P<fname>[^._ \n][^ \n]+) \(\) \{)(  #(?P<usage> .+))?'
     local subcmd_pattern='.*  # (?P<usage>.*)  ## subcmd: <CMD> <SUBCMD>(?P<postdoc>\n( *# [^\n]+\n)*)'
@@ -80,6 +97,9 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
     elif (( $+commands[rg] )); then
         local cmd_doc=(rg --no-config --color never -NU -r '$predoc$aname$fname$usage')
         local subcmd_doc=(rg --no-config --color never -NU -r '$usage$postdoc')
+    elif zmodload -e zsh/pcre; then
+        local cmd_doc=(.zpy_zpcregrep '$1$4$5$7')
+        local subcmd_doc=(.zpy_zpcregrep '$1$2')
     else
         print -lrPu2 '%F{red}> zpy documentation functions require one of:' \
             'rg (ripgrep)' 'pcre2grep (pcre2/pcre2-tools)' 'pcregrep (pcre/pcre-tools)%f'
@@ -170,7 +190,7 @@ venvs_path () {  # [-i|<proj-dir>]
         '%F{yellow}> You probably want to activate a venv with 'activate' (or 'a8'), first.' \
         "%B::%b ${${${PWD:P}/#~\//~/}/%${PWD:t}/%B${PWD:t}%b}%f"
     # read -q "?Continue anyway [yN]? "
-    # [[ $REPLY == y ]] && rm -rf $orphaned_venv
+    # [[ $REPLY == y ]] && zf_rm -rf $orphaned_venv
             # print '\n'
 }
 
@@ -249,7 +269,7 @@ pips () {  # [<reqs-txt>...]
     PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
     pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1 | .zpy_hlt ini
     local badrets=(${pipestatus:#0})
-    [[ $badrets ]] && [[ $faildir ]] && touch $faildir/${PWD:t}
+    [[ $badrets ]] && [[ $faildir ]] && print -n >> $faildir/${PWD:t}
     return $badrets[1]
 }
 
@@ -266,7 +286,7 @@ pips () {  # [<reqs-txt>...]
     local reqs=($@)
     local reqstxt=${reqsin:r}.txt
     local before=$(mktemp)
-    cp $reqstxt $before 2>/dev/null || true
+    <$reqstxt >$before 2>/dev/null || true
 
     pipi -q pip-tools
 
@@ -285,7 +305,7 @@ pips () {  # [<reqs-txt>...]
             .zpy_hlt diff <<<${(F)lines}
         fi
     fi
-    rm -f $before
+    zf_rm -f $before
     return ret
 }
 
@@ -316,7 +336,7 @@ pipc () {  # [-h] [-U|-u <pkgspec>,...] [<reqs-in>...] [-- <pip-compile-arg>...]
         -- .zpy_pipc --faildir $faildir ___ $gen_hashes $pipcompile_args
     fi
     local failures=($faildir/*(N:t))
-    rm -rf $faildir
+    zf_rm -rf $faildir
     if [[ $failures ]]; then
         print -lrPu2 \
             '%F{red}> Problems compiling:' \
@@ -466,7 +486,7 @@ reqshow () {  # [<folder>...]
         print -rPu2 "%F{red}> FAILED: $venv_cmd $venv%f"
         return ret
     fi
-    ln -sfn $PWD ${vpath}/project
+    zf_ln -sfn $PWD ${vpath}/project
     . $venv/bin/activate
     pipi -q pip-tools
     pips $reqstxts
@@ -695,6 +715,7 @@ vpy () {  # [--py 2|pypy|current] [--activate] <script> [<script-arg>...]
 # which should already have the venv's python in its shebang line.
 vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher-dest>
     # TODO: Consider replacing --link-only with its inverse, --activate.
+    # Get input on that before major release.
     emulate -L zsh
     if [[ $1 == --help ]]; then zpy $0; return; fi
     local linkonly venv_name=venv
@@ -727,7 +748,7 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
                 "%B::%b ${projdir/#~\//~/}%f"
             return 1
         fi
-        ln -s "${cmdpath}" $dest
+        zf_ln -s "${cmdpath}" $dest
     else
         print -rl -- '#!/bin/sh -e' ". ${venv}/bin/activate" "exec $cmd \$@" > $dest
         zf_chmod 0755 $dest
@@ -745,9 +766,9 @@ prunevenvs () {  # [-y]
             orphaned_venv=$REPLY
             print -rl "Missing: ${proj/#~\//~/}" "Orphan: $(du -hs $orphaned_venv)"
             if [[ $noconfirm ]]; then
-                rm -rf $orphaned_venv
+                zf_rm -rf $orphaned_venv
             else
-                read -q "?Delete orphan [yN]? " && rm -rf $orphaned_venv
+                read -q "?Delete orphan [yN]? " && zf_rm -rf $orphaned_venv
                 print '\n'
             fi
         fi
@@ -836,7 +857,7 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
         pipcs -U
     )
     local ret=$?
-    (( ret )) && [[ $faildir ]] && touch $faildir/${1:t}
+    (( ret )) && [[ $faildir ]] && print -n >> $faildir/${1:t}
     return ret
 }
 
@@ -854,7 +875,7 @@ pipup () {  # [--py 2|pypy|current] [<proj-dir>...]
     -- ${@:-${ZPY_VENVS_WORLD}/*/project(@N-/:P)} \
     -- .zpy_pipup $extra_args --faildir $faildir
     local failures=($faildir/*(N:t))
-    rm -rf $faildir
+    zf_rm -rf $faildir
     if [[ $failures ]]; then
         print -lrPu2 \
             '%F{red}> Problems upgrading:' \
@@ -1089,23 +1110,24 @@ sublp () {  # [<subl-arg>...]
     local pkg=$2
     local REPLY
     if ! .zpy_pkgspec2name $pkg; then
-        [[ $faildir ]] && touch $faildir/$pkgname
+        [[ $faildir ]] && print -n >> $faildir/$pkgname
         return 1
     fi
     local pkgname=$REPLY
-    mkdir -p ${projects_home}/${pkgname}
+    zf_mkdir -p ${projects_home}/${pkgname}
     (
         set -e
         cd ${projects_home}/${pkgname}
-        rm -f requirements.{in,txt}
+        zf_rm -f requirements.{in,txt}
         activate
         pipacs $pkg
     )
-    (( ? )) && [[ $faildir ]] && touch $faildir/$pkgname
+    (( ? )) && [[ $faildir ]] && print -n >> $faildir/$pkgname
 }
 
 .zpy_pipzchoosepkg () {  # [--header <header>] [--multi] <projects_home>  ## <header> default: 'Packages:'
     emulate -L zsh
+    # TODO: fzf OR skim OR fzy
     local fzf_args=(--reverse -0) fzf_header='Packages:' fzf_prompt='Which package? ' multi
     while [[ $1 == --header || $1 == --multi ]]; do
         if [[ $1 == --header ]]; then fzf_header=$2; shift 2; fi
@@ -1145,7 +1167,7 @@ sublp () {  # [<subl-arg>...]
     local vpaths=($reply)
     local binlinks=(${bins_home}/*(@Ne['.zpy_is_under ${REPLY:P} $vpaths']))
     if [[ $binlinks ]]; then
-        rm $binlinks
+        zf_rm $binlinks
     fi
     rehash
 }
@@ -1159,7 +1181,7 @@ sublp () {  # [<subl-arg>...]
     for 1; do
         .zpy_pkgspec2name $1 || return 1
         .zpy_venvs_path ${projects_home}/${REPLY}
-        rm -rf $REPLY
+        zf_rm -rf $REPLY
     done
 }
 
@@ -1176,7 +1198,7 @@ sublp () {  # [<subl-arg>...]
         if [[ $1 == --header ]]; then fzf_header=$2; shift 2; fi
     done
     [[ $1 && $bins_home && $projects_home ]] || return 1
-    mkdir -p $bins_home
+    zf_mkdir -p $bins_home
     local bins pkgname projdir vpath bin REPLY
     for 1; do
         .zpy_pkgspec2name $1 || return 1
@@ -1203,9 +1225,9 @@ sublp () {  # [<subl-arg>...]
             if [[ $linkonly ]]; then
                 vlauncher --link-only $projdir $bin $bins_home
             else
-                mkdir -p ${vpath}/venv/pipz_launchers
+                zf_mkdir -p ${vpath}/venv/pipz_launchers
                 vlauncher $projdir $bin ${vpath}/venv/pipz_launchers
-                ln -s ${vpath}/venv/pipz_launchers/${bin} $bins_home/
+                zf_ln -s ${vpath}/venv/pipz_launchers/${bin} $bins_home/
             fi
         done
     done
@@ -1257,7 +1279,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         -- $@ \
         -- .zpy_pipzinstallpkg --faildir $faildir $ZPY_PIPZ_PROJECTS
         local failures=($faildir/*(N:t))
-        rm -rf $faildir
+        zf_rm -rf $faildir
         # TODO: could skip linkbins for failures, but is that desirable?
         # new array: pkgspec2name each $@
         # filter array: ${arr:|failures}
@@ -1288,7 +1310,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             .zpy_pkgspec2name $pkg || return 1
             projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}
             if [[ -d $projdir ]]; then
-                rm -r $projdir
+                zf_rm -r $projdir
             else
                 print -rPu2 "%F{red}> Project not found %B::%b ${projdir/#~\//~/}%f"
                 ret=1
@@ -1326,7 +1348,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             lines=(${(M)lines:#(-|+|@)*})
             .zpy_hlt diff <<<${(F)lines}
         fi
-        rm -f $before
+        zf_rm -f $before
         if (( ret )); then
             print -rPu2 "%F{red}> FAILED: $0 upgrade $@%f"
             return ret
@@ -1391,7 +1413,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         fi
         .zpy_pipzunlinkbins $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
         .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
-        rm -f ${ZPY_PIPZ_PROJECTS}/${^pkgs}/requirements.txt
+        zf_rm -f ${ZPY_PIPZ_PROJECTS}/${^pkgs}/requirements.txt
         pipz upgrade $pkgs
         .zpy_pipzlinkbins $linkbins_args $pkgs
     ;;
@@ -1444,7 +1466,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         local vpath=$REPLY
         local venv=${vpath}/venv
         [[ -d $venv ]] || python3 -m venv $venv
-        ln -sfn $projdir ${vpath}/project
+        zf_ln -sfn $projdir ${vpath}/project
         . $venv/bin/activate
         pipi $pkg -q
         deactivate
@@ -1480,6 +1502,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
 # Make a standalone script for any zpy function.
 .zpy_mkbin () {  # <func> <dest>
+    # TODO: flag for standalone copy, or small source-ing script?
     emulate -L zsh
     if [[ $1 == --help ]]; then zpy $0; return; fi
     if ! [[ $2 && $1 ]]; then zpy $0; return 1; fi
@@ -1971,7 +1994,7 @@ unset _zpyfn
     emulate -L zsh
     unset reply
     local folder=${XDG_CACHE_HOME:-~/.cache}/zpy
-    mkdir -p $folder
+    zf_mkdir -p $folder
     local json=$folder/pypi.json txt=$folder/pypi.txt
     if [[ $1 == --refresh ]] || [[ ! -r $txt ]]; then
         if (( $+commands[wget] )); then
