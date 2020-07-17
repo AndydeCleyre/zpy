@@ -6,12 +6,13 @@ ZPYPROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
 ## User may want to override these:
 ZPY_VENVS_WORLD=${ZPY_VENVS_WORLD:-${XDG_DATA_HOME:-~/.local/share}/venvs}
-## Each project is associated with one or more of:
-## $ZPY_VENVS_WORLD/<hash of proj-dir>/{venv,venv2,venv-pypy,venv-<pyver>}
-## which is also:
-## $(venvs_path <proj-dir>)/{venv,venv2,venv-pypy,venv-<pyver>}
+## Each project is associated with: $ZPY_VENVS_WORLD/<hash of proj-dir>/<venv-name>
+## <venv-name> is one or more of: venv, venv2, venv-pypy, venv-<pyver>
+## $(venvs_path <proj-dir>) evals to $ZPY_VENVS_WORLD/<hash of proj-dir>
 ZPY_PIPZ_PROJECTS=${ZPY_PIPZ_PROJECTS:-${XDG_DATA_HOME:-~/.local/share}/python}
 ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
+## Installing an app via pipz puts requirements.{in,txt} in $ZPY_PIPZ_PROJECTS/<appname>
+## and executables in $ZPY_PIPZ_BINS
 
 ## Syntax highlighter, reading stdin.
 .zpy_hlt () {  # <syntax>
