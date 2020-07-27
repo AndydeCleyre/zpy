@@ -102,7 +102,10 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
         local subcmd_doc=(.zpy_zpcregrep '$1$2')
     else
         print -lrPu2 '%F{red}> zpy documentation functions require one of:' \
-            'rg (ripgrep)' 'pcre2grep (pcre2/pcre2-tools)' 'pcregrep (pcre/pcre-tools)%f'
+            'zsh built with --enable-pcre' \
+            'rg (ripgrep)' \
+            'pcre2grep (pcre2/pcre2-tools)' \
+            'pcregrep (pcre/pcre-tools)%f'
         return 1
     fi
     if [[ $# -eq 0 ]]; then  # all commands
