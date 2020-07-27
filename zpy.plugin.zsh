@@ -198,7 +198,7 @@ venvs_path () {  # [-i|<proj-dir>]
 }
 
 # Install and upgrade packages.
-pipi () {  # [--no-upgrade] <pkgspec>...
+pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
     emulate -L zsh
     if [[ $1 == --help ]]; then zpy $0; return; fi
     [[ $VIRTUAL_ENV ]] || .zpy_please_activate venv
@@ -1236,7 +1236,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     emulate -L zsh +o promptsubst
     local reply REPLY
     local subcmds=(
-        install     "Install apps from PyPI into isolated venvs"
+        install     "Install apps from PyPI or filesystem into isolated venvs"
         uninstall   "Remove apps"
         upgrade     "Install newer versions of apps and their dependencies"
         list        "Show each installed app with its version, commands, and Python runtime"
@@ -1578,17 +1578,24 @@ _envin () {
 }
 compdef _envin envin 2>/dev/null
 
+_zpy_pypi_pkg () {
+    local reply
+    .zpy_pypi_pkgs
+    _arguments \
+        "*:PyPI Package:($reply)"
+    if (( ${@[(I)--or-local]} )); then
+        _files
+    fi
+}
+
 _pipa () {
     _zpy_helpmsg ${0[2,-1]}
     local -U catgs=(dev doc test *-requirements.{in,txt}(N))
     catgs=(${catgs%%-*})
-    local reply
-    .zpy_pypi_pkgs
-    local pkgs=($reply)
     _arguments \
         '(- *)--help[Show usage information]' \
         "(--help)-c[Use <category>-requirements.in]:Category:($catgs)" \
-        "(-)*:Package Spec:($pkgs)"
+        '(-)*:Package Spec:_zpy_pypi_pkg --or-local'
 }
 compdef _pipa pipa 2>/dev/null
 
@@ -1605,19 +1612,16 @@ for _zpyfn in pipac pipacs; do
         fi
         local -U catgs=(dev doc test *-requirements.{in,txt}(N))
         catgs=(${catgs%%-*})
-        local reply
-        .zpy_pypi_pkgs
-        local pkgs=($reply)
         local context state state_descr line opt_args
         _arguments \
             '(- * :)--help[Show usage information]' \
             "(--help)-c[Use <category>-requirements.in]:Category:($catgs)" \
             '(--help)-h[Include hashes in compiled requirements.txt]' \
-            "(--help -c -h)1:Package Spec:($pkgs)" \
+            "(--help -c -h)1:Package Spec:_zpy_pypi_pkg --or-local" \
             '(--help -c -h)*:Package Spec:->pkgspecs'
         if [[ $state == pkgspecs ]]; then
             _arguments \
-                "*:Package Spec:($pkgs)" \
+                '*:Package Spec:_zpy_pypi_pkg --or-local' \
                 '(*)--[pip-compile Arguments]:pip-compile Argument: '
         fi
     }
@@ -1625,18 +1629,13 @@ for _zpyfn in pipac pipacs; do
 done
 
 for _zpyfn in pipcheckold pipup; do
+    # TODO: Project completions are too lenient
     _${_zpyfn} () {
         _zpy_helpmsg ${0[2,-1]}
-        local context state state_descr line opt_args
         _arguments \
             '(* -)--help[Show usage information]' \
             '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
-            '(--help)*: :->projects'
-        if [[ $state == projects ]]; then
-            local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
-            _arguments \
-                "(--help)*:Project:_path_files -F blacklist -/ -g '${ZPY_VENVS_WORLD}/*/project(@N-/:P)'"
-        fi
+            '(--help)*: :_zpy_projects'
     }
     compdef _${_zpyfn} ${_zpyfn} 2>/dev/null
 done
@@ -1674,13 +1673,19 @@ done
 
 _pipi () {
     _zpy_helpmsg ${0[2,-1]}
-    local reply
-    .zpy_pypi_pkgs
-    local pkgs=($reply)
+    local context state state_descr line opt_args
     _arguments \
         '(- *)--help[Show usage information]' \
         "(--help)--no-upgrade[Don't upgrade already-installed packages]" \
-        "(-)*:Package Spec:($pkgs)"
+        "(-)*:::Option or Package Spec:->opt_or_pkgspec"
+    if [[ $state == opt_or_pkgspec ]]; then
+        words=(pip install $words)
+        (( CURRENT+=2 ))
+        _normal
+        _zpy_pypi_pkg --or-local
+        # TODO: Still quite sloppy... though so is upstream pip completion
+        # TODO: Consider filtering out some pip completions
+    fi
 }
 compdef _pipi pipi 2>/dev/null
 
@@ -1716,15 +1721,9 @@ done
 
 _reqshow () {
     _zpy_helpmsg ${0[2,-1]}
-    local context state state_descr line opt_args
     _arguments \
         '(*)--help[Show usage information]' \
-        '(--help)*: :->folders'
-    if [[ $state == folders ]]; then
-        local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
-        _arguments \
-            '(--help)*:Project:_path_files -F blacklist -/'
-    fi
+        '(--help)*: :_zpy_projects'
 }
 compdef _reqshow reqshow 2>/dev/null
 
@@ -1746,18 +1745,20 @@ _venvs_path () {
     _arguments \
         '(- :)--help[Show usage information]' \
         '(--help 1)-i[Interactively choose a project]' \
-        '(-)1::Project:_path_files -/'
+        '(-)1::Project:_zpy_projects'
+        # '(-)1::Project:_path_files -/'
 }
 compdef _venvs_path venvs_path 2>/dev/null
 
 _vlauncher () {
+    # TODO: Project completions are too lenient (again?)!
     _zpy_helpmsg ${0[2,-1]}
     local context state state_descr line opt_args
     _arguments \
         '(- * :)--help[Show usage information]' \
         '(--help)--link-only[Only create a symlink to <venv>/bin/<cmd>]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
-        "(-)1:Project:_path_files -/ -g '${ZPY_VENVS_WORLD}/*/project(@N-/:P)'" \
+        "(-)1:Project:_zpy_projects" \
         '(-)2: :->cmd' \
         '(-)3:Destination:_path_files -/'
     if [[ $state == cmd ]]; then
@@ -1789,7 +1790,15 @@ _vpyshebang () {
 }
 compdef _vpyshebang vpyshebang 2>/dev/null
 
+_zpy_projects () {
+    local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
+    # TODO: can I get properly styled "Project" header?
+    _tags globbed-files
+    _files -x 'Project:' -F blacklist -/ -g '${ZPY_VENVS_WORLD}/*/project(@N-/:P)'
+}
+
 _vrun () {
+    # TODO: Project completions are too lenient (again?)!
     _zpy_helpmsg ${0[2,-1]}
     local context state state_descr line opt_args
     integer NORMARG
@@ -1798,7 +1807,7 @@ _vrun () {
         '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
         '(--help)--cd[Run the command from within the project folder]' \
         "(--help)--activate[Activate the venv (usually unnecessary for venv-installed scripts, and slower)]" \
-        "(-)1:Project:_path_files -/ -g '${ZPY_VENVS_WORLD}/*/project(@N-/:P)'" \
+        '(-)1:Project:_zpy_projects' \
         '(-)*::: :->cmd'
     local vname=venv
     if (( words[(i)--py] < NORMARG )); then
@@ -1827,6 +1836,8 @@ _vrun () {
 
             # Currently settling for this:
             _path_files -g "${venv}/bin/*(Nx:t)"
+            # Can I refactor to call _arguments once and still cover this?
+            # Can I / should I use a dummy _arguments call to capture the style args, then pass them manually?
         fi
         _normal -P
     fi
@@ -1868,14 +1879,11 @@ _pipz () {
         _zpy_helpmsg "$0[2,-1] $line[1]"
         case $line[1] in
         install)
-            local reply
-           .zpy_pypi_pkgs
-            local pkgs=($reply)
             _arguments \
                 '(* -)--help[Show usage information]' \
                 '(--help)--cmd[Specify commands to add to your path, rather than interactively choosing]:Command (comma-separated): ' \
                 '(--help)--activate[Ensure command launchers explicitly activate the venv (usually unnecessary)]' \
-                "(-)*:Package Spec:($pkgs)"
+                '(-)*:Package Spec:_zpy_pypi_pkg --or-local'
         ;;
         reinstall)
             local blacklist=(${(Q)words[2,-1]})
@@ -1896,15 +1904,12 @@ _pipz () {
                 "(-)*:Installed Package Name:($pkgs)"
         ;;
         inject)
-            local reply
-            .zpy_pypi_pkgs
-            local pkgs=($reply)
             _arguments \
                 '(* - :)--help[Show usage information]' \
                 '(--help)--cmd[Specify commands to add to your path, rather than interactively choosing]:Command (comma-separated): ' \
                 '(--help)--activate[Ensure command launchers explicitly activate the venv (usually unnecessary)]' \
                 "(-)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
-                "(-)*:Extra Package Spec:($pkgs)"
+                '(-)*:Extra Package Spec:_zpy_pypi_pkg --or-local'
         ;;
         uninstall)
             local blacklist=(${(Q)words[2,-1]})
@@ -1939,12 +1944,9 @@ _pipz () {
                 pkgname=$REPLY
             fi
             pkgcmd=$line[3]
-            local reply
-            .zpy_pypi_pkgs
-            local pkgs=($reply)
             _arguments \
                 '(* :)--help[Show usage information]' \
-                "(--help)1:Package Spec:($pkgs)" \
+                '(--help)1:Package Spec:_zpy_pypi_pkg --or-local' \
                 "(--help)2:Command:($pkgname)" \
                 '(--help)*:::Command Argument:->cmdarg'
             if [[ $state == cmdarg ]]; then
