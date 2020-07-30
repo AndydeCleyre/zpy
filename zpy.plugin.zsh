@@ -314,7 +314,7 @@ pips () {  # [<reqs-txt>...]
 
 # Compile requirements.txt files from all found or specified requirements.in files (compile).
 # Use -h to include hashes, -u dep1,dep2... to upgrade specific dependencies, and -U to upgrade all.
-pipc () {  # [-h] [-U|-u <pkgspec>,...] [<reqs-in>...] [-- <pip-compile-arg>...]
+pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compile-arg>...]
     emulate -L zsh
     # TODO: follow pip-tools progress: #1047 #908 #891
     if [[ $1 == --help ]]; then zpy $0; return; fi
@@ -1124,7 +1124,7 @@ sublp () {  # [<subl-arg>...]
 
 .zpy_pipzchoosepkg () {  # [--header <header>] [--multi] <projects_home>  ## <header> default: 'Packages:'
     emulate -L zsh
-    # TODO: fzf OR skim OR fzy
+    # TODO: fzf OR skim OR fzy OR peco
     local fzf_args=(--reverse -0) fzf_header='Packages:' fzf_prompt='Which package? ' multi
     while [[ $1 == --header || $1 == --multi ]]; do
         if [[ $1 == --header ]]; then fzf_header=$2; shift 2; fi
@@ -1495,6 +1495,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         return 1
     ;;
     esac
+    # TODO: split subcommands out to 'private' functions. don't forget to update 'zpy "$0 $1"', etc.
 }
 
 # Make a standalone script for any zpy function.
