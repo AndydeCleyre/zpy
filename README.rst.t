@@ -55,7 +55,7 @@ __ https://github.com/AndydeCleyre/zpy/issues
 Preview
 -------
 
-Try it in isolation with docker or podman if you like:
+Try it in isolation with docker or podman if you like, with one of these commands:
 
 .. code:: console
 
