@@ -18,6 +18,9 @@ case $distro in
     ;;
 esac
 tag=${2:-$tag_default}
+if [ $tag = --local ]; then
+    tag=$tag_default
+fi
 
 ctnr=termtosvg-zpy-$distro
 img=quay.io/andykluger/$ctnr
@@ -30,8 +33,12 @@ alias ctnr_urun="buildah run --user $user $ctnr"
 
 buildah rm $ctnr 2>/dev/null || true
 if ! buildah from -q --name $ctnr quay.io/andykluger/zpy-$distro:$tag; then
-	"${gitroot}/mk/ctnr/zpy.sh" --local $distro
-	buildah from -q --name $ctnr quay.io/andykluger/zpy-$distro:$tag
+    if [ $tag = $tag_default ]; then
+        "${gitroot}/mk/ctnr/zpy.sh" --local $distro
+    else
+        "${gitroot}/mk/ctnr/zpy.sh" $tag $distro
+    fi
+    buildah from -q --name $ctnr quay.io/andykluger/zpy-$distro:$tag
 fi
 
 if [ $distro = alpine ]; then
@@ -40,9 +47,16 @@ if [ $distro = alpine ]; then
 fi
 ctnr_urun sed -Ei '/^(print|zpy) /d' /home/$user/.zshrc
 ctnr_urun zsh -ic 'pipz install termtosvg; .zpy_pypi_pkgs'
-ctnr_urun rm -f /home/$user/.zhistory
+ctnr_urun sh -c 'printf "%s\n" \
+    "#!/bin/zsh" \
+    "print You can override the recording width and height by setting variables width and height" \
+    "read -q \"?Hit Enter to begin recording . . .\"" \
+    "/home/dev/.local/bin/termtosvg demo.svg -t window_frame -g \${width:-112}x\${height:-15} -M 1500 -c \"zsh -i\"" \
+> /home/dev/.local/bin/start.zsh'
+ctnr_urun chmod +x /home/$user/.local/bin/start.zsh
 
+ctnr_urun rm -f /home/$user/.zhistory
 buildah config \
-    --cmd 'zsh -fc "read -q \"?Hit Enter to begin recording . . .\";/home/dev/.local/bin/termtosvg demo.svg -t window_frame -g 112x15 -M 1500 -c \"zsh -i\""' \
+    --cmd '/home/dev/.local/bin/start.zsh' \
     $ctnr
 buildah commit --quiet --rm $ctnr $img
