@@ -1,6 +1,5 @@
 version: 2
-formats:
-  - epub
+formats: all
 python:
   install:
     - requirements: doc/doc-requirements.txt

@@ -1,5 +1,5 @@
 project = 'zpy'
 author = 'Andy Kluger'
-release = '0.0.3'
-pygments_style = 'rrt'
+release = '0.0.4'
+pygments_style = 'native'
 html_theme = 'groundwork'
