@@ -60,11 +60,9 @@ Try it in isolation with docker or podman if you like, with one of these command
 .. code:: console
 
   $ docker run --net=host -it --rm quay.io/andykluger/zpy-alpine:master
-  $ docker run --net=host -it --rm quay.io/andykluger/zpy-fedora:master
-  $ docker run --net=host -it --rm quay.io/andykluger/zpy-ubuntu:master
   $ podman run -it --rm quay.io/andykluger/zpy-alpine:master
-  $ podman run -it --rm quay.io/andykluger/zpy-fedora:master
-  $ podman run -it --rm quay.io/andykluger/zpy-ubuntu:master
+
+Replace "alpine" with "ubuntu" or "fedora" if you prefer.
 
 .. image:: https://gist.githubusercontent.com/AndydeCleyre/4d634829092ca6c1280eaa19914995a3/raw/18629622adc28e563183276c975459f2021c553d/demo.svg?sanitize=true
 
@@ -329,32 +327,32 @@ The big ones:
 The ones you already have anyway, probably:
 
 diff
-  either diffutils_, busybox_, BSD, or macOS
+  provided by diffutils_, busybox_, BSD, or macOS
 du
-  either coreutils_, busybox_, toybox_, BSD, or macOS
+  provided by coreutils_, busybox_, toybox_, BSD, or macOS
 md5sum *or* md5
-  either coreutils_, busybox_, toybox_, BSD, or macOS
+  provided by coreutils_, busybox_, toybox_, BSD, or macOS
 mktemp
-  either coreutils_, busybox_, toybox_, BSD, or macOS
+  provided by coreutils_, busybox_, toybox_, BSD, or macOS
 nproc *or* sysctl
-  either coreutils_, busybox_, toybox_, BSD, or macOS
+  provided by coreutils_, busybox_, toybox_, BSD, or macOS
 wget *or* curl
-  either wget_, curl_, busybox_, or macOS
+  provided by wget_, curl_, busybox_, or macOS
 a pcre tool
-  either pcregrep/pcre-tools, pcre2grep/pcre2-tools, ripgrep_, or zsh with pcre enabled
+  provided by pcregrep/pcre-tools, pcre2grep/pcre2-tools, ripgrep_, or zsh with pcre enabled
 
 The very optional ones:
 
 highlight_ *or* bat_
-  pretty syntax highlighting
+  for pretty syntax highlighting
 delta_ *or* diff-so-fancy_ *or* diff-highlight (from git + perl)
-  more pretty syntax highlighting
+  for more pretty syntax highlighting
 jq_ *or* jello_
-  theoretically more reliable parsing
+  for theoretically more reliable parsing
 python2 *and* virtualenv_
-  python2 support
+  for python2 support
 git
-  easy zpy installation
+  for easy installation of zpy itself
 
 Dependency Installation
 ```````````````````````
@@ -392,7 +390,7 @@ MacOS
 
 .. code:: console
 
-  brew install fzf git highlight pcre2 python zsh
+  $ brew install fzf git highlight pcre2 python zsh
 
 OpenSUSE
 ~~~~~~~~
