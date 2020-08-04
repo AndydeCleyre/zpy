@@ -3,7 +3,6 @@ babel==2.8.0              # via sphinx
 certifi==2020.6.20        # via requests
 chardet==3.0.4            # via requests
 docutils==0.16            # via sphinx
-groundwork-sphinx-theme==1.1.1  # via -r doc-requirements.in
 idna==2.10                # via requests
 imagesize==1.2.0          # via sphinx
 jinja2==2.11.2            # via sphinx
@@ -16,7 +15,8 @@ pytz==2020.1              # via babel
 requests==2.24.0          # via sphinx
 six==1.15.0               # via packaging
 snowballstemmer==2.0.0    # via sphinx
-sphinx==3.1.2             # via -r doc-requirements.in, groundwork-sphinx-theme
+sphinx-bootstrap-theme==0.7.1  # via -r doc-requirements.in
+sphinx==3.1.2             # via -r doc-requirements.in
 sphinxcontrib-applehelp==1.0.2  # via sphinx
 sphinxcontrib-devhelp==1.0.2  # via sphinx
 sphinxcontrib-htmlhelp==1.0.3  # via sphinx
