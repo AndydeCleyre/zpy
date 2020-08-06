@@ -1,0 +1,3 @@
+pyratemp                 # mk/doc/{readme,sphinx}.sh
+sphinx                   # mk/doc/sphinx.sh
+sphinx_bootstrap_theme   # mk/doc/sphinx.sh
