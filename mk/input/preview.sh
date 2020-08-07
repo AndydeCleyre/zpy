@@ -3,9 +3,9 @@ gitroot="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 . "${gitroot}/mk/input/common.sh"
 
 printf '%s\n' \
-    "Recommended record command: width=89 ./mk/svg/demo.sh" \
-    "Beginning demo input for preview in 10 seconds." \
-    "Focus the recording terminal, or abort now with ctrl-C"
+  "Recommended record command: width=89 ./mk/svg/demo.sh" \
+  "Beginning demo input for preview in 10 seconds." \
+  "Focus the recording terminal, or abort now with ctrl-C"
 sleep 10
 
 enter
