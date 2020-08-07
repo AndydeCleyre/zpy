@@ -1,0 +1,4 @@
+docutils==0.16            # via -r requirements.in
+jinja2==2.11.2            # via -r requirements.in
+markupsafe==1.1.1         # via jinja2
+pygments==2.6.1           # via -r requirements.in
