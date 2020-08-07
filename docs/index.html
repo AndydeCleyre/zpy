@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>zpy: Zsh helpers for Python venvs, with pip-tools | zpy Zsh helpers for Python venvs, with pip-tools</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="favicon-32x32.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/andydecleyre/zpy">zpy</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Zsh helpers for Python venvs, with pip-tools</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-12 m-col-m-none">
+            <li><a href="https://zpy.rtfd.io">Light</a></li>
+            <li><a href="https://github.com/andydecleyre/zpy">Source</a></li>
+            <li><a href="https://github.com/andydecleyre/zpy/issues">Issues</a></li>
+            <li><a href="https://github.com/jazzband/pip-tools">pip-tools</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          zpy: Zsh helpers for Python venvs, with pip-tools
+        </h1>
+<p><a href="https://github.com/andydecleyre/zpy"><img alt="GitHub file size in bytes" src="https://img.shields.io/github/size/andydecleyre/zpy/zpy.plugin.zsh?logo=github&amp;label=Code&amp;color=blueviolet" /></a> <a href="https://zpy.readthedocs.io/en/latest/"><img alt="Documentation Status" src="https://readthedocs.org/projects/zpy/badge/" /></a> <a href="https://quay.io/repository/andykluger/zpy-alpine"><img alt="Demo container - Alpine Linux" src="https://img.shields.io/badge/Container-Quay.io-green?logo=alpine-linux" /></a> <a href="https://quay.io/repository/andykluger/zpy-fedora"><img alt="Demo container - Fedora" src="https://img.shields.io/badge/Container-Quay.io-green?logo=fedora" /></a> <a href="https://quay.io/repository/andykluger/zpy-ubuntu"><img alt="Demo container - Ubuntu" src="https://img.shields.io/badge/Container-Quay.io-green?logo=ubuntu" /></a> <a href="https://andydecleyre.semaphoreci.com/projects/zpy"><img alt="Demo container - Semaphore CI" src="https://andydecleyre.semaphoreci.com/badges/zpy/branches/develop.svg" /></a> <a href="https://t.me/andykluger"><img alt="Contact developer on Telegram" src="https://img.shields.io/badge/Contact-Telegram-blue?logo=telegram" /></a></p>
+<p>In a hurry? Jump to <a href="#installation">Installation</a>.</p>
+<p>Here are Zsh convenience functions to manage Python venvs and packages,
+using (the excellent) <a href="https://github.com/jazzband/pip-tools">pip-tools</a>. At least a few are very handy.
+None of them should get in your way.</p>
+<p>They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.</p>
+<img alt="Animated demo of zpy functions: envin, pipac, pips" src="https://gist.githubusercontent.com/AndydeCleyre/530538f4afde15278cad3411f3d14e24/raw/17aaeb90ef29817c73d5abec81f5b39caef01d7d/demo.svg?sanitize=true" />
+<aside class="contents" id="contents">
+<h3>Contents</h3>
+<ul>
+<li><a href="#guiding-ideas" id="id10">Guiding Ideas</a></li>
+<li><a href="#preview" id="id11">Preview</a></li>
+<li><a href="#wording" id="id12">Wording</a></li>
+<li><a href="#basic-operations" id="id13">Basic Operations</a></li>
+<li><a href="#bonus-operations" id="id14">Bonus Operations</a></li>
+<li><a href="#functions-aliases" id="id15">Functions &amp; Aliases</a></li>
+<li><a href="#installation" id="id16">Installation</a></li>
+<li><a href="#dependencies" id="id17">Dependencies</a></li>
+<li><a href="#extra-scripts" id="id18">Extra Scripts</a></li>
+<li><a href="#environment-variables" id="id19">Environment Variables</a></li>
+</ul>
+</aside>
+<section id="guiding-ideas">
+<h2><a href="#id10">Guiding Ideas</a></h2>
+<ul>
+<li>You should not have to manually specify the dependencies anywhere other than
+<code>*requirements.in</code> files</li>
+<li>Folks who want to use your code shouldn't have to install any new-fangled
+less-standard tools (pipenv, poetry, pip-tools, zpy, etc.);
+<code>pip install -r *requirements.txt</code> ought to be sufficient</li>
+<li>It's nice to keep the venv folder <em>outside</em> of the project itself</li>
+<li>Tab completion is wonderful</li>
+<li>These functions <strong>don't</strong>:<ul>
+<li>need to be used exclusively</li>
+<li>need to be used by everyone on the same project</li>
+<li>do what <a href="https://github.com/pyenv/pyenv">pyenv</a>/<a href="https://asdf-vm.com">asdf-vm</a> or <a href="https://flit.readthedocs.io/en/latest/">flit</a> do best (but do work with them if you choose)</li>
+<li><em>conflict</em> with anything else your team cares to do with your code;
+If they can be a friendlier neighbor to your workflows, file an <a href="https://github.com/AndydeCleyre/zpy/issues">issue</a></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="preview">
+<h2><a href="#id11">Preview</a></h2>
+<p>Try it in isolation with docker or podman if you like, with one of these commands:</p>
+<pre class="code console"><span class="gp">$</span> docker run --net<span class="o">=</span>host -it --rm quay.io/andykluger/zpy-alpine:master
+<span class="gp">$</span> podman run -it --rm quay.io/andykluger/zpy-alpine:master</pre>
+<p>Replace &quot;alpine&quot; with &quot;ubuntu&quot; or &quot;fedora&quot; if you prefer.</p>
+<img alt="Animated demo of pipz" src="https://gist.githubusercontent.com/AndydeCleyre/4d634829092ca6c1280eaa19914995a3/raw/18629622adc28e563183276c975459f2021c553d/demo.svg?sanitize=true" />
+<p>Run <code>zpy</code> to see a full reference of <a href="#functions-aliases">Functions &amp; Aliases</a>.</p>
+</section>
+<section id="wording">
+<h2><a href="#id12">Wording</a></h2>
+<p>There are just a handful of things you probably wish to do to your dependency
+specifications and virtual environments, and it may be helpful to enumerate them before
+introducing the included helper functions.</p>
+<section id="dependency-specification-actions">
+<h3>Dependency Specification Actions</h3>
+<dl>
+<dt>add (<code>pipa</code>)</dt>
+<dd>add a package to your list of loosely-versioned requirements (<em>reqs-in</em>)</dd>
+<dt>compile (<code>pipc</code>)</dt>
+<dd>(re)generate a lockfile of strictly-versioned requirements (<em>reqs-txt</em>)</dd>
+</dl>
+<p>This project expects <em>reqs-in</em>s to be named as <code>*requirements.in</code> and
+<em>reqs-txt</em>s <code>*requirements.txt</code>, but it's not necessary.</p>
+</section>
+<section id="virtual-environment-actions">
+<h3>Virtual Environment Actions</h3>
+<dl>
+<dt>create + activate (<code>envin</code>, <code>activate</code>/<code>a8</code>)</dt>
+<dd>i.e. <code>python -m venv &lt;path/to/venv&gt;; . &lt;path/to/venv&gt;/bin/activate</code></dd>
+<dt>deactivate (<code>envout</code>/<code>deactivate</code>/<code>da8</code>)</dt>
+<dd>i.e. <code>deactivate</code></dd>
+<dt>sync (<code>pips</code>)</dt>
+<dd>install and uninstall packages to exactly match your specifications in one or more <em>reqs-txt</em> files</dd>
+</dl>
+</section>
+</section>
+<section id="basic-operations">
+<h2><a href="#id13">Basic Operations</a></h2>
+<dl>
+<dt><code>envin [&lt;reqs-txt&gt;...]</code></dt>
+<dd><ul>
+<li><em>create</em> a new venv for the current <em>project</em> (folder), if it doesn't already exist</li>
+<li><em>activate</em> the venv</li>
+<li>ensure pip-tools is installed in the venv</li>
+<li><em>sync</em> venv's installed packages to exactly match those specified in all
+<em>reqs-txt</em>s in the folder</li>
+</ul>
+<p>You may also pass as many specific <em>reqs-txt</em>s as you want to <code>envin</code>,
+in which case it will ensure your environment matches those and only those.</p>
+</dd>
+<dt><code>activate [-i|&lt;proj-dir&gt;]</code></dt>
+<dd><p>If you know your venv is already in a good state, and just want to activate it
+without all that installing and uninstalling, you can save a second by running
+<code>activate</code> (or alias <code>a8</code>) instead of <code>envin</code>.</p>
+<p>If the venv doesn't already exist, this will fall back to <code>envin</code>-like behavior
+(<em>create</em>, <em>activate</em>, <em>sync</em>).</p>
+<p>You may pass a <em>project</em> to <code>activate</code>, in order to activate a specific venv
+regardless of your current folder.</p>
+<p>Pass <code>-i</code> to interactively select an existing <em>project</em>.</p>
+</dd>
+<dt><code>envout</code> and <code>da8</code></dt>
+<dd>two totally unnecessary aliases for <code>deactivate</code></dd>
+</dl>
+<section id="add-compile-sync">
+<h3>Add, Compile, Sync</h3>
+<dl>
+<dt><code>pipa [-c &lt;category&gt;] &lt;pkgspec&gt;...</code></dt>
+<dd><p>append one or more new <code>requirements.txt</code>-<a href="https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format">syntax</a> lines to <code>requirements.in</code>,
+or <code>&lt;category&gt;-requirements.in</code></p>
+<p>You can also add special <a href="https://github.com/jazzband/pip-tools#workflow-for-layered-requirements">constraints</a> for layered requirements workflows, or add
+&quot;include&quot; lines like <code>-r prod-requirements.in</code>.</p>
+</dd>
+</dl>
+<dl>
+<dt><code>pipc [-h] [-U|-u &lt;pkgspec&gt;[,&lt;pkgspec&gt;...]] [&lt;reqs-in&gt;...]</code></dt>
+<dd><p>generate version-locked <em>reqs-txt</em>s including all dependencies from the
+information in each found <em>reqs-in</em> in the current folder</p>
+<p>You may also pass one or more specific <em>reqs-in</em>s instead.</p>
+<p>Use <code>-h</code> to include hashes in the output.</p>
+<p>You can ensure specific dependencies are upgraded as far as possible
+while matching the specifications in the <em>reqs-in</em>s by passing them,
+comma-separated, with <code>-u</code>.</p>
+<p>You can do the same for <strong>all</strong> dependencies with <code>-U</code>.</p>
+</dd>
+<dt><code>pips [&lt;reqs-txt&gt;...]</code></dt>
+<dd><p><em>sync</em> your environment to match your <em>reqs-txt</em>s, installing and
+uninstalling packages as necessary</p>
+<p>You may also pass specific <em>reqs-txt</em>s as arguments to match only those.</p>
+</dd>
+</dl>
+<p>Often, you'll want to do a few of these things in sequence. You can do so with
+<code>pipac</code> (<em>add</em>, <em>compile</em>), <code>pipacs</code> (<em>add</em>, <em>compile</em>, <em>sync</em>), and <code>pipcs</code>
+(<em>compile</em>, <em>sync</em>).</p>
+<p>Tab completion aims to be thorough.</p>
+<p>For a full list of functions and their descriptions and arguments, see
+<a href="#functions-aliases">Functions &amp; Aliases</a>.</p>
+</section>
+</section>
+<section id="bonus-operations">
+<h2><a href="#id14">Bonus Operations</a></h2>
+<p>Welcome to the bonus round!</p>
+<dl>
+<dt><code>pypc</code></dt>
+<dd>automatically update your <a href="https://flit.readthedocs.io/en/latest/">flit</a>-generated <code>pyproject.toml</code>'s categorized
+dependencies from the information in your <em>reqs-in</em>s</dd>
+</dl>
+<dl>
+<dt><code>vpy &lt;script.py&gt;</code></dt>
+<dd>launch a Python script using <code>python</code> from its project's venv, from outside the venv</dd>
+<dt><code>vpyshebang &lt;script.py&gt;</code></dt>
+<dd>alter a Python script so that it's always launched using <code>python</code> from its project's
+venv, from outside the venv</dd>
+<dt><code>vrun &lt;/path/to/project&gt; &lt;cmd&gt;</code></dt>
+<dd>run command in a subshell with <code>&lt;venv&gt;/bin</code> for the given project folder prepended
+to the PATH, from outside the venv</dd>
+<dt><code>pipz</code></dt>
+<dd>install and manage isolated apps (pipx clone)</dd>
+</dl>
+<p>But wait, there's more! Find it all at <a href="#functions-aliases">Functions &amp; Aliases</a>.</p>
+</section>
+<section id="functions-aliases">
+<h2><a href="#id15">Functions &amp; Aliases</a></h2>
+<pre class="code bash"><span class="c1"># Print description and arguments for all or specified functions.
+</span>zpy <span class="o">[</span>&lt;zpy-function&gt;...<span class="o">]</span>
+
+<span class="c1"># Get path of folder containing all venvs for the current folder or specified proj-dir.
+# Pass -i to interactively choose the project.
+</span>venvs_path <span class="o">[</span>-i<span class="p">|</span>&lt;proj-dir&gt;<span class="o">]</span>
+
+<span class="c1"># Install and upgrade packages.
+</span>pipi <span class="o">[</span>--no-upgrade<span class="o">]</span> <span class="o">[</span>&lt;pip install arg&gt;...<span class="o">]</span> &lt;pkgspec&gt;...
+
+<span class="c1"># Install packages according to all found or specified requirements.txt files (sync).
+</span>pips <span class="o">[</span>&lt;reqs-txt&gt;...<span class="o">]</span>
+
+<span class="c1"># Compile requirements.txt files from all found or specified requirements.in files (compile).
+# Use -h to include hashes, -u dep1,dep2... to upgrade specific dependencies, and -U to upgrade all.
+</span>pipc <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>-U<span class="p">|</span>-u &lt;pkgspec&gt;<span class="o">[</span>,&lt;pkgspec&gt;...<span class="o">]]</span> <span class="o">[</span>&lt;reqs-in&gt;...<span class="o">]</span> <span class="o">[</span>-- &lt;pip-compile-arg&gt;...<span class="o">]</span>
+
+<span class="c1"># Compile, then sync.
+# Use -h to include hashes, -u dep1,dep2... to upgrade specific dependencies, and -U to upgrade all.
+</span>pipcs <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>-U<span class="p">|</span>-u &lt;pkgspec&gt;,...<span class="o">]</span> <span class="o">[</span>&lt;reqs-in&gt;...<span class="o">]</span> <span class="o">[</span>-- &lt;pip-compile-arg&gt;...<span class="o">]</span>
+
+<span class="c1"># Add loose requirements to [&lt;category&gt;-]requirements.in (add).
+</span>pipa <span class="o">[</span>-c &lt;category&gt;<span class="o">]</span> &lt;pkgspec&gt;...
+
+<span class="c1"># Add to requirements.in, then compile it to requirements.txt (add, compile).
+# Use -c to affect categorized requirements, and -h to include hashes.
+</span>pipac <span class="o">[</span>-c &lt;category&gt;<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span> &lt;pkgspec&gt;... <span class="o">[</span>-- &lt;pip-compile-arg&gt;...<span class="o">]</span>
+
+<span class="c1"># Add to requirements.in, compile it to requirements.txt, then sync to that (add, compile, sync).
+# Use -c to affect categorized requirements, and -h to include hashes.
+</span>pipacs <span class="o">[</span>-c &lt;category&gt;<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span> &lt;pkgspec&gt;... <span class="o">[</span>-- &lt;pip-compile-arg&gt;...<span class="o">]</span>
+
+<span class="c1"># View contents of all *requirements*.{in,txt} files in the current or specified folders.
+</span>reqshow <span class="o">[</span>&lt;folder&gt;...<span class="o">]</span>
+
+<span class="c1"># Activate the venv (creating if needed) for the current folder, and sync its
+# installed package set according to all found or specified requirements.txt files.
+# In other words: [create, ]activate, sync.
+# The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
+# Pass --py to use another interpreter and named venv.
+</span>envin <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> <span class="o">[</span>&lt;reqs-txt&gt;...<span class="o">]</span>
+
+<span class="c1"># Activate the venv for the current folder or specified project, if it exists.
+# Otherwise create, activate, sync.
+# Pass -i to interactively choose the project.
+# Pass --py to use another interpreter and named venv.
+</span>activate <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> <span class="o">[</span>-i<span class="p">|</span>&lt;proj-dir&gt;<span class="o">]</span>
+
+<span class="c1"># Alias for 'activate'.
+</span>a8 <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> <span class="o">[</span>-i<span class="p">|</span>&lt;proj-dir&gt;<span class="o">]</span>
+
+<span class="c1"># Alias for 'deactivate'.
+</span>envout
+
+<span class="c1"># Another alias for 'deactivate'.
+</span>da8
+
+<span class="c1"># Display path of project for the activated venv.
+</span>whichpyproj
+
+<span class="c1"># Prepend each script with a shebang for its folder's associated venv interpreter.
+# If 'vpy' exists in the PATH, '#!/path/to/vpy' will be used instead.
+# Also ensure the script is executable.
+# --py may be used, same as for envin.
+</span>vpyshebang <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> &lt;script&gt;...
+
+<span class="c1"># Run command in a subshell with &lt;venv&gt;/bin for the given project folder prepended to the PATH.
+# Use --cd to run the command from within the project folder.
+# --py may be used, same as for envin.
+# With --activate, activate the venv (usually unnecessary, and slower).
+</span>vrun <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> <span class="o">[</span>--cd<span class="o">]</span> <span class="o">[</span>--activate<span class="o">]</span> &lt;proj-dir&gt; &lt;cmd&gt; <span class="o">[</span>&lt;cmd-arg&gt;...<span class="o">]</span>
+
+<span class="c1"># Run script with the python from its folder's venv.
+# --py may be used, same as for envin.
+</span>vpy <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> <span class="o">[</span>--activate<span class="o">]</span> &lt;script&gt; <span class="o">[</span>&lt;script-arg&gt;...<span class="o">]</span>
+
+<span class="c1"># Make a launcher script for a command run in a given project's activated venv.
+# With --link-only, only create a symlink to &lt;venv&gt;/bin/&lt;cmd&gt;,
+# which should already have the venv's python in its shebang line.
+</span>vlauncher <span class="o">[</span>--link-only<span class="o">]</span> <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> &lt;proj-dir&gt; &lt;cmd&gt; &lt;launcher-dest&gt;
+
+<span class="c1"># Delete venvs for project folders which no longer exist.
+</span>prunevenvs <span class="o">[</span>-y<span class="o">]</span>
+
+<span class="c1"># 'pip list -o' for all or specified projects.
+</span>pipcheckold <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> <span class="o">[</span>&lt;proj-dir&gt;...<span class="o">]</span>
+
+<span class="c1"># 'pipcs -U' (upgrade-compile, sync) for all or specified projects.
+</span>pipup <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> <span class="o">[</span>&lt;proj-dir&gt;...<span class="o">]</span>
+
+<span class="c1"># Inject loose requirements.in dependencies into a flit-flavored pyproject.toml.
+# Run either from the folder housing pyproject.toml, or one below.
+# To categorize, name files &lt;category&gt;-requirements.in.
+</span>pypc
+
+<span class="c1"># Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
+</span>vpysublp
+
+<span class="c1"># Launch a new or existing Sublime Text project, setting venv interpreter.
+</span>sublp <span class="o">[</span>&lt;subl-arg&gt;...<span class="o">]</span>
+
+<span class="c1"># Package manager for venv-isolated scripts (pipx clone; py3 only).
+</span>pipz <span class="o">[</span>install<span class="p">|</span>uninstall<span class="p">|</span>upgrade<span class="p">|</span>list<span class="p">|</span>inject<span class="p">|</span>reinstall<span class="p">|</span>cd<span class="p">|</span>runpip<span class="p">|</span>runpkg<span class="o">]</span> <span class="o">[</span>&lt;subcmd-arg&gt;...<span class="o">]</span></pre>
+</section>
+<section id="installation">
+<h2><a href="#id16">Installation</a></h2>
+<p>Aside from the <a href="#dependencies">Dependencies</a>, <code>zpy</code> is a single file to be sourced in your <code>.zshrc</code>, and
+can be sourced manually or with the help of a Zsh configuration framework or plugin manager.</p>
+<p>If you're new to Zsh and want to try a framework, I recommend <a href="https://github.com/zimfw/zimfw">Zim</a>.</p>
+<section id="manual">
+<h3>Manual</h3>
+<pre class="code console"><span class="gp">$</span> <span class="nb">cd</span> /wherever/you/want/to/keep/zpy
+<span class="gp">$</span> git clone https://github.com/andydecleyre/zpy
+<span class="gp">$</span> print <span class="s2">&quot;. </span><span class="nv">$PWD</span><span class="s2">/zpy/zpy.plugin.zsh&quot;</span> &gt;&gt; ~/.zshrc</pre>
+<p>If you want completions, make sure to load <code>compinit</code> earlier in <code>~/.zshrc</code>:</p>
+<pre class="code bash">autoload -Uz compinit
+compinit</pre>
+<p>If you're using a Zsh framework, that's probably done for you already.</p>
+</section>
+<section id="oh-my-zsh">
+<h3>Oh My Zsh</h3>
+<pre class="code console"><span class="gp">$</span> git clone https://github.com/andydecleyre/zpy <span class="nv">$ZSH_CUSTOM</span>/plugins/zpy</pre>
+<p>Then add <code>zpy</code> to your <code>plugins</code> array in <code>~/.zshrc</code>.</p>
+</section>
+<section id="prezto">
+<h3>Prezto</h3>
+<pre class="code console"><span class="gp">$</span> git clone https://github.com/andydecleyre/zpy <span class="nv">$ZPREZTODIR</span>/modules/zpy</pre>
+<p>Then add <code>zpy</code> to your pmodule list in <code>~/.zpreztorc</code>.</p>
+</section>
+<section id="zim">
+<h3>Zim</h3>
+<pre class="code console"><span class="gp">$</span> print zmodule andydecleyre/zpy &gt;&gt; ~/.zimrc
+<span class="gp">$</span> zimfw install</pre>
+</section>
+<section id="antibody">
+<h3>Antibody</h3>
+<pre class="code console"><span class="gp">$</span> print antibody bundle andydecleyre/zpy &gt;&gt; ~/.zshrc</pre>
+</section>
+<section id="zinit">
+<h3>Zinit</h3>
+<pre class="code console"><span class="gp">$</span> print zinit light andydecleyre/zpy &gt;&gt; ~/.zshrc</pre>
+</section>
+<section id="antigen">
+<h3>Antigen</h3>
+<p>Put <code>antigen bundle andydecleyre/zpy</code> in your <code>~/.zshrc</code>, before <code>antigen apply</code>.</p>
+</section>
+<section id="zgen">
+<h3>zgen</h3>
+<p>Put <code>zgen load andydecleyre/zpy</code> in the plugin section of your <code>~/.zshrc</code>, then</p>
+<pre class="code console"><span class="gp">$</span> zgen reset</pre>
+</section>
+<section id="zplug">
+<h3>zplug</h3>
+<p>Put <code>zplug &quot;andydecleyre/zpy&quot;</code> in <code>~/.zshrc</code> (after <code>source ~/.zplug/init.zsh</code>,
+before <code>zplug load</code>), then</p>
+<pre class="code console"><span class="gp">$</span> zplug install<span class="p">;</span> zplug load</pre>
+</section>
+</section>
+<section id="dependencies">
+<h2><a href="#id17">Dependencies</a></h2>
+<p>Jump to <a href="#dependency-installation">Dependency Installation</a> for a recommended command for your distro.</p>
+<p>The big ones:</p>
+<ul>
+<li><a href="https://repology.org/project/zsh/versions">zsh</a></li>
+<li><a href="https://repology.org/project/python/versions">python</a></li>
+<li><a href="https://repology.org/project/fzf/versions">fzf</a></li>
+</ul>
+<p>The ones you already have anyway, probably:</p>
+<dl>
+<dt>diff</dt>
+<dd>provided by <a href="https://repology.org/project/diffutils/versions">diffutils</a>, <a href="https://repology.org/project/busybox/versions">busybox</a>, BSD, or macOS</dd>
+<dt>du</dt>
+<dd>provided by <a href="https://repology.org/project/coreutils/versions">coreutils</a>, <a href="https://repology.org/project/busybox/versions">busybox</a>, <a href="https://repology.org/project/toybox/versions">toybox</a>, BSD, or macOS</dd>
+<dt>md5sum <em>or</em> md5</dt>
+<dd>provided by <a href="https://repology.org/project/coreutils/versions">coreutils</a>, <a href="https://repology.org/project/busybox/versions">busybox</a>, <a href="https://repology.org/project/toybox/versions">toybox</a>, BSD, or macOS</dd>
+<dt>mktemp</dt>
+<dd>provided by <a href="https://repology.org/project/coreutils/versions">coreutils</a>, <a href="https://repology.org/project/busybox/versions">busybox</a>, <a href="https://repology.org/project/toybox/versions">toybox</a>, BSD, or macOS</dd>
+<dt>nproc <em>or</em> sysctl</dt>
+<dd>provided by <a href="https://repology.org/project/coreutils/versions">coreutils</a>, <a href="https://repology.org/project/busybox/versions">busybox</a>, <a href="https://repology.org/project/toybox/versions">toybox</a>, BSD, or macOS</dd>
+<dt>wget <em>or</em> curl</dt>
+<dd>provided by <a href="https://repology.org/project/wget/versions">wget</a>, <a href="https://repology.org/project/curl/versions">curl</a>, <a href="https://repology.org/project/busybox/versions">busybox</a>, or macOS</dd>
+<dt>a pcre tool</dt>
+<dd>provided by pcregrep/pcre-tools, pcre2grep/pcre2-tools, <a href="https://repology.org/project/ripgrep/versions">ripgrep</a>, or zsh with pcre enabled</dd>
+</dl>
+<p>The very optional ones:</p>
+<dl>
+<dt><a href="https://repology.org/project/highlight/versions">highlight</a> <em>or</em> <a href="https://repology.org/project/bat/versions">bat</a></dt>
+<dd>for pretty syntax highlighting</dd>
+<dt><a href="https://repology.org/project/git-delta/versions">delta</a> <em>or</em> <a href="https://repology.org/project/diff-so-fancy/versions">diff-so-fancy</a> <em>or</em> diff-highlight (from git + perl)</dt>
+<dd>for more pretty syntax highlighting</dd>
+<dt><a href="https://repology.org/project/jq/versions">jq</a> <em>or</em> <a href="https://pypi.org/project/jello/">jello</a></dt>
+<dd>for theoretically more reliable parsing</dd>
+<dt>python2 <em>and</em> <a href="https://repology.org/project/python:virtualenv/versions">virtualenv</a></dt>
+<dd>for python2 support</dd>
+<dt>git</dt>
+<dd>for easy installation of zpy itself</dd>
+</dl>
+<section id="dependency-installation">
+<h3>Dependency Installation</h3>
+<section id="alpine">
+<h4>Alpine</h4>
+<pre class="code console"><span class="gp">$</span> sudo apk add fzf git highlight pcre2-tools python3 zsh</pre>
+</section>
+<section id="arch">
+<h4>Arch</h4>
+<pre class="code console"><span class="gp">$</span> sudo pacman -S fzf git highlight python zsh</pre>
+</section>
+<section id="debian-ubuntu">
+<h4>Debian/Ubuntu</h4>
+<pre class="code console"><span class="gp">$</span> sudo apt --no-install-recommends install fzf git highlight pcre2-utils python3<span class="o">{</span>,-venv<span class="o">}</span> zsh</pre>
+</section>
+<section id="fedora">
+<h4>Fedora</h4>
+<pre class="code console"><span class="gp">$</span> sudo dnf --setopt<span class="o">=</span><span class="nv">install_weak_deps</span><span class="o">=</span>False install diffutils fzf git-core highlight pcre-tools python3 zsh</pre>
+</section>
+<section id="macos">
+<h4>MacOS</h4>
+<pre class="code console"><span class="gp">$</span> brew install fzf git highlight pcre2 python zsh</pre>
+</section>
+<section id="opensuse">
+<h4>OpenSUSE</h4>
+<pre class="code console"><span class="gp">$</span> sudo zypper in fzf git highlight pcre2-tools python3 zsh</pre>
+</section>
+</section>
+</section>
+<section id="extra-scripts">
+<h2><a href="#id18">Extra Scripts</a></h2>
+<p>You may wish to generate some &quot;standalone&quot; scripts for some of the provided functions --
+particularly <code>vpy</code>. You can do so with, for example:</p>
+<pre class="code console"><span class="gp">$</span> .zpy_mkbin vpy ~/.local/bin</pre>
+</section>
+<section id="environment-variables">
+<h2><a href="#id19">Environment Variables</a></h2>
+<p>Users may want to override these:</p>
+<dl>
+<dt><code>ZPY_VENVS_WORLD</code></dt>
+<dd><p>Each project is associated with: <code>$ZPY_VENVS_WORLD/&lt;hash of proj-dir&gt;/&lt;venv-name&gt;</code>.</p>
+<p><code>&lt;venv-name&gt;</code> is one or more of: <code>venv</code>, <code>venv2</code>, <code>venv-pypy</code>, <code>venv-&lt;pyver&gt;</code></p>
+<p><code>$(venvs_path &lt;proj-dir&gt;)</code> evaluates to <code>$ZPY_VENVS_WORLD/&lt;hash of proj-dir&gt;</code>.</p>
+<p>This is normally <code>~/.local/share/venvs</code>.</p>
+</dd>
+<dt><code>ZPY_PIPZ_PROJECTS</code> and <code>ZPY_PIPZ_BINS</code></dt>
+<dd><p>Installing an app via <code>pipz</code> puts <code>requirements.{in,txt}</code> in
+<code>$ZPY_PIPZ_PROJECTS/&lt;appname&gt;</code>, and executables in <code>$ZPY_PIPZ_BINS</code>.</p>
+<p>These are normally <code>~/.local/share/python</code> and <code>~/.local/bin</code>.</p>
+</dd>
+</dl>
+</section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>zpy Zsh helpers for Python venvs, with pip-tools. Created with <a href="https://mcss.mosra.cz/documentation/python/">m.css Python doc generator</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
