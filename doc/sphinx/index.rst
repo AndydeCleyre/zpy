@@ -17,8 +17,6 @@ They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 .. image:: https://gist.githubusercontent.com/AndydeCleyre/530538f4afde15278cad3411f3d14e24/raw/17aaeb90ef29817c73d5abec81f5b39caef01d7d/demo.svg?sanitize=true
    :alt: Animated demo of zpy functions: envin, pipac, pips
 
-.. contents::
-   :depth: 1
 
 Guiding Ideas
 -------------

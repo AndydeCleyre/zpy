@@ -1,5 +1,5 @@
-/doc/site
 *.sublime-project
 *.sublime-workspace
 /build
 /.directory
+__pycache__
