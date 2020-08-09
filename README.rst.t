@@ -222,7 +222,7 @@ Manual
 
   $ cd /wherever/you/want/to/keep/zpy
   $ git clone https://github.com/andydecleyre/zpy
-  $ print ". $PWD/zpy/zpy.plugin.zsh" >> ~/.zshrc
+  $ print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
 
 If you want completions, make sure to load ``compinit`` earlier in ``~/.zshrc``:
 
@@ -256,7 +256,7 @@ Zim
 
 .. code:: console
 
-  $ print zmodule andydecleyre/zpy >> ~/.zimrc
+  $ print zmodule andydecleyre/zpy >>~/.zimrc
   $ zimfw install
 
 Antibody
@@ -264,14 +264,14 @@ Antibody
 
 .. code:: console
 
-  $ print antibody bundle andydecleyre/zpy >> ~/.zshrc
+  $ print antibody bundle andydecleyre/zpy >>~/.zshrc
 
 Zinit
 `````
 
 .. code:: console
 
-  $ print zinit light andydecleyre/zpy >> ~/.zshrc
+  $ print -l 'zinit ice cloneopts' 'zinit light andydecleyre/zpy' >>~/.zshrc
 
 Antigen
 ```````
