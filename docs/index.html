@@ -301,10 +301,13 @@ to the PATH, from outside the venv</dd>
 </span>pypc
 
 <span class="c1"># Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
-</span>vpysublp
+</span>vpysublp <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span>
 
-<span class="c1"># Launch a new or existing Sublime Text project, setting venv interpreter.
-</span>sublp <span class="o">[</span>&lt;subl-arg&gt;...<span class="o">]</span>
+<span class="c1"># Specify the venv interpreter in a new or existing [VS]Code settings file for the working folder.
+</span>vpyvscode <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span>
+
+<span class="c1"># Launch a new or existing Sublime Text project for the working folder, setting venv interpreter.
+</span>sublp <span class="o">[</span>--py <span class="m">2</span><span class="p">|</span>pypy<span class="p">|</span>current<span class="o">]</span> <span class="o">[</span>&lt;subl-arg&gt;...<span class="o">]</span>
 
 <span class="c1"># Package manager for venv-isolated scripts (pipx clone; py3 only).
 </span>pipz <span class="o">[</span>install<span class="p">|</span>uninstall<span class="p">|</span>upgrade<span class="p">|</span>list<span class="p">|</span>inject<span class="p">|</span>reinstall<span class="p">|</span>cd<span class="p">|</span>runpip<span class="p">|</span>runpkg<span class="o">]</span> <span class="o">[</span>&lt;subcmd-arg&gt;...<span class="o">]</span></pre>
@@ -318,7 +321,7 @@ can be sourced manually or with the help of a Zsh configuration framework or plu
 <h3>Manual</h3>
 <pre class="code console"><span class="gp">$</span> <span class="nb">cd</span> /wherever/you/want/to/keep/zpy
 <span class="gp">$</span> git clone https://github.com/andydecleyre/zpy
-<span class="gp">$</span> print <span class="s2">&quot;. </span><span class="nv">$PWD</span><span class="s2">/zpy/zpy.plugin.zsh&quot;</span> &gt;&gt; ~/.zshrc</pre>
+<span class="gp">$</span> print <span class="s2">&quot;. </span><span class="nv">$PWD</span><span class="s2">/zpy/zpy.plugin.zsh&quot;</span> &gt;&gt;~/.zshrc</pre>
 <p>If you want completions, make sure to load <code>compinit</code> earlier in <code>~/.zshrc</code>:</p>
 <pre class="code bash">autoload -Uz compinit
 compinit</pre>
@@ -336,16 +339,16 @@ compinit</pre>
 </section>
 <section id="zim">
 <h3>Zim</h3>
-<pre class="code console"><span class="gp">$</span> print zmodule andydecleyre/zpy &gt;&gt; ~/.zimrc
+<pre class="code console"><span class="gp">$</span> print zmodule andydecleyre/zpy &gt;&gt;~/.zimrc
 <span class="gp">$</span> zimfw install</pre>
 </section>
 <section id="antibody">
 <h3>Antibody</h3>
-<pre class="code console"><span class="gp">$</span> print antibody bundle andydecleyre/zpy &gt;&gt; ~/.zshrc</pre>
+<pre class="code console"><span class="gp">$</span> print antibody bundle andydecleyre/zpy &gt;&gt;~/.zshrc</pre>
 </section>
 <section id="zinit">
 <h3>Zinit</h3>
-<pre class="code console"><span class="gp">$</span> print zinit light andydecleyre/zpy &gt;&gt; ~/.zshrc</pre>
+<pre class="code console"><span class="gp">$</span> print -l <span class="s1">'zinit ice cloneopts'</span> <span class="s1">'zinit light andydecleyre/zpy'</span> &gt;&gt;~/.zshrc</pre>
 </section>
 <section id="antigen">
 <h3>Antigen</h3>

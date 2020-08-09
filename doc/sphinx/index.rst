@@ -293,10 +293,13 @@ Functions & Aliases
   pypc
   
   # Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
-  vpysublp
+  vpysublp [--py 2|pypy|current]
   
-  # Launch a new or existing Sublime Text project, setting venv interpreter.
-  sublp [<subl-arg>...]
+  # Specify the venv interpreter in a new or existing [VS]Code settings file for the working folder.
+  vpyvscode [--py 2|pypy|current]
+  
+  # Launch a new or existing Sublime Text project for the working folder, setting venv interpreter.
+  sublp [--py 2|pypy|current] [<subl-arg>...]
   
   # Package manager for venv-isolated scripts (pipx clone; py3 only).
   pipz [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
@@ -318,7 +321,7 @@ Manual
 
   $ cd /wherever/you/want/to/keep/zpy
   $ git clone https://github.com/andydecleyre/zpy
-  $ print ". $PWD/zpy/zpy.plugin.zsh" >> ~/.zshrc
+  $ print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
 
 If you want completions, make sure to load ``compinit`` earlier in ``~/.zshrc``:
 
@@ -352,7 +355,7 @@ Zim
 
 .. code:: console
 
-  $ print zmodule andydecleyre/zpy >> ~/.zimrc
+  $ print zmodule andydecleyre/zpy >>~/.zimrc
   $ zimfw install
 
 Antibody
@@ -360,14 +363,14 @@ Antibody
 
 .. code:: console
 
-  $ print antibody bundle andydecleyre/zpy >> ~/.zshrc
+  $ print antibody bundle andydecleyre/zpy >>~/.zshrc
 
 Zinit
 `````
 
 .. code:: console
 
-  $ print zinit light andydecleyre/zpy >> ~/.zshrc
+  $ print -l 'zinit ice cloneopts' 'zinit light andydecleyre/zpy' >>~/.zshrc
 
 Antigen
 ```````
