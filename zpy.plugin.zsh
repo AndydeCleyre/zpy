@@ -272,7 +272,7 @@ pips () {  # [<reqs-txt>...]
     PIP_TOOLS_CACHE_DIR=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash} \
     pip-compile --no-header -o $reqstxt $@ $reqsin 2>&1 | .zpy_hlt ini
     local badrets=(${pipestatus:#0})
-    [[ $badrets ]] && [[ $faildir ]] && print -n >> $faildir/${PWD:t}
+    [[ $badrets ]] && [[ $faildir ]] && print -n >>$faildir/${PWD:t}
     return $badrets[1]
 }
 
@@ -383,7 +383,7 @@ pipa () {  # [-c <category>] <pkgspec>...
         '%F{cyan}> %F{magenta}appending' \
         "%F{cyan}%B->%b $reqsin" \
         "%B::%b ${${${PWD:P}/#~\//~/}/%${PWD:t}/%B${PWD:t}%b}%f"
-    print -rl -- $@ >> $reqsin
+    print -rl -- $@ >>$reqsin
     .zpy_hlt ini <$reqsin
 }
 
@@ -648,7 +648,7 @@ vpyshebang () {  # [--py 2|pypy|current] <script>...
         fi
         lines=("${(@f)$(<$1)}")
         if [[ $lines[1] != $shebang ]]; then
-            print -rl -- "${shebang}" "${(@)lines}" > $1
+            print -rl -- "${shebang}" "${(@)lines}" >$1
         fi
     done
 }
@@ -747,7 +747,7 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
         fi
         zf_ln -s "${cmdpath}" $dest
     else
-        print -rl -- '#!/bin/sh -e' ". ${venv}/bin/activate" "exec $cmd \$@" > $dest
+        print -rl -- '#!/bin/sh -e' ". ${venv}/bin/activate" "exec $cmd \$@" >$dest
         zf_chmod 0755 $dest
     fi
 }
@@ -854,7 +854,7 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
         pipcs -U
     )
     local ret=$?
-    (( ret )) && [[ $faildir ]] && print -n >> $faildir/${1:t}
+    (( ret )) && [[ $faildir ]] && print -n >>$faildir/${1:t}
     return ret
 }
 
@@ -952,51 +952,93 @@ if pyproject.is_file():
     local spfiles=(*.sublime-project(N))
     if [[ ! $spfiles ]]; then
         spfile=${PWD:t}.sublime-project
-        print -r '{}' > $spfile
+        >$spfile <<<'{}'
     else
         spfile=$spfiles[1]
     fi
     REPLY=$spfile
 }
 
-# Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
-vpysublp () {
+
+
+
+# Specify the venv interpreter for the working folder in a new or existing json file.
+.zpy_vpy2json () {  # [--py 2|pypy|current] <jsonfile> <keycrumb>...
+    # Does not currently handle spaces within any keycrumb (or need to)
     emulate -L zsh
     if [[ $1 == --help ]]; then zpy $0; return; fi
     rehash
+    local venv_name=venv
+    if [[ $1 == --py ]]; then
+        local reply
+        if ! .zpy_argvenv $2; then zpy $0; return 1; fi
+        venv_name=$reply[1]
+        shift 2
+    fi
+    local jsonfile=$1; shift
+    zf_mkdir -p ${jsonfile:h}
+    [[ -r $jsonfile ]] || >$jsonfile <<<'{}'
     local REPLY
-    .zpy_get_sublp
-    local stp=$REPLY
     .zpy_venvs_path
-    local pypath=${REPLY}/venv/bin/python
+    local pypath=${REPLY}/${venv_name}/bin/python
     print -rPu2 \
         "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~\//~/}" \
-        "%B->%b ${stp/#~\//~/}" \
+        "%B->%b ${jsonfile/#~\//~/}" \
         "%B::%b ${${${PWD:P}/#~\//~/}/%${PWD:t}/%B${PWD:t}%b}%f"
     if (( $+commands[jq] )); then
+        local keypath=".\"${(j:".":)@}\""
         print -r -- "$(
-            jq --arg py $pypath '.settings+={python_interpreter: $py}' $stp
-        )" > $stp
+            jq --arg py "$pypath" "${keypath}=\$py" "$jsonfile"
+        )" >$jsonfile
     else
         python3 -c "
-from pathlib import Path
+from collections import defaultdict
 from json import loads, dumps
+from pathlib import Path
 
 
-spfile = Path('''${stp}''')
-sp = loads(spfile.read_text())
-sp.setdefault('settings', {})
-sp['settings']['python_interpreter'] = '''${pypath}'''
-spfile.write_text(dumps(sp, indent=4))
+jsonfile = Path('''${jsonfile}''')
+
+deepdefaultdict = lambda: defaultdict(deepdefaultdict)
+data = defaultdict(deepdefaultdict)
+data.update(loads(jsonfile.read_text()))
+
+keycrumbs = '''${(j: :)@}'''.split()
+d = data
+for key in keycrumbs[:-1]:
+    d = d[key]
+d[keycrumbs[-1]] = '''${pypath}'''
+
+jsonfile.write_text(dumps(data, indent=4))
         "
     fi
 }
 
-# Launch a new or existing Sublime Text project, setting venv interpreter.
-sublp () {  # [<subl-arg>...]
+# Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
+vpysublp () {  # [--py 2|pypy|current]
     emulate -L zsh
     if [[ $1 == --help ]]; then zpy $0; return; fi
-    vpysublp
+    local REPLY
+    .zpy_get_sublp
+    local jsonfile=$REPLY
+    .zpy_vpy2json $@ $jsonfile settings python_interpreter
+}
+
+# Specify the venv interpreter in a new or existing [VS]Code settings file for the working folder.
+vpyvscode () {  # [--py 2|pypy|current]
+    emulate -L zsh
+    if [[ $1 == --help ]]; then zpy $0; return; fi
+    local jsonfile=$PWD/.vscode/settings.json
+    .zpy_vpy2json $@ $jsonfile python.pythonPath
+}
+
+# Launch a new or existing Sublime Text project for the working folder, setting venv interpreter.
+sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
+    # would it be worth it to accept --py later, aside from as first flag?
+    emulate -L zsh
+    if [[ $1 == --help ]]; then zpy $0; return; fi
+    if [[ $1 == --py ]]; then local vpysublp_args=($1 $2); shift 2; fi
+    vpysublp $vpysublp_args
     local REPLY
     .zpy_get_sublp
     subl --project "$REPLY" $@
@@ -1107,7 +1149,7 @@ sublp () {  # [<subl-arg>...]
     local pkg=$2
     local REPLY
     if ! .zpy_pkgspec2name $pkg; then
-        [[ $faildir ]] && print -n >> $faildir/$pkgname
+        [[ $faildir ]] && print -n >>$faildir/$pkgname
         return 1
     fi
     local pkgname=$REPLY
@@ -1119,7 +1161,7 @@ sublp () {  # [<subl-arg>...]
         activate
         pipacs $pkg
     )
-    (( ? )) && [[ $faildir ]] && print -n >> $faildir/$pkgname
+    (( ? )) && [[ $faildir ]] && print -n >>$faildir/$pkgname
 }
 
 .zpy_pipzchoosepkg () {  # [--header <header>] [--multi] <projects_home>  ## <header> default: 'Packages:'
@@ -1332,7 +1374,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             '%F{cyan}> creating pipz-list snapshot for post-comparison' \
             "%B::%b ${ZPY_PIPZ_PROJECTS/#~\//~/}%f"
         local before=$(mktemp)
-        pipz list $pkgnames > $before
+        pipz list $pkgnames >$before
         pipup ${ZPY_PIPZ_PROJECTS}/${^pkgnames}
         local ret=$?
         local lines
@@ -1510,7 +1552,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         print -rPu2 "%F{red}> ${dest/#~\//~/} exists!%f"
         return 1
     fi
-    print -rl -- '#!/bin/zsh' "$(<$ZPYSRC)" "$1 \$@" > $dest
+    print -rl -- '#!/bin/zsh' "$(<$ZPYSRC)" "$1 \$@" >$dest
     zf_chmod 0755 $dest
 }
 
@@ -1600,78 +1642,6 @@ _pipa () {
 }
 compdef _pipa pipa 2>/dev/null
 
-for _zpyfn in pipac pipacs; do
-    _${_zpyfn} () {
-        _zpy_helpmsg ${0[2,-1]}
-        local i=$words[(i)--]
-        if (( CURRENT > $i )); then
-            shift i words
-            words=(pip-compile $words)
-            (( CURRENT-=i, CURRENT+=1 ))
-            _normal -P
-            return
-        fi
-        local -U catgs=(dev doc test *-requirements.{in,txt}(N))
-        catgs=(${catgs%%-*})
-        local context state state_descr line opt_args
-        _arguments \
-            '(- * :)--help[Show usage information]' \
-            "(--help)-c[Use <category>-requirements.in]:Category:($catgs)" \
-            '(--help)-h[Include hashes in compiled requirements.txt]' \
-            "(--help -c -h)1:Package Spec:_zpy_pypi_pkg --or-local" \
-            '(--help -c -h)*:Package Spec:->pkgspecs'
-        if [[ $state == pkgspecs ]]; then
-            _arguments \
-                '*:Package Spec:_zpy_pypi_pkg --or-local' \
-                '(*)--[pip-compile Arguments]:pip-compile Argument: '
-        fi
-    }
-    compdef _${_zpyfn} $_zpyfn 2>/dev/null
-done
-
-for _zpyfn in pipcheckold pipup; do
-    # TODO: Project completions are too lenient
-    _${_zpyfn} () {
-        _zpy_helpmsg ${0[2,-1]}
-        _arguments \
-            '(* -)--help[Show usage information]' \
-            '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
-            '(--help)*: :_zpy_projects'
-    }
-    compdef _${_zpyfn} ${_zpyfn} 2>/dev/null
-done
-
-for _zpyfn in pipc pipcs; do
-    _${_zpyfn} () {
-        _zpy_helpmsg ${0[2,-1]}
-        local i=$words[(i)--]
-        if (( CURRENT > $i )); then
-            shift i words
-            words=(pip-compile $words)
-            (( CURRENT-=i, CURRENT+=1 ))
-            _normal -P
-            return
-        fi
-        local reply
-        .zpy_pypi_pkgs
-        local pkgs=($reply)
-        local context state state_descr line opt_args
-        _arguments \
-            '(- *)--help[Show usage information]' \
-            '(--help)-h[Include hashes in compiled requirements.txt]' \
-            '(--help -u)-U[Upgrade all dependencies]' \
-            "(--help -U)-u[Upgrade specific dependencies]:Package Names (comma-separated):_values -s , 'Package Names (comma-separated)' $pkgs" \
-            '(-)*: :->reqsins'
-        if [[ $state == reqsins ]]; then
-            local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
-            _arguments \
-                '*:requirements.in:_files -F blacklist -g "*.in"' \
-                '(*)--[pip-compile Arguments]:pip-compile Argument: '
-        fi
-    }
-    compdef _${_zpyfn} $_zpyfn 2>/dev/null
-done
-
 _pipi () {
     _zpy_helpmsg ${0[2,-1]}
     local context state state_descr line opt_args
@@ -1712,14 +1682,6 @@ _prunevenvs () {
 }
 compdef _prunevenvs prunevenvs 2>/dev/null
 
-for _zpyfn in pypc vpysublp whichpyproj; do
-    _${_zpyfn} () {
-        _zpy_helpmsg ${0[2,-1]}
-        _arguments '--help[Show usage information]'
-    }
-    compdef _${_zpyfn} $_zpyfn 2>/dev/null
-done
-
 _reqshow () {
     _zpy_helpmsg ${0[2,-1]}
     _arguments \
@@ -1732,14 +1694,114 @@ _sublp () {
     _zpy_helpmsg ${0[2,-1]}
     if (( $+_comps[subl] )); then
     # Theoretically may act as false negative, though should be fine for subl
+        if (( CURRENT < 3 )) || [[ $words[2] == --py ]]; then
+            _arguments \
+                '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)'
+        fi
         $_comps[subl]
     else
         _arguments \
             '(- *)--help[Show usage information]' \
-            '(--help)*:File or Folder:_files'
+            '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+            '(-)*:File or Folder:_files'
     fi
 }
 compdef _sublp sublp 2>/dev/null
+
+() {
+    emulate -L zsh
+    local zpyfn
+
+    for zpyfn in pypc whichpyproj; do
+        _${zpyfn} () {
+            _zpy_helpmsg ${0[2,-1]}
+            _arguments '--help[Show usage information]'
+        }
+        compdef _${zpyfn} $zpyfn 2>/dev/null
+    done
+
+    for zpyfn in vpysublp vpyvscode; do
+        _${zpyfn} () {
+            _zpy_helpmsg ${0[2,-1]}
+            _arguments \
+                '(-)--help[Show usage information]' \
+                '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)'
+        }
+        compdef _${zpyfn} $zpyfn 2>/dev/null
+    done
+
+    for zpyfn in pipac pipacs; do
+        _${zpyfn} () {
+            _zpy_helpmsg ${0[2,-1]}
+            local i=$words[(i)--]
+            if (( CURRENT > $i )); then
+                shift i words
+                words=(pip-compile $words)
+                (( CURRENT-=i, CURRENT+=1 ))
+                _normal -P
+                return
+            fi
+            local -U catgs=(dev doc test *-requirements.{in,txt}(N))
+            catgs=(${catgs%%-*})
+            local context state state_descr line opt_args
+            _arguments \
+                '(- * :)--help[Show usage information]' \
+                "(--help)-c[Use <category>-requirements.in]:Category:($catgs)" \
+                '(--help)-h[Include hashes in compiled requirements.txt]' \
+                "(--help -c -h)1:Package Spec:_zpy_pypi_pkg --or-local" \
+                '(--help -c -h)*:Package Spec:->pkgspecs'
+            if [[ $state == pkgspecs ]]; then
+                _arguments \
+                    '*:Package Spec:_zpy_pypi_pkg --or-local' \
+                    '(*)--[pip-compile Arguments]:pip-compile Argument: '
+            fi
+        }
+        compdef _${zpyfn} $zpyfn 2>/dev/null
+    done
+
+    for zpyfn in pipcheckold pipup; do
+        # TODO: Project completions are too lenient
+        _${zpyfn} () {
+            _zpy_helpmsg ${0[2,-1]}
+            _arguments \
+                '(* -)--help[Show usage information]' \
+                '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+                '(--help)*: :_zpy_projects'
+        }
+        compdef _${zpyfn} ${zpyfn} 2>/dev/null
+    done
+
+    for zpyfn in pipc pipcs; do
+        _${zpyfn} () {
+            _zpy_helpmsg ${0[2,-1]}
+            local i=$words[(i)--]
+            if (( CURRENT > $i )); then
+                shift i words
+                words=(pip-compile $words)
+                (( CURRENT-=i, CURRENT+=1 ))
+                _normal -P
+                return
+            fi
+            local reply
+            .zpy_pypi_pkgs
+            local pkgs=($reply)
+            local context state state_descr line opt_args
+            _arguments \
+                '(- *)--help[Show usage information]' \
+                '(--help)-h[Include hashes in compiled requirements.txt]' \
+                '(--help -u)-U[Upgrade all dependencies]' \
+                "(--help -U)-u[Upgrade specific dependencies]:Package Names (comma-separated):_values -s , 'Package Names (comma-separated)' $pkgs" \
+                '(-)*: :->reqsins'
+            if [[ $state == reqsins ]]; then
+                local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
+                _arguments \
+                    '*:requirements.in:_files -F blacklist -g "*.in"' \
+                    '(*)--[pip-compile Arguments]:pip-compile Argument: '
+            fi
+        }
+        compdef _${zpyfn} $zpyfn 2>/dev/null
+    done
+}
 
 _venvs_path () {
     _zpy_helpmsg ${0[2,-1]}
@@ -1983,8 +2045,6 @@ _pipz () {
     fi
 }
 compdef _pipz pipz 2>/dev/null
-
-unset _zpyfn
 
 ## TODO: more [-- pip-{compile,sync}-arg...]? (pips pipup 'pipz inject' 'pipz install')
 ## TODO: revisit instances of 'pipi -q pip-tools' if/when pip-tools gets out-of-venv support:
