@@ -11,11 +11,11 @@ git -C "${gitroot}" submodule update --init --recursive
 "${gitroot}/mk/doc/readme.sh"
 cp "${gitroot}/README.rst" "${gitroot}/build/index.rst"
 
-rm -rf "${gitroot}/docs"
+rm -rf "${gitroot}/build/m.css"
 "${gitroot}/doc/m.css/m.css/documentation/python.py" "${gitroot}/doc/m.css/conf.py"
 
 rm \
 	"${gitroot}/build/index.rst" \
-	"${gitroot}/docs/classes.html" \
-	"${gitroot}/docs/modules.html" \
-	"${gitroot}/docs/pages.html"
+	"${gitroot}/build/m.css/classes.html" \
+	"${gitroot}/build/m.css/modules.html" \
+	"${gitroot}/build/m.css/pages.html"

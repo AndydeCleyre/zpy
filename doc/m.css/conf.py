@@ -1,7 +1,7 @@
 PROJECT_TITLE = "zpy"
 PROJECT_SUBTITLE = "Zsh helpers for Python venvs, with pip-tools"
 MAIN_PROJECT_URL = 'https://github.com/andydecleyre/zpy'
-OUTPUT = '../../docs'
+OUTPUT = '../../build/m.css'
 INPUT_PAGES = ['../../build/index.rst']
 LINKS_NAVBAR1 = [
     ("Light", 'https://zpy.rtfd.io', []),
