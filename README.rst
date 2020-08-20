@@ -328,14 +328,12 @@ Manual
   $ git clone https://github.com/andydecleyre/zpy
   $ print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
 
-If you use a dotfiles manager like yadm__, you can replace that `git clone` command,
+If you use a dotfiles manager like yadm_, you can replace that ``git clone`` command,
 instead adding this repo as a submodule, e.g.:
 
 .. code:: console
 
   $ yadm submodule add git@github.com:andydecleyre/zpy
-
-__ https://github.com/TheLocehiliosan/yadm
 
 If you want completions, make sure to load ``compinit`` earlier in ``~/.zshrc``:
 
@@ -570,4 +568,5 @@ Users may want to override these:
 .. _toybox: https://repology.org/project/toybox/versions
 .. _virtualenv: https://repology.org/project/python:virtualenv/versions
 .. _wget: https://repology.org/project/wget/versions
+.. _yadm: https://github.com/TheLocehiliosan/yadm
 .. _zsh: https://repology.org/project/zsh/versions
