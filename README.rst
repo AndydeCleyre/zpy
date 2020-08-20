@@ -4,6 +4,9 @@ zpy: Zsh helpers for Python venvs, with pip-tools
 
 |repo| |docsite| |container-alpine| |container-fedora| |container-ubuntu| |container-ci| |contact|
 
+.. image:: https://user-images.githubusercontent.com/1787385/90825505-036d6a80-e307-11ea-801d-ea32a53d5fd4.png
+   :alt: Screenshot: envin; pipacs requests
+
 In a hurry? Jump to Installation_.
 
 Here are Zsh convenience functions to manage Python venvs and packages,
@@ -13,9 +16,6 @@ None of them should get in your way.
 __ https://github.com/jazzband/pip-tools
 
 They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
-
-.. image:: https://gist.githubusercontent.com/AndydeCleyre/530538f4afde15278cad3411f3d14e24/raw/17aaeb90ef29817c73d5abec81f5b39caef01d7d/demo.svg?sanitize=true
-   :alt: Animated demo of zpy functions: envin, pipac, pips
 
 .. contents::
    :depth: 1
@@ -59,8 +59,8 @@ Try it in isolation with docker or podman if you like, with one of these command
 
 Replace "alpine" with "ubuntu" or "fedora" if you prefer.
 
-.. image:: https://gist.githubusercontent.com/AndydeCleyre/4d634829092ca6c1280eaa19914995a3/raw/18629622adc28e563183276c975459f2021c553d/demo.svg?sanitize=true
-   :alt: Animated demo of pipz
+.. image:: https://gist.githubusercontent.com/AndydeCleyre/530538f4afde15278cad3411f3d14e24/raw/17aaeb90ef29817c73d5abec81f5b39caef01d7d/demo.svg?sanitize=true
+   :alt: Animated demo of zpy functions: envin, pipac, pips
 
 Run ``zpy`` to see a full reference of `Functions & Aliases`_.
 
@@ -192,6 +192,9 @@ __ https://flit.readthedocs.io/en/latest/
 ``pipz``
   install and manage isolated apps (pipx clone)
 
+  .. image:: https://gist.githubusercontent.com/AndydeCleyre/4d634829092ca6c1280eaa19914995a3/raw/18629622adc28e563183276c975459f2021c553d/demo.svg?sanitize=true
+     :alt: Animated demo of pipz
+
 But wait, there's more! Find it all at `Functions & Aliases`_.
 
 Functions & Aliases
@@ -218,7 +221,7 @@ Functions & Aliases
   
   # Compile, then sync.
   # Use -h to include hashes, -u dep1,dep2... to upgrade specific dependencies, and -U to upgrade all.
-  pipcs [-h] [-U|-u <pkgspec>,...] [<reqs-in>...] [-- <pip-compile-arg>...]
+  pipcs [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compile-arg>...]
   
   # Add loose requirements to [<category>-]requirements.in (add).
   pipa [-c <category>] <pkgspec>...
@@ -309,7 +312,7 @@ Functions & Aliases
 Installation
 ------------
 
-Aside from the Dependencies_, ``zpy`` is a single file to be sourced in your ``.zshrc``, and
+Aside from the few Dependencies_ (Zsh, Python, fzf), ``zpy`` is a single file to be sourced in your ``.zshrc``, and
 can be sourced manually or with the help of a Zsh configuration framework or plugin manager.
 
 If you're new to Zsh and want to try a framework, I recommend Zim__.
@@ -325,6 +328,15 @@ Manual
   $ git clone https://github.com/andydecleyre/zpy
   $ print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
 
+If you use a dotfiles manager like yadm__, you can replace that `git clone` command,
+instead adding this repo as a submodule, e.g.:
+
+.. code:: console
+
+  $ yadm submodule add git@github.com:andydecleyre/zpy
+
+__ https://github.com/TheLocehiliosan/yadm
+
 If you want completions, make sure to load ``compinit`` earlier in ``~/.zshrc``:
 
 .. code:: bash
@@ -333,6 +345,18 @@ If you want completions, make sure to load ``compinit`` earlier in ``~/.zshrc``:
   compinit
 
 If you're using a Zsh framework, that's probably done for you already.
+
+Antibody
+````````
+
+.. code:: console
+
+  $ print antibody bundle andydecleyre/zpy >>~/.zshrc
+
+Antigen
+```````
+
+Put ``antigen bundle andydecleyre/zpy`` in your ``~/.zshrc``, before ``antigen apply``.
 
 Oh My Zsh
 `````````
@@ -352,33 +376,6 @@ Prezto
 
 Then add ``zpy`` to your pmodule list in ``~/.zpreztorc``.
 
-Zim
-```
-
-.. code:: console
-
-  $ print zmodule andydecleyre/zpy >>~/.zimrc
-  $ zimfw install
-
-Antibody
-````````
-
-.. code:: console
-
-  $ print antibody bundle andydecleyre/zpy >>~/.zshrc
-
-Zinit
-`````
-
-.. code:: console
-
-  $ print -l 'zinit ice cloneopts' 'zinit light andydecleyre/zpy' >>~/.zshrc
-
-Antigen
-```````
-
-Put ``antigen bundle andydecleyre/zpy`` in your ``~/.zshrc``, before ``antigen apply``.
-
 zgen
 ````
 
@@ -387,6 +384,21 @@ Put ``zgen load andydecleyre/zpy`` in the plugin section of your ``~/.zshrc``, t
 .. code:: console
 
     $ zgen reset
+
+Zim
+```
+
+.. code:: console
+
+  $ print zmodule andydecleyre/zpy >>~/.zimrc
+  $ zimfw install
+
+Zinit
+`````
+
+.. code:: console
+
+  $ print -l 'zinit ice cloneopts' 'zinit light andydecleyre/zpy' >>~/.zshrc
 
 zplug
 `````
