@@ -6,4 +6,6 @@ gitroot="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 rm -rf "${gitroot}/docs"
 cp -r "${gitroot}/build/sphinx" "${gitroot}/docs"
 
+touch "${gitroot}/docs/.nojekyll"
+
 rm -r "${gitroot}/build/sphinx"
