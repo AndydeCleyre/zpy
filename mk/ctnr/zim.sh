@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 # [<base-distro>=fedora [<base-tag>]]
 
 distro=${1:-fedora}
@@ -74,6 +74,7 @@ ctnr_ufetch /home/$user/.zim/zimfw.zsh https://github.com/zimfw/zimfw/releases/l
 
 # Replace zsh-syntax-highlighting with fast-syntax-highlighting
 ctnr_urun sed -i 's:zsh-users/zsh-syntax-highlighting:zdharma/fast-syntax-highlighting:g' /home/$user/.zimrc
+ctnr_urun sed -i '/^ZSH_HIGHLIGHT_/d' /home/$user/.zshrc
 
 # In Ubuntu 20.04, of the themes at https://github.com/zimfw/zimfw/wiki/Themes,
 # steeef is the only one that doesn't bug out when completing with no matches.
@@ -81,11 +82,21 @@ ctnr_urun sed -i 's:zsh-users/zsh-syntax-highlighting:zdharma/fast-syntax-highli
 # Replace steeef prompt with agkozak/agkozak-zsh-prompt
 ctnr_urun sed -i 's:steeef:agkozak/agkozak-zsh-prompt:g' /home/$user/.zimrc
 
-# Prepend user bin dir to PATH; Always rehash; Make fish-y suggestions visible
+# Tidy and add settings to .zshrc:
+# - Prepend user bin dir to PATH
+# - Always rehash
+# - Make fish-y suggestions visible
+# - Left-ish prompt
+# - LESS
+ctnr_urun sed -i '/^#/d' /home/$user/.zshrc
+ctnr_urun sed -i '/^$/d' /home/$user/.zshrc
 ctnr_urun sh -c 'printf "%s\n" \
+  "# Everything above comes from Zim" \
   "path=(~/.local/bin \$path)" \
   "precmd () { rehash }" \
   "ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=4" \
+  "AGKOZAK_LEFT_PROMPT_ONLY=1" \
+  "export LESS=Rij.5" \
 >> ~/.zshrc'
 
 # Get zim to install its managed modules
