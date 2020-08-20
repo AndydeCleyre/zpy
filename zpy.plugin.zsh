@@ -351,7 +351,7 @@ pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compi
 
 # Compile, then sync.
 # Use -h to include hashes, -u dep1,dep2... to upgrade specific dependencies, and -U to upgrade all.
-pipcs () {  # [-h] [-U|-u <pkgspec>,...] [<reqs-in>...] [-- <pip-compile-arg>...]
+pipcs () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compile-arg>...]
     emulate -L zsh
     if [[ $1 == --help ]]; then zpy $0; return; fi
     pipc $@
@@ -1224,7 +1224,7 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
     done
 }
 
-.zpy_pipzlinkbins () {  # <projects_home> <bins_home> [--[no-]cmd <cmd>,...] [--activate] [--auto1] [--header <fzf_header>] <pkgspec>...
+.zpy_pipzlinkbins () {  # <projects_home> <bins_home> [--[no-]cmd <cmd>[,<cmd>...]] [--activate] [--auto1] [--header <fzf_header>] <pkgspec>...
     emulate -L zsh
     local projects_home=$1; shift
     local bins_home=$1; shift
@@ -1302,7 +1302,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         done
         return
     ;;
-    install)  # [--cmd <cmd>,...] [--activate] <pkgspec>...  ## subcmd: pipz install
+    install)  # [--cmd <cmd>[,<cmd>...]] [--activate] <pkgspec>...  ## subcmd: pipz install
     # Without --cmd, interactively choose.
     # Without --activate, 'vlauncher --link-only' is used.
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
@@ -1429,7 +1429,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             print -l -- ${(i)table[2,-1]}
         fi
     ;;
-    reinstall)  # [--cmd <cmd>,...] [--activate] [--all|<pkgname>...]  ## subcmd: pipz reinstall
+    reinstall)  # [--cmd <cmd>[,<cmd>...]] [--activate] [--all|<pkgname>...]  ## subcmd: pipz reinstall
     # Without --cmd, interactively choose.
     # Without --activate, 'vlauncher --link-only' is used.
     # Without --all or <pkgspec>, interactively choose.
@@ -1456,7 +1456,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         pipz upgrade $pkgs
         .zpy_pipzlinkbins $linkbins_args $pkgs
     ;;
-    inject)  # [--cmd <cmd>,...] [--activate] <installed-pkgname> <extra-pkgspec>...  ## subcmd: pipz inject
+    inject)  # [--cmd <cmd>[,<cmd>...]] [--activate] <installed-pkgname> <extra-pkgspec>...  ## subcmd: pipz inject
     # Without --cmd, interactively choose.
     # Without --activate, 'vlauncher --link-only' is used.
         if [[ $2 == --help ]]; then zpy "$0 $1"; return; fi
