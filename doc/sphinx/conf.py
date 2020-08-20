@@ -8,9 +8,11 @@ html_theme_options = {
     'source_link_position': 'nowhere',
     'bootswatch_theme': 'flatly',
     'navbar_links': [
-        ("Dark", 'https://andydecleyre.github.io/zpy', True),
         ("Source", 'https://github.com/andydecleyre/zpy', True),
         ("Issues", 'https://github.com/andydecleyre/zpy/issues', True),
         ("pip-tools", 'https://github.com/jazzband/pip-tools', True),
     ],
 }
+html_static_path = ['DarkReader-zpy-readthedocs-io.css']
+def setup(app):
+    app.add_css_file('DarkReader-zpy-readthedocs-io.css')

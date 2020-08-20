@@ -4,7 +4,6 @@ MAIN_PROJECT_URL = 'https://github.com/andydecleyre/zpy'
 OUTPUT = '../../build/m.css'
 INPUT_PAGES = ['../../build/index.rst']
 LINKS_NAVBAR1 = [
-    ("Light", 'https://zpy.rtfd.io', []),
     ("Source", 'https://github.com/andydecleyre/zpy', []),
     ("Issues", 'https://github.com/andydecleyre/zpy/issues', []),
     ("pip-tools", 'https://github.com/jazzband/pip-tools', []),
