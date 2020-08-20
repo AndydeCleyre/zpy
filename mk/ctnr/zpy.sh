@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 # --local|<branch> [<base-distro>=fedora]
 
 zpy_branch=$1
@@ -56,7 +56,7 @@ esac
 
 # Start fresh
 buildah rm $ctnr 2>/dev/null || true
-if ! buildah from -q --name $ctnr "$base_img:$today"; then
+if ! buildah from -q --name $ctnr "$base_img:$today" 2>/dev/null; then
   "${gitroot}/mk/ctnr/zim.sh" $distro
   buildah from -q --name $ctnr "$base_img:$today"
 fi
@@ -133,7 +133,7 @@ esac
 
 # Remind user of a few useful commands
 ctnr_urun sh -c 'printf "%s\n" \
-  "zpy zpy envin pipa pipc pips pipacs pipz" \
+  "zpy zpy envin pipc pips pipacs pipz" \
 >> ~/.zshrc'
 
 # Cut some fat
