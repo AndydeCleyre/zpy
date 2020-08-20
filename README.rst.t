@@ -61,9 +61,6 @@ Try it in isolation with docker or podman if you like, with one of these command
 
 Replace "alpine" with "ubuntu" or "fedora" if you prefer.
 
-.. image:: https://gist.githubusercontent.com/AndydeCleyre/4d634829092ca6c1280eaa19914995a3/raw/18629622adc28e563183276c975459f2021c553d/demo.svg?sanitize=true
-   :alt: Animated demo of pipz
-
 .. image:: https://gist.githubusercontent.com/AndydeCleyre/530538f4afde15278cad3411f3d14e24/raw/17aaeb90ef29817c73d5abec81f5b39caef01d7d/demo.svg?sanitize=true
    :alt: Animated demo of zpy functions: envin, pipac, pips
 
@@ -196,6 +193,9 @@ __ https://flit.readthedocs.io/en/latest/
 
 ``pipz``
   install and manage isolated apps (pipx clone)
+
+  .. image:: https://gist.githubusercontent.com/AndydeCleyre/4d634829092ca6c1280eaa19914995a3/raw/18629622adc28e563183276c975459f2021c553d/demo.svg?sanitize=true
+     :alt: Animated demo of pipz
 
 But wait, there's more! Find it all at `Functions & Aliases`_.
 
