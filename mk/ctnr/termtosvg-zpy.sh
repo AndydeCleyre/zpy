@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 # [<distro>=fedora [<zpyctnr-tag>=<host>-local-working]]
 
 distro=${1:-fedora}
