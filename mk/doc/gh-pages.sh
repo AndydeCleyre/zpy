@@ -1,9 +1,9 @@
 #!/bin/sh -e
 gitroot="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 
-"${gitroot}/mk/doc/m.css.sh"
+"${gitroot}/mk/doc/sphinx.sh"
 
 rm -rf "${gitroot}/docs"
-cp -r "${gitroot}/build/m.css" "${gitroot}/docs"
+cp -r "${gitroot}/build/sphinx" "${gitroot}/docs"
 
-rm -r "${gitroot}/build/m.css"
+rm -r "${gitroot}/build/sphinx"
