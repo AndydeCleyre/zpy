@@ -245,6 +245,18 @@ If you want completions, make sure to load ``compinit`` earlier in ``~/.zshrc``:
 
 If you're using a Zsh framework, that's probably done for you already.
 
+Antibody
+````````
+
+.. code:: console
+
+  $ print antibody bundle andydecleyre/zpy >>~/.zshrc
+
+Antigen
+```````
+
+Put ``antigen bundle andydecleyre/zpy`` in your ``~/.zshrc``, before ``antigen apply``.
+
 Oh My Zsh
 `````````
 
@@ -263,33 +275,6 @@ Prezto
 
 Then add ``zpy`` to your pmodule list in ``~/.zpreztorc``.
 
-Zim
-```
-
-.. code:: console
-
-  $ print zmodule andydecleyre/zpy >>~/.zimrc
-  $ zimfw install
-
-Antibody
-````````
-
-.. code:: console
-
-  $ print antibody bundle andydecleyre/zpy >>~/.zshrc
-
-Zinit
-`````
-
-.. code:: console
-
-  $ print -l 'zinit ice cloneopts' 'zinit light andydecleyre/zpy' >>~/.zshrc
-
-Antigen
-```````
-
-Put ``antigen bundle andydecleyre/zpy`` in your ``~/.zshrc``, before ``antigen apply``.
-
 zgen
 ````
 
@@ -298,6 +283,21 @@ Put ``zgen load andydecleyre/zpy`` in the plugin section of your ``~/.zshrc``, t
 .. code:: console
 
     $ zgen reset
+
+Zim
+```
+
+.. code:: console
+
+  $ print zmodule andydecleyre/zpy >>~/.zimrc
+  $ zimfw install
+
+Zinit
+`````
+
+.. code:: console
+
+  $ print -l 'zinit ice cloneopts' 'zinit light andydecleyre/zpy' >>~/.zshrc
 
 zplug
 `````
