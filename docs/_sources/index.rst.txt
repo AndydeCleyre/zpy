@@ -4,9 +4,6 @@ zpy: Zsh helpers for Python venvs, with pip-tools
 
 |repo| |docsite| |container-alpine| |container-fedora| |container-ubuntu| |container-ci| |contact|
 
-.. image:: https://user-images.githubusercontent.com/1787385/90825505-036d6a80-e307-11ea-801d-ea32a53d5fd4.png
-   :alt: Screenshot: envin; pipacs requests
-
 In a hurry? Jump to Installation_.
 
 Here are Zsh convenience functions to manage Python venvs and packages,
@@ -16,6 +13,35 @@ None of them should get in your way.
 __ https://github.com/jazzband/pip-tools
 
 They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
+
+Examples
+--------
+
+.. code:: zsh
+
+  % envin
+  % pipacs requests
+
+.. image:: https://user-images.githubusercontent.com/1787385/93536201-7e31a180-f916-11ea-9a52-aea92b7efc47.png
+   :alt: Screenshot: pipacs requests
+
+.. admonition:: What it does:
+
+  - activate a virtual environment for the current folder, creating it first if necessary
+  - **a**\ dd ``requests`` to a list of explicit requirements -- a ``requirements.in`` file
+  - **c**\ ompile a version-locked ``requirements.txt`` file for the full dependency tree
+  - **s**\ ync your environment to match the lockfile, by installing and uninstalling packages
+
+.. note:: Other sequences of *add*, *compile*, and *sync* actions are available as ``pipa``, ``pipc``, ``pips``, ``pipac``, and ``pipcs``.
+
+.. code:: zsh
+
+  % pipz install youtube-dl tldr black httpie
+
+.. admonition:: What it does:
+
+  - install each app in its own virtual environment
+  - add each app to the ``PATH``
 
 
 Guiding Ideas
@@ -48,7 +74,7 @@ __ https://github.com/AndydeCleyre/zpy/issues
 Preview
 -------
 
-Try it in isolation with docker or podman if you like, with one of these commands:
+Try it in isolation with docker or podman with one of these commands:
 
 .. code:: console
 
@@ -62,36 +88,63 @@ Replace "alpine" with "ubuntu" or "fedora" if you prefer.
 
 Run ``zpy`` to see a full reference of `Functions & Aliases`_.
 
-Wording
--------
+Installation
+------------
 
-There are just a handful of things you probably wish to do to your dependency
-specifications and virtual environments, and it may be helpful to enumerate them before
-introducing the included helper functions.
+Download ``zpy.plugin.zsh`` and source it in your ``.zshrc``:
 
-Dependency Specification Actions
-````````````````````````````````
+.. code:: zsh
 
-add (``pipa``)
-  add a package to your list of loosely-versioned requirements (*reqs-in*)
+  % git clone https://github.com/andydecleyre/zpy
+  % print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
 
-compile (``pipc``)
-  (re)generate a lockfile of strictly-versioned requirements (*reqs-txt*)
+or `Install with a Plugin Manager`_.
 
-This project expects *reqs-in*\ s to be named as ``*requirements.in`` and
-*reqs-txt*\ s ``*requirements.txt``, but it's not necessary.
+The only hard requirements are Zsh, Python, and fzf,
+with optional additions for minor enhancements or Python2 support.
+For details, see Dependencies_. To get it done, find your platform here:
 
-Virtual Environment Actions
-```````````````````````````
+Alpine
+~~~~~~
 
-create + activate (``envin``, ``activate``/``a8``)
-  i.e. ``python -m venv <path/to/venv>; . <path/to/venv>/bin/activate``
+.. code:: console
 
-deactivate (``envout``/``deactivate``/``da8``)
-  i.e. ``deactivate``
+  $ sudo apk add fzf highlight pcre2-tools python3 zsh
 
-sync (``pips``)
-  install and uninstall packages to exactly match your specifications in one or more *reqs-txt* files
+Arch
+~~~~
+
+.. code:: console
+
+  $ sudo pacman -S fzf highlight python zsh
+
+Debian/Ubuntu
+~~~~~~~~~~~~~
+
+.. code:: console
+
+  $ sudo apt --no-install-recommends install fzf highlight pcre2-utils python3{,-venv} zsh
+
+Fedora
+~~~~~~
+
+.. code:: console
+
+  $ sudo dnf --setopt=install_weak_deps=False install diffutils fzf highlight pcre-tools python3 zsh
+
+MacOS
+~~~~~
+
+.. code:: console
+
+  $ brew install fzf highlight pcre2 python zsh
+
+OpenSUSE
+~~~~~~~~
+
+.. code:: console
+
+  $ sudo zypper in fzf highlight pcre2-tools python3 zsh
 
 Basic Operations
 ----------------
@@ -106,24 +159,8 @@ Basic Operations
   You may also pass as many specific *reqs-txt*\ s as you want to ``envin``,
   in which case it will ensure your environment matches those and only those.
 
-``activate [-i|<proj-dir>]``
-  If you know your venv is already in a good state, and just want to activate it
-  without all that installing and uninstalling, you can save a second by running
-  ``activate`` (or alias ``a8``) instead of ``envin``.
-
-  If the venv doesn't already exist, this will fall back to ``envin``-like behavior
-  (*create*, *activate*, *sync*).
-
-  You may pass a *project* to ``activate``, in order to activate a specific venv
-  regardless of your current folder.
-
-  Pass ``-i`` to interactively select an existing *project*.
-
 ``envout`` and ``da8``
   two totally unnecessary aliases for ``deactivate``
-
-Add, Compile, Sync
-``````````````````
 
 ``pipa [-c <category>] <pkgspec>...``
   append one or more new ``requirements.txt``-syntax__ lines to ``requirements.in``,
@@ -160,8 +197,6 @@ Often, you'll want to do a few of these things in sequence. You can do so with
 ``pipac`` (*add*, *compile*), ``pipacs`` (*add*, *compile*, *sync*), and ``pipcs``
 (*compile*, *sync*).
 
-Tab completion aims to be thorough.
-
 For a full list of functions and their descriptions and arguments, see
 `Functions & Aliases`_.
 
@@ -169,6 +204,19 @@ Bonus Operations
 ----------------
 
 Welcome to the bonus round!
+
+``activate [-i|<proj-dir>]``
+  If you know your venv is already in a good state, and just want to activate it
+  without all that installing and uninstalling, you can save a second by running
+  ``activate`` (or alias ``a8``) instead of ``envin``.
+
+  If the venv doesn't already exist, this will fall back to ``envin``-like behavior
+  (*create*, *activate*, *sync*).
+
+  You may pass a *project* to ``activate``, in order to activate a specific venv
+  regardless of your current folder.
+
+  Pass ``-i`` to interactively select an existing *project*.
 
 ``pypc``
   automatically update your flit__-generated ``pyproject.toml``\ 's categorized
@@ -307,109 +355,139 @@ Functions & Aliases
   # Package manager for venv-isolated scripts (pipx clone; py3 only).
   pipz [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
 
-Installation
-------------
+Extra Scripts
+-------------
 
-Aside from the few Dependencies_ (Zsh, Python, fzf), ``zpy`` is a single file to be sourced in your ``.zshrc``, and
-can be sourced manually or with the help of a Zsh configuration framework or plugin manager.
+You may wish to generate some "standalone" scripts for some of the provided functions --
+particularly ``vpy``. You can do so with, for example:
 
-If you're new to Zsh and want to try a framework, I recommend Zim__.
+.. code:: zsh
 
-__ https://github.com/zimfw/zimfw
+  % .zpy_mkbin vpy ~/.local/bin
 
-Manual
-``````
+Environment Variables
+---------------------
 
-.. code:: console
+Users may want to override these:
 
-  $ cd /wherever/you/want/to/keep/zpy
-  $ git clone https://github.com/andydecleyre/zpy
-  $ print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
+``ZPY_VENVS_WORLD``
+  Each project is associated with: ``$ZPY_VENVS_WORLD/<hash of proj-dir>/<venv-name>``.
 
-If you use a dotfiles manager like yadm_, you can replace that ``git clone`` command,
-instead adding this repo as a submodule, e.g.:
+  ``<venv-name>`` is one or more of: ``venv``, ``venv2``, ``venv-pypy``, ``venv-<pyver>``
 
-.. code:: console
+  ``$(venvs_path <proj-dir>)`` evaluates to ``$ZPY_VENVS_WORLD/<hash of proj-dir>``.
 
-  $ yadm submodule add git@github.com:andydecleyre/zpy
+  This is normally ``~/.local/share/venvs``.
 
-If you want completions, make sure to load ``compinit`` earlier in ``~/.zshrc``:
+``ZPY_PIPZ_PROJECTS`` and ``ZPY_PIPZ_BINS``
+  Installing an app via ``pipz`` puts ``requirements.{in,txt}`` in
+  ``$ZPY_PIPZ_PROJECTS/<appname>``, and executables in ``$ZPY_PIPZ_BINS``.
 
-.. code:: bash
+  These are normally ``~/.local/share/python`` and ``~/.local/bin``.
 
-  autoload -Uz compinit
-  compinit
+Wording
+-------
 
-If you're using a Zsh framework, that's probably done for you already.
+Dependency Specification Actions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Antibody
-````````
+add (``pipa``)
+  add a package to your list of loosely-versioned requirements (*reqs-in*)
 
-.. code:: console
+compile (``pipc``)
+  (re)generate a lockfile of strictly-versioned requirements (*reqs-txt*)
 
-  $ print antibody bundle andydecleyre/zpy >>~/.zshrc
+This project expects *reqs-in*\ s to be named as ``*requirements.in`` and
+*reqs-txt*\ s ``*requirements.txt``, but it's not necessary.
 
-Antigen
-```````
+Virtual Environment Actions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Put ``antigen bundle andydecleyre/zpy`` in your ``~/.zshrc``, before ``antigen apply``.
+create + activate (``envin``, ``activate``/``a8``)
+  i.e. ``python -m venv <path/to/venv>; . <path/to/venv>/bin/activate``
+
+deactivate (``envout``/``deactivate``/``da8``)
+  i.e. ``deactivate``
+
+sync (``pips``)
+  install and uninstall packages to exactly match your specifications in one or more *reqs-txt* files
+
+Install with a Plugin Manager
+-----------------------------
 
 Oh My Zsh
-`````````
+~~~~~~~~~
 
-.. code:: console
+.. code:: zsh
 
-  $ git clone https://github.com/andydecleyre/zpy $ZSH_CUSTOM/plugins/zpy
+  % git clone https://github.com/andydecleyre/zpy $ZSH_CUSTOM/plugins/zpy
 
 Then add ``zpy`` to your ``plugins`` array in ``~/.zshrc``.
 
+yadm
+~~~~
+
+.. code:: zsh
+
+  % yadm submodule add git@github.com:andydecleyre/zpy
+  % print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
+
+Zim
+~~~
+
+.. code:: zsh
+
+  % print zmodule andydecleyre/zpy >>~/.zimrc
+  % zimfw install
+
+Zinit
+~~~~~
+
+.. code:: zsh
+
+  % print zinit light andydecleyre/zpy >>~/.zshrc
+
+Antibody
+~~~~~~~~
+
+.. code:: zsh
+
+  % print antibody bundle andydecleyre/zpy >>~/.zshrc
+
+Antigen
+~~~~~~~
+
+Put ``antigen bundle andydecleyre/zpy`` in your ``~/.zshrc``, before ``antigen apply``.
+
 Prezto
-``````
+~~~~~~
 
-.. code:: console
+.. code:: zsh
 
-  $ git clone https://github.com/andydecleyre/zpy $ZPREZTODIR/modules/zpy
+  % git clone https://github.com/andydecleyre/zpy $ZPREZTODIR/modules/zpy
 
 Then add ``zpy`` to your pmodule list in ``~/.zpreztorc``.
 
 zgen
-````
+~~~~
 
 Put ``zgen load andydecleyre/zpy`` in the plugin section of your ``~/.zshrc``, then
 
-.. code:: console
+.. code:: zsh
 
-    $ zgen reset
-
-Zim
-```
-
-.. code:: console
-
-  $ print zmodule andydecleyre/zpy >>~/.zimrc
-  $ zimfw install
-
-Zinit
-`````
-
-.. code:: console
-
-  $ print -l 'zinit ice cloneopts' 'zinit light andydecleyre/zpy' >>~/.zshrc
+    % zgen reset
 
 zplug
-`````
+~~~~~
 
-Put ``zplug "andydecleyre/zpy"`` in ``~/.zshrc`` (after ``source ~/.zplug/init.zsh``,
-before ``zplug load``), then
+Put ``zplug "andydecleyre/zpy"`` in ``~/.zshrc`` (between ``. ~/.zplug/init.zsh`` and ``zplug load``), then
 
-.. code:: console
+.. code:: zsh
 
-    $ zplug install; zplug load
+    % zplug install; zplug load
 
 Dependencies
 ------------
-
-Jump to `Dependency Installation`_ for a recommended command for your distro.
 
 The big ones:
 
@@ -446,81 +524,6 @@ python2 *and* virtualenv_
   for python2 support
 git
   for easy installation of zpy itself
-
-Dependency Installation
-```````````````````````
-
-Alpine
-~~~~~~
-
-.. code:: console
-
-  $ sudo apk add fzf git highlight pcre2-tools python3 zsh
-
-Arch
-~~~~
-
-.. code:: console
-
-  $ sudo pacman -S fzf git highlight python zsh
-
-Debian/Ubuntu
-~~~~~~~~~~~~~
-
-.. code:: console
-
-  $ sudo apt --no-install-recommends install fzf git highlight pcre2-utils python3{,-venv} zsh
-
-Fedora
-~~~~~~
-
-.. code:: console
-
-  $ sudo dnf --setopt=install_weak_deps=False install diffutils fzf git-core highlight pcre-tools python3 zsh
-
-MacOS
-~~~~~
-
-.. code:: console
-
-  $ brew install fzf git highlight pcre2 python zsh
-
-OpenSUSE
-~~~~~~~~
-
-.. code:: console
-
-  $ sudo zypper in fzf git highlight pcre2-tools python3 zsh
-
-Extra Scripts
--------------
-
-You may wish to generate some "standalone" scripts for some of the provided functions --
-particularly ``vpy``. You can do so with, for example:
-
-.. code:: console
-
-  $ .zpy_mkbin vpy ~/.local/bin
-
-Environment Variables
----------------------
-
-Users may want to override these:
-
-``ZPY_VENVS_WORLD``
-  Each project is associated with: ``$ZPY_VENVS_WORLD/<hash of proj-dir>/<venv-name>``.
-
-  ``<venv-name>`` is one or more of: ``venv``, ``venv2``, ``venv-pypy``, ``venv-<pyver>``
-
-  ``$(venvs_path <proj-dir>)`` evaluates to ``$ZPY_VENVS_WORLD/<hash of proj-dir>``.
-
-  This is normally ``~/.local/share/venvs``.
-
-``ZPY_PIPZ_PROJECTS`` and ``ZPY_PIPZ_BINS``
-  Installing an app via ``pipz`` puts ``requirements.{in,txt}`` in
-  ``$ZPY_PIPZ_PROJECTS/<appname>``, and executables in ``$ZPY_PIPZ_BINS``.
-
-  These are normally ``~/.local/share/python`` and ``~/.local/bin``.
 
 .. |repo| image:: https://img.shields.io/github/size/andydecleyre/zpy/zpy.plugin.zsh?logo=github&label=Code&color=blueviolet
    :alt: GitHub file size in bytes
@@ -566,5 +569,4 @@ Users may want to override these:
 .. _toybox: https://repology.org/project/toybox/versions
 .. _virtualenv: https://repology.org/project/python:virtualenv/versions
 .. _wget: https://repology.org/project/wget/versions
-.. _yadm: https://github.com/TheLocehiliosan/yadm
 .. _zsh: https://repology.org/project/zsh/versions

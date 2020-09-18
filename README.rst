@@ -4,9 +4,6 @@ zpy: Zsh helpers for Python venvs, with pip-tools
 
 |repo| |docsite| |container-alpine| |container-fedora| |container-ubuntu| |container-ci| |contact|
 
-.. image:: https://user-images.githubusercontent.com/1787385/90825505-036d6a80-e307-11ea-801d-ea32a53d5fd4.png
-   :alt: Screenshot: envin; pipacs requests
-
 In a hurry? Jump to Installation_.
 
 Here are Zsh convenience functions to manage Python venvs and packages,
@@ -23,14 +20,17 @@ Examples
 .. code:: zsh
 
   % envin
-  % pipacs requests beautifulsoup4
+  % pipacs requests
 
-What it does:
+.. image:: https://user-images.githubusercontent.com/1787385/93536201-7e31a180-f916-11ea-9a52-aea92b7efc47.png
+   :alt: Screenshot: pipacs requests
 
-- activate a virtual environment for the current folder, creating it first if necessary
-- **a**dd ``requests`` and ``beautifulsoup4`` to a list of explicit requirements -- a ``requirements.in`` file
-- **c**ompile a version-locked ``requirements.txt`` file for the full dependency tree
-- **s**ync your environment to match the lockfile, by installing and uninstalling packages
+.. admonition:: What it does:
+
+  - activate a virtual environment for the current folder, creating it first if necessary
+  - **a**\ dd ``requests`` to a list of explicit requirements -- a ``requirements.in`` file
+  - **c**\ ompile a version-locked ``requirements.txt`` file for the full dependency tree
+  - **s**\ ync your environment to match the lockfile, by installing and uninstalling packages
 
 .. note:: Other sequences of *add*, *compile*, and *sync* actions are available as ``pipa``, ``pipc``, ``pips``, ``pipac``, and ``pipcs``.
 
@@ -38,10 +38,10 @@ What it does:
 
   % pipz install youtube-dl tldr black httpie
 
-What it does:
+.. admonition:: What it does:
 
-- install each app in its own virtual environment
-- add each app to the ``PATH``
+  - install each app in its own virtual environment
+  - add each app to the ``PATH``
 
 .. contents::
    :depth: 1
@@ -391,7 +391,7 @@ Wording
 -------
 
 Dependency Specification Actions
-````````````````````````````````
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 add (``pipa``)
   add a package to your list of loosely-versioned requirements (*reqs-in*)
@@ -403,7 +403,7 @@ This project expects *reqs-in*\ s to be named as ``*requirements.in`` and
 *reqs-txt*\ s ``*requirements.txt``, but it's not necessary.
 
 Virtual Environment Actions
-```````````````````````````
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 create + activate (``envin``, ``activate``/``a8``)
   i.e. ``python -m venv <path/to/venv>; . <path/to/venv>/bin/activate``
@@ -418,7 +418,7 @@ Install with a Plugin Manager
 -----------------------------
 
 Oh My Zsh
-`````````
+~~~~~~~~~
 
 .. code:: zsh
 
@@ -427,7 +427,7 @@ Oh My Zsh
 Then add ``zpy`` to your ``plugins`` array in ``~/.zshrc``.
 
 yadm
-````
+~~~~
 
 .. code:: zsh
 
@@ -435,7 +435,7 @@ yadm
   % print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
 
 Zim
-```
+~~~
 
 .. code:: zsh
 
@@ -443,26 +443,26 @@ Zim
   % zimfw install
 
 Zinit
-`````
+~~~~~
 
 .. code:: zsh
 
   % print zinit light andydecleyre/zpy >>~/.zshrc
 
 Antibody
-````````
+~~~~~~~~
 
 .. code:: zsh
 
   % print antibody bundle andydecleyre/zpy >>~/.zshrc
 
 Antigen
-```````
+~~~~~~~
 
 Put ``antigen bundle andydecleyre/zpy`` in your ``~/.zshrc``, before ``antigen apply``.
 
 Prezto
-``````
+~~~~~~
 
 .. code:: zsh
 
@@ -471,7 +471,7 @@ Prezto
 Then add ``zpy`` to your pmodule list in ``~/.zpreztorc``.
 
 zgen
-````
+~~~~
 
 Put ``zgen load andydecleyre/zpy`` in the plugin section of your ``~/.zshrc``, then
 
@@ -480,7 +480,7 @@ Put ``zgen load andydecleyre/zpy`` in the plugin section of your ``~/.zshrc``, t
     % zgen reset
 
 zplug
-`````
+~~~~~
 
 Put ``zplug "andydecleyre/zpy"`` in ``~/.zshrc`` (between ``. ~/.zplug/init.zsh`` and ``zplug load``), then
 

@@ -70,33 +70,10 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">zpy: Zsh helpers for Python venvs, with pip-tools</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
 <li><a class="reference internal" href="#guiding-ideas">Guiding Ideas</a></li>
 <li><a class="reference internal" href="#preview">Preview</a></li>
-<li><a class="reference internal" href="#wording">Wording</a><ul>
-<li><a class="reference internal" href="#dependency-specification-actions">Dependency Specification Actions</a></li>
-<li><a class="reference internal" href="#virtual-environment-actions">Virtual Environment Actions</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#basic-operations">Basic Operations</a><ul>
-<li><a class="reference internal" href="#add-compile-sync">Add, Compile, Sync</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#bonus-operations">Bonus Operations</a></li>
-<li><a class="reference internal" href="#functions-aliases">Functions &amp; Aliases</a></li>
 <li><a class="reference internal" href="#installation">Installation</a><ul>
-<li><a class="reference internal" href="#manual">Manual</a></li>
-<li><a class="reference internal" href="#antibody">Antibody</a></li>
-<li><a class="reference internal" href="#antigen">Antigen</a></li>
-<li><a class="reference internal" href="#oh-my-zsh">Oh My Zsh</a></li>
-<li><a class="reference internal" href="#prezto">Prezto</a></li>
-<li><a class="reference internal" href="#zgen">zgen</a></li>
-<li><a class="reference internal" href="#zim">Zim</a></li>
-<li><a class="reference internal" href="#zinit">Zinit</a></li>
-<li><a class="reference internal" href="#zplug">zplug</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#dependencies">Dependencies</a><ul>
-<li><a class="reference internal" href="#dependency-installation">Dependency Installation</a><ul>
 <li><a class="reference internal" href="#alpine">Alpine</a></li>
 <li><a class="reference internal" href="#arch">Arch</a></li>
 <li><a class="reference internal" href="#debian-ubuntu">Debian/Ubuntu</a></li>
@@ -105,10 +82,29 @@
 <li><a class="reference internal" href="#opensuse">OpenSUSE</a></li>
 </ul>
 </li>
-</ul>
-</li>
+<li><a class="reference internal" href="#basic-operations">Basic Operations</a></li>
+<li><a class="reference internal" href="#bonus-operations">Bonus Operations</a></li>
+<li><a class="reference internal" href="#functions-aliases">Functions &amp; Aliases</a></li>
 <li><a class="reference internal" href="#extra-scripts">Extra Scripts</a></li>
 <li><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
+<li><a class="reference internal" href="#wording">Wording</a><ul>
+<li><a class="reference internal" href="#dependency-specification-actions">Dependency Specification Actions</a></li>
+<li><a class="reference internal" href="#virtual-environment-actions">Virtual Environment Actions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#install-with-a-plugin-manager">Install with a Plugin Manager</a><ul>
+<li><a class="reference internal" href="#oh-my-zsh">Oh My Zsh</a></li>
+<li><a class="reference internal" href="#yadm">yadm</a></li>
+<li><a class="reference internal" href="#zim">Zim</a></li>
+<li><a class="reference internal" href="#zinit">Zinit</a></li>
+<li><a class="reference internal" href="#antibody">Antibody</a></li>
+<li><a class="reference internal" href="#antigen">Antigen</a></li>
+<li><a class="reference internal" href="#prezto">Prezto</a></li>
+<li><a class="reference internal" href="#zgen">zgen</a></li>
+<li><a class="reference internal" href="#zplug">zplug</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 </ul>
 </li>
 </ul>
@@ -147,12 +143,42 @@
   <div class="section" id="zpy-zsh-helpers-for-python-venvs-with-pip-tools">
 <h1>zpy: Zsh helpers for Python venvs, with pip-tools<a class="headerlink" href="#zpy-zsh-helpers-for-python-venvs-with-pip-tools" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference external" href="https://github.com/andydecleyre/zpy"><img alt="GitHub file size in bytes" src="https://img.shields.io/github/size/andydecleyre/zpy/zpy.plugin.zsh?logo=github&amp;label=Code&amp;color=blueviolet" /></a> <a class="reference external" href="https://zpy.readthedocs.io/en/latest/"><img alt="Documentation Status" src="https://readthedocs.org/projects/zpy/badge/" /></a> <a class="reference external" href="https://quay.io/repository/andykluger/zpy-alpine"><img alt="Demo container - Alpine Linux" src="https://img.shields.io/badge/Container-Quay.io-green?logo=alpine-linux" /></a> <a class="reference external" href="https://quay.io/repository/andykluger/zpy-fedora"><img alt="Demo container - Fedora" src="https://img.shields.io/badge/Container-Quay.io-green?logo=fedora" /></a> <a class="reference external" href="https://quay.io/repository/andykluger/zpy-ubuntu"><img alt="Demo container - Ubuntu" src="https://img.shields.io/badge/Container-Quay.io-green?logo=ubuntu" /></a> <a class="reference external" href="https://andydecleyre.semaphoreci.com/projects/zpy"><img alt="Demo container - Semaphore CI" src="https://andydecleyre.semaphoreci.com/badges/zpy/branches/develop.svg" /></a> <a class="reference external" href="https://t.me/andykluger"><img alt="Contact developer on Telegram" src="https://img.shields.io/badge/Contact-Telegram-blue?logo=telegram" /></a></p>
-<img alt="Screenshot: envin; pipacs requests" src="https://user-images.githubusercontent.com/1787385/90825505-036d6a80-e307-11ea-801d-ea32a53d5fd4.png" />
 <p>In a hurry? Jump to <a class="reference internal" href="#installation">Installation</a>.</p>
 <p>Here are Zsh convenience functions to manage Python venvs and packages,
 using (the excellent) <a class="reference external" href="https://github.com/jazzband/pip-tools">pip-tools</a>. At least a few are very handy.
 None of them should get in your way.</p>
 <p>They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.</p>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% envin
+% pipacs requests
+</pre></div>
+</div>
+<img alt="Screenshot: pipacs requests" src="https://user-images.githubusercontent.com/1787385/93536201-7e31a180-f916-11ea-9a52-aea92b7efc47.png" />
+<div class="admonition-what-it-does admonition">
+<p class="admonition-title">What it does:</p>
+<ul class="simple">
+<li><p>activate a virtual environment for the current folder, creating it first if necessary</p></li>
+<li><p><strong>a</strong>dd <code class="docutils literal notranslate"><span class="pre">requests</span></code> to a list of explicit requirements – a <code class="docutils literal notranslate"><span class="pre">requirements.in</span></code> file</p></li>
+<li><p><strong>c</strong>ompile a version-locked <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file for the full dependency tree</p></li>
+<li><p><strong>s</strong>ync your environment to match the lockfile, by installing and uninstalling packages</p></li>
+</ul>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Other sequences of <em>add</em>, <em>compile</em>, and <em>sync</em> actions are available as <code class="docutils literal notranslate"><span class="pre">pipa</span></code>, <code class="docutils literal notranslate"><span class="pre">pipc</span></code>, <code class="docutils literal notranslate"><span class="pre">pips</span></code>, <code class="docutils literal notranslate"><span class="pre">pipac</span></code>, and <code class="docutils literal notranslate"><span class="pre">pipcs</span></code>.</p>
+</div>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% pipz install youtube-dl tldr black httpie
+</pre></div>
+</div>
+<div class="admonition-what-it-does admonition">
+<p class="admonition-title">What it does:</p>
+<ul class="simple">
+<li><p>install each app in its own virtual environment</p></li>
+<li><p>add each app to the <code class="docutils literal notranslate"><span class="pre">PATH</span></code></p></li>
+</ul>
+</div>
+</div>
 <div class="section" id="guiding-ideas">
 <h2>Guiding Ideas<a class="headerlink" href="#guiding-ideas" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -176,7 +202,7 @@ If they can be a friendlier neighbor to your workflows, file an <a class="refere
 </div>
 <div class="section" id="preview">
 <h2>Preview<a class="headerlink" href="#preview" title="Permalink to this headline">¶</a></h2>
-<p>Try it in isolation with docker or podman if you like, with one of these commands:</p>
+<p>Try it in isolation with docker or podman with one of these commands:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> docker run --net<span class="o">=</span>host -it --rm quay.io/andykluger/zpy-alpine:master
 <span class="gp">$</span> podman run -it --rm quay.io/andykluger/zpy-alpine:master
 </pre></div>
@@ -185,32 +211,52 @@ If they can be a friendlier neighbor to your workflows, file an <a class="refere
 <img alt="Animated demo of zpy functions: envin, pipac, pips" src="https://gist.githubusercontent.com/AndydeCleyre/530538f4afde15278cad3411f3d14e24/raw/17aaeb90ef29817c73d5abec81f5b39caef01d7d/demo.svg?sanitize=true" />
 <p>Run <code class="docutils literal notranslate"><span class="pre">zpy</span></code> to see a full reference of <a class="reference internal" href="#functions-aliases">Functions &amp; Aliases</a>.</p>
 </div>
-<div class="section" id="wording">
-<h2>Wording<a class="headerlink" href="#wording" title="Permalink to this headline">¶</a></h2>
-<p>There are just a handful of things you probably wish to do to your dependency
-specifications and virtual environments, and it may be helpful to enumerate them before
-introducing the included helper functions.</p>
-<div class="section" id="dependency-specification-actions">
-<h3>Dependency Specification Actions<a class="headerlink" href="#dependency-specification-actions" title="Permalink to this headline">¶</a></h3>
-<dl class="simple">
-<dt>add (<code class="docutils literal notranslate"><span class="pre">pipa</span></code>)</dt><dd><p>add a package to your list of loosely-versioned requirements (<em>reqs-in</em>)</p>
-</dd>
-<dt>compile (<code class="docutils literal notranslate"><span class="pre">pipc</span></code>)</dt><dd><p>(re)generate a lockfile of strictly-versioned requirements (<em>reqs-txt</em>)</p>
-</dd>
-</dl>
-<p>This project expects <em>reqs-in</em>s to be named as <code class="docutils literal notranslate"><span class="pre">*requirements.in</span></code> and
-<em>reqs-txt</em>s <code class="docutils literal notranslate"><span class="pre">*requirements.txt</span></code>, but it’s not necessary.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Download <code class="docutils literal notranslate"><span class="pre">zpy.plugin.zsh</span></code> and source it in your <code class="docutils literal notranslate"><span class="pre">.zshrc</span></code>:</p>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% git clone https://github.com/andydecleyre/zpy
+% print <span class="s2">&quot;. </span><span class="nv">$PWD</span><span class="s2">/zpy/zpy.plugin.zsh&quot;</span> &gt;&gt;~/.zshrc
+</pre></div>
 </div>
-<div class="section" id="virtual-environment-actions">
-<h3>Virtual Environment Actions<a class="headerlink" href="#virtual-environment-actions" title="Permalink to this headline">¶</a></h3>
-<dl class="simple">
-<dt>create + activate (<code class="docutils literal notranslate"><span class="pre">envin</span></code>, <code class="docutils literal notranslate"><span class="pre">activate</span></code>/<code class="docutils literal notranslate"><span class="pre">a8</span></code>)</dt><dd><p>i.e. <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">&lt;path/to/venv&gt;;</span> <span class="pre">.</span> <span class="pre">&lt;path/to/venv&gt;/bin/activate</span></code></p>
-</dd>
-<dt>deactivate (<code class="docutils literal notranslate"><span class="pre">envout</span></code>/<code class="docutils literal notranslate"><span class="pre">deactivate</span></code>/<code class="docutils literal notranslate"><span class="pre">da8</span></code>)</dt><dd><p>i.e. <code class="docutils literal notranslate"><span class="pre">deactivate</span></code></p>
-</dd>
-<dt>sync (<code class="docutils literal notranslate"><span class="pre">pips</span></code>)</dt><dd><p>install and uninstall packages to exactly match your specifications in one or more <em>reqs-txt</em> files</p>
-</dd>
-</dl>
+<p>or <a class="reference internal" href="#install-with-a-plugin-manager">Install with a Plugin Manager</a>.</p>
+<p>The only hard requirements are Zsh, Python, and fzf,
+with optional additions for minor enhancements or Python2 support.
+For details, see <a class="reference internal" href="#dependencies">Dependencies</a>. To get it done, find your platform here:</p>
+<div class="section" id="alpine">
+<h3>Alpine<a class="headerlink" href="#alpine" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo apk add fzf highlight pcre2-tools python3 zsh
+</pre></div>
+</div>
+</div>
+<div class="section" id="arch">
+<h3>Arch<a class="headerlink" href="#arch" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo pacman -S fzf highlight python zsh
+</pre></div>
+</div>
+</div>
+<div class="section" id="debian-ubuntu">
+<h3>Debian/Ubuntu<a class="headerlink" href="#debian-ubuntu" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo apt --no-install-recommends install fzf highlight pcre2-utils python3<span class="o">{</span>,-venv<span class="o">}</span> zsh
+</pre></div>
+</div>
+</div>
+<div class="section" id="fedora">
+<h3>Fedora<a class="headerlink" href="#fedora" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo dnf --setopt<span class="o">=</span><span class="nv">install_weak_deps</span><span class="o">=</span>False install diffutils fzf highlight pcre-tools python3 zsh
+</pre></div>
+</div>
+</div>
+<div class="section" id="macos">
+<h3>MacOS<a class="headerlink" href="#macos" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> brew install fzf highlight pcre2 python zsh
+</pre></div>
+</div>
+</div>
+<div class="section" id="opensuse">
+<h3>OpenSUSE<a class="headerlink" href="#opensuse" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo zypper in fzf highlight pcre2-tools python3 zsh
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="basic-operations">
@@ -226,21 +272,8 @@ introducing the included helper functions.</p>
 <p>You may also pass as many specific <em>reqs-txt</em>s as you want to <code class="docutils literal notranslate"><span class="pre">envin</span></code>,
 in which case it will ensure your environment matches those and only those.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">activate</span> <span class="pre">[-i|&lt;proj-dir&gt;]</span></code></dt><dd><p>If you know your venv is already in a good state, and just want to activate it
-without all that installing and uninstalling, you can save a second by running
-<code class="docutils literal notranslate"><span class="pre">activate</span></code> (or alias <code class="docutils literal notranslate"><span class="pre">a8</span></code>) instead of <code class="docutils literal notranslate"><span class="pre">envin</span></code>.</p>
-<p>If the venv doesn’t already exist, this will fall back to <code class="docutils literal notranslate"><span class="pre">envin</span></code>-like behavior
-(<em>create</em>, <em>activate</em>, <em>sync</em>).</p>
-<p>You may pass a <em>project</em> to <code class="docutils literal notranslate"><span class="pre">activate</span></code>, in order to activate a specific venv
-regardless of your current folder.</p>
-<p>Pass <code class="docutils literal notranslate"><span class="pre">-i</span></code> to interactively select an existing <em>project</em>.</p>
-</dd>
 <dt><code class="docutils literal notranslate"><span class="pre">envout</span></code> and <code class="docutils literal notranslate"><span class="pre">da8</span></code></dt><dd><p>two totally unnecessary aliases for <code class="docutils literal notranslate"><span class="pre">deactivate</span></code></p>
 </dd>
-</dl>
-<div class="section" id="add-compile-sync">
-<h3>Add, Compile, Sync<a class="headerlink" href="#add-compile-sync" title="Permalink to this headline">¶</a></h3>
-<dl>
 <dt><code class="docutils literal notranslate"><span class="pre">pipa</span> <span class="pre">[-c</span> <span class="pre">&lt;category&gt;]</span> <span class="pre">&lt;pkgspec&gt;...</span></code></dt><dd><p>append one or more new <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>-<a class="reference external" href="https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format">syntax</a> lines to <code class="docutils literal notranslate"><span class="pre">requirements.in</span></code>,
 or <code class="docutils literal notranslate"><span class="pre">&lt;category&gt;-requirements.in</span></code></p>
 <p>You can also add special <a class="reference external" href="https://github.com/jazzband/pip-tools#workflow-for-layered-requirements">constraints</a> for layered requirements workflows, or add
@@ -265,15 +298,22 @@ uninstalling packages as necessary</p>
 <p>Often, you’ll want to do a few of these things in sequence. You can do so with
 <code class="docutils literal notranslate"><span class="pre">pipac</span></code> (<em>add</em>, <em>compile</em>), <code class="docutils literal notranslate"><span class="pre">pipacs</span></code> (<em>add</em>, <em>compile</em>, <em>sync</em>), and <code class="docutils literal notranslate"><span class="pre">pipcs</span></code>
 (<em>compile</em>, <em>sync</em>).</p>
-<p>Tab completion aims to be thorough.</p>
 <p>For a full list of functions and their descriptions and arguments, see
 <a class="reference internal" href="#functions-aliases">Functions &amp; Aliases</a>.</p>
-</div>
 </div>
 <div class="section" id="bonus-operations">
 <h2>Bonus Operations<a class="headerlink" href="#bonus-operations" title="Permalink to this headline">¶</a></h2>
 <p>Welcome to the bonus round!</p>
-<dl class="simple">
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">activate</span> <span class="pre">[-i|&lt;proj-dir&gt;]</span></code></dt><dd><p>If you know your venv is already in a good state, and just want to activate it
+without all that installing and uninstalling, you can save a second by running
+<code class="docutils literal notranslate"><span class="pre">activate</span></code> (or alias <code class="docutils literal notranslate"><span class="pre">a8</span></code>) instead of <code class="docutils literal notranslate"><span class="pre">envin</span></code>.</p>
+<p>If the venv doesn’t already exist, this will fall back to <code class="docutils literal notranslate"><span class="pre">envin</span></code>-like behavior
+(<em>create</em>, <em>activate</em>, <em>sync</em>).</p>
+<p>You may pass a <em>project</em> to <code class="docutils literal notranslate"><span class="pre">activate</span></code>, in order to activate a specific venv
+regardless of your current folder.</p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">-i</span></code> to interactively select an existing <em>project</em>.</p>
+</dd>
 <dt><code class="docutils literal notranslate"><span class="pre">pypc</span></code></dt><dd><p>automatically update your <a class="reference external" href="https://flit.readthedocs.io/en/latest/">flit</a>-generated <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>‘s categorized
 dependencies from the information in your <em>reqs-in</em>s</p>
 </dd>
@@ -404,33 +444,86 @@ pipz <span class="o">[</span>install<span class="p">|</span>uninstall<span class
 </pre></div>
 </div>
 </div>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>Aside from the few <a class="reference internal" href="#dependencies">Dependencies</a> (Zsh, Python, fzf), <code class="docutils literal notranslate"><span class="pre">zpy</span></code> is a single file to be sourced in your <code class="docutils literal notranslate"><span class="pre">.zshrc</span></code>, and
-can be sourced manually or with the help of a Zsh configuration framework or plugin manager.</p>
-<p>If you’re new to Zsh and want to try a framework, I recommend <a class="reference external" href="https://github.com/zimfw/zimfw">Zim</a>.</p>
-<div class="section" id="manual">
-<h3>Manual<a class="headerlink" href="#manual" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">cd</span> /wherever/you/want/to/keep/zpy
-<span class="gp">$</span> git clone https://github.com/andydecleyre/zpy
-<span class="gp">$</span> print <span class="s2">&quot;. </span><span class="nv">$PWD</span><span class="s2">/zpy/zpy.plugin.zsh&quot;</span> &gt;&gt;~/.zshrc
+<div class="section" id="extra-scripts">
+<h2>Extra Scripts<a class="headerlink" href="#extra-scripts" title="Permalink to this headline">¶</a></h2>
+<p>You may wish to generate some “standalone” scripts for some of the provided functions –
+particularly <code class="docutils literal notranslate"><span class="pre">vpy</span></code>. You can do so with, for example:</p>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% .zpy_mkbin vpy ~/.local/bin
 </pre></div>
 </div>
-<p>If you use a dotfiles manager like <a class="reference external" href="https://github.com/TheLocehiliosan/yadm">yadm</a>, you can replace that <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code> command,
-instead adding this repo as a submodule, e.g.:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> yadm submodule add git@github.com:andydecleyre/zpy
+</div>
+<div class="section" id="environment-variables">
+<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Permalink to this headline">¶</a></h2>
+<p>Users may want to override these:</p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">ZPY_VENVS_WORLD</span></code></dt><dd><p>Each project is associated with: <code class="docutils literal notranslate"><span class="pre">$ZPY_VENVS_WORLD/&lt;hash</span> <span class="pre">of</span> <span class="pre">proj-dir&gt;/&lt;venv-name&gt;</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;venv-name&gt;</span></code> is one or more of: <code class="docutils literal notranslate"><span class="pre">venv</span></code>, <code class="docutils literal notranslate"><span class="pre">venv2</span></code>, <code class="docutils literal notranslate"><span class="pre">venv-pypy</span></code>, <code class="docutils literal notranslate"><span class="pre">venv-&lt;pyver&gt;</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">$(venvs_path</span> <span class="pre">&lt;proj-dir&gt;)</span></code> evaluates to <code class="docutils literal notranslate"><span class="pre">$ZPY_VENVS_WORLD/&lt;hash</span> <span class="pre">of</span> <span class="pre">proj-dir&gt;</span></code>.</p>
+<p>This is normally <code class="docutils literal notranslate"><span class="pre">~/.local/share/venvs</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">ZPY_PIPZ_PROJECTS</span></code> and <code class="docutils literal notranslate"><span class="pre">ZPY_PIPZ_BINS</span></code></dt><dd><p>Installing an app via <code class="docutils literal notranslate"><span class="pre">pipz</span></code> puts <code class="docutils literal notranslate"><span class="pre">requirements.{in,txt}</span></code> in
+<code class="docutils literal notranslate"><span class="pre">$ZPY_PIPZ_PROJECTS/&lt;appname&gt;</span></code>, and executables in <code class="docutils literal notranslate"><span class="pre">$ZPY_PIPZ_BINS</span></code>.</p>
+<p>These are normally <code class="docutils literal notranslate"><span class="pre">~/.local/share/python</span></code> and <code class="docutils literal notranslate"><span class="pre">~/.local/bin</span></code>.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="wording">
+<h2>Wording<a class="headerlink" href="#wording" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="dependency-specification-actions">
+<h3>Dependency Specification Actions<a class="headerlink" href="#dependency-specification-actions" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>add (<code class="docutils literal notranslate"><span class="pre">pipa</span></code>)</dt><dd><p>add a package to your list of loosely-versioned requirements (<em>reqs-in</em>)</p>
+</dd>
+<dt>compile (<code class="docutils literal notranslate"><span class="pre">pipc</span></code>)</dt><dd><p>(re)generate a lockfile of strictly-versioned requirements (<em>reqs-txt</em>)</p>
+</dd>
+</dl>
+<p>This project expects <em>reqs-in</em>s to be named as <code class="docutils literal notranslate"><span class="pre">*requirements.in</span></code> and
+<em>reqs-txt</em>s <code class="docutils literal notranslate"><span class="pre">*requirements.txt</span></code>, but it’s not necessary.</p>
+</div>
+<div class="section" id="virtual-environment-actions">
+<h3>Virtual Environment Actions<a class="headerlink" href="#virtual-environment-actions" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>create + activate (<code class="docutils literal notranslate"><span class="pre">envin</span></code>, <code class="docutils literal notranslate"><span class="pre">activate</span></code>/<code class="docutils literal notranslate"><span class="pre">a8</span></code>)</dt><dd><p>i.e. <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">&lt;path/to/venv&gt;;</span> <span class="pre">.</span> <span class="pre">&lt;path/to/venv&gt;/bin/activate</span></code></p>
+</dd>
+<dt>deactivate (<code class="docutils literal notranslate"><span class="pre">envout</span></code>/<code class="docutils literal notranslate"><span class="pre">deactivate</span></code>/<code class="docutils literal notranslate"><span class="pre">da8</span></code>)</dt><dd><p>i.e. <code class="docutils literal notranslate"><span class="pre">deactivate</span></code></p>
+</dd>
+<dt>sync (<code class="docutils literal notranslate"><span class="pre">pips</span></code>)</dt><dd><p>install and uninstall packages to exactly match your specifications in one or more <em>reqs-txt</em> files</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="install-with-a-plugin-manager">
+<h2>Install with a Plugin Manager<a class="headerlink" href="#install-with-a-plugin-manager" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="oh-my-zsh">
+<h3>Oh My Zsh<a class="headerlink" href="#oh-my-zsh" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% git clone https://github.com/andydecleyre/zpy <span class="nv">$ZSH_CUSTOM</span>/plugins/zpy
 </pre></div>
 </div>
-<p>If you want completions, make sure to load <code class="docutils literal notranslate"><span class="pre">compinit</span></code> earlier in <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>autoload -Uz compinit
-compinit
+<p>Then add <code class="docutils literal notranslate"><span class="pre">zpy</span></code> to your <code class="docutils literal notranslate"><span class="pre">plugins</span></code> array in <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code>.</p>
+</div>
+<div class="section" id="yadm">
+<h3>yadm<a class="headerlink" href="#yadm" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% yadm submodule add git@github.com:andydecleyre/zpy
+% print <span class="s2">&quot;. </span><span class="nv">$PWD</span><span class="s2">/zpy/zpy.plugin.zsh&quot;</span> &gt;&gt;~/.zshrc
 </pre></div>
 </div>
-<p>If you’re using a Zsh framework, that’s probably done for you already.</p>
+</div>
+<div class="section" id="zim">
+<h3>Zim<a class="headerlink" href="#zim" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% print zmodule andydecleyre/zpy &gt;&gt;~/.zimrc
+% zimfw install
+</pre></div>
+</div>
+</div>
+<div class="section" id="zinit">
+<h3>Zinit<a class="headerlink" href="#zinit" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% print zinit light andydecleyre/zpy &gt;&gt;~/.zshrc
+</pre></div>
+</div>
 </div>
 <div class="section" id="antibody">
 <h3>Antibody<a class="headerlink" href="#antibody" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> print antibody bundle andydecleyre/zpy &gt;&gt;~/.zshrc
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% print antibody bundle andydecleyre/zpy &gt;&gt;~/.zshrc
 </pre></div>
 </div>
 </div>
@@ -438,16 +531,9 @@ compinit
 <h3>Antigen<a class="headerlink" href="#antigen" title="Permalink to this headline">¶</a></h3>
 <p>Put <code class="docutils literal notranslate"><span class="pre">antigen</span> <span class="pre">bundle</span> <span class="pre">andydecleyre/zpy</span></code> in your <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code>, before <code class="docutils literal notranslate"><span class="pre">antigen</span> <span class="pre">apply</span></code>.</p>
 </div>
-<div class="section" id="oh-my-zsh">
-<h3>Oh My Zsh<a class="headerlink" href="#oh-my-zsh" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git clone https://github.com/andydecleyre/zpy <span class="nv">$ZSH_CUSTOM</span>/plugins/zpy
-</pre></div>
-</div>
-<p>Then add <code class="docutils literal notranslate"><span class="pre">zpy</span></code> to your <code class="docutils literal notranslate"><span class="pre">plugins</span></code> array in <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code>.</p>
-</div>
 <div class="section" id="prezto">
 <h3>Prezto<a class="headerlink" href="#prezto" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git clone https://github.com/andydecleyre/zpy <span class="nv">$ZPREZTODIR</span>/modules/zpy
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% git clone https://github.com/andydecleyre/zpy <span class="nv">$ZPREZTODIR</span>/modules/zpy
 </pre></div>
 </div>
 <p>Then add <code class="docutils literal notranslate"><span class="pre">zpy</span></code> to your pmodule list in <code class="docutils literal notranslate"><span class="pre">~/.zpreztorc</span></code>.</p>
@@ -455,35 +541,20 @@ compinit
 <div class="section" id="zgen">
 <h3>zgen<a class="headerlink" href="#zgen" title="Permalink to this headline">¶</a></h3>
 <p>Put <code class="docutils literal notranslate"><span class="pre">zgen</span> <span class="pre">load</span> <span class="pre">andydecleyre/zpy</span></code> in the plugin section of your <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code>, then</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> zgen reset
-</pre></div>
-</div>
-</div>
-<div class="section" id="zim">
-<h3>Zim<a class="headerlink" href="#zim" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> print zmodule andydecleyre/zpy &gt;&gt;~/.zimrc
-<span class="gp">$</span> zimfw install
-</pre></div>
-</div>
-</div>
-<div class="section" id="zinit">
-<h3>Zinit<a class="headerlink" href="#zinit" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> print -l <span class="s1">&#39;zinit ice cloneopts&#39;</span> <span class="s1">&#39;zinit light andydecleyre/zpy&#39;</span> &gt;&gt;~/.zshrc
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% zgen reset
 </pre></div>
 </div>
 </div>
 <div class="section" id="zplug">
 <h3>zplug<a class="headerlink" href="#zplug" title="Permalink to this headline">¶</a></h3>
-<p>Put <code class="docutils literal notranslate"><span class="pre">zplug</span> <span class="pre">&quot;andydecleyre/zpy&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code> (after <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">~/.zplug/init.zsh</span></code>,
-before <code class="docutils literal notranslate"><span class="pre">zplug</span> <span class="pre">load</span></code>), then</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> zplug install<span class="p">;</span> zplug load
+<p>Put <code class="docutils literal notranslate"><span class="pre">zplug</span> <span class="pre">&quot;andydecleyre/zpy&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code> (between <code class="docutils literal notranslate"><span class="pre">.</span> <span class="pre">~/.zplug/init.zsh</span></code> and <code class="docutils literal notranslate"><span class="pre">zplug</span> <span class="pre">load</span></code>), then</p>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>% zplug install<span class="p">;</span> zplug load
 </pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<p>Jump to <a class="reference internal" href="#dependency-installation">Dependency Installation</a> for a recommended command for your distro.</p>
 <p>The big ones:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://repology.org/project/zsh/versions">zsh</a></p></li>
@@ -518,68 +589,6 @@ before <code class="docutils literal notranslate"><span class="pre">zplug</span>
 <dt>python2 <em>and</em> <a class="reference external" href="https://repology.org/project/python:virtualenv/versions">virtualenv</a></dt><dd><p>for python2 support</p>
 </dd>
 <dt>git</dt><dd><p>for easy installation of zpy itself</p>
-</dd>
-</dl>
-<div class="section" id="dependency-installation">
-<h3>Dependency Installation<a class="headerlink" href="#dependency-installation" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="alpine">
-<h4>Alpine<a class="headerlink" href="#alpine" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo apk add fzf git highlight pcre2-tools python3 zsh
-</pre></div>
-</div>
-</div>
-<div class="section" id="arch">
-<h4>Arch<a class="headerlink" href="#arch" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo pacman -S fzf git highlight python zsh
-</pre></div>
-</div>
-</div>
-<div class="section" id="debian-ubuntu">
-<h4>Debian/Ubuntu<a class="headerlink" href="#debian-ubuntu" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo apt --no-install-recommends install fzf git highlight pcre2-utils python3<span class="o">{</span>,-venv<span class="o">}</span> zsh
-</pre></div>
-</div>
-</div>
-<div class="section" id="fedora">
-<h4>Fedora<a class="headerlink" href="#fedora" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo dnf --setopt<span class="o">=</span><span class="nv">install_weak_deps</span><span class="o">=</span>False install diffutils fzf git-core highlight pcre-tools python3 zsh
-</pre></div>
-</div>
-</div>
-<div class="section" id="macos">
-<h4>MacOS<a class="headerlink" href="#macos" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> brew install fzf git highlight pcre2 python zsh
-</pre></div>
-</div>
-</div>
-<div class="section" id="opensuse">
-<h4>OpenSUSE<a class="headerlink" href="#opensuse" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo zypper in fzf git highlight pcre2-tools python3 zsh
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="section" id="extra-scripts">
-<h2>Extra Scripts<a class="headerlink" href="#extra-scripts" title="Permalink to this headline">¶</a></h2>
-<p>You may wish to generate some “standalone” scripts for some of the provided functions –
-particularly <code class="docutils literal notranslate"><span class="pre">vpy</span></code>. You can do so with, for example:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> .zpy_mkbin vpy ~/.local/bin
-</pre></div>
-</div>
-</div>
-<div class="section" id="environment-variables">
-<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Permalink to this headline">¶</a></h2>
-<p>Users may want to override these:</p>
-<dl>
-<dt><code class="docutils literal notranslate"><span class="pre">ZPY_VENVS_WORLD</span></code></dt><dd><p>Each project is associated with: <code class="docutils literal notranslate"><span class="pre">$ZPY_VENVS_WORLD/&lt;hash</span> <span class="pre">of</span> <span class="pre">proj-dir&gt;/&lt;venv-name&gt;</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">&lt;venv-name&gt;</span></code> is one or more of: <code class="docutils literal notranslate"><span class="pre">venv</span></code>, <code class="docutils literal notranslate"><span class="pre">venv2</span></code>, <code class="docutils literal notranslate"><span class="pre">venv-pypy</span></code>, <code class="docutils literal notranslate"><span class="pre">venv-&lt;pyver&gt;</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">$(venvs_path</span> <span class="pre">&lt;proj-dir&gt;)</span></code> evaluates to <code class="docutils literal notranslate"><span class="pre">$ZPY_VENVS_WORLD/&lt;hash</span> <span class="pre">of</span> <span class="pre">proj-dir&gt;</span></code>.</p>
-<p>This is normally <code class="docutils literal notranslate"><span class="pre">~/.local/share/venvs</span></code>.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">ZPY_PIPZ_PROJECTS</span></code> and <code class="docutils literal notranslate"><span class="pre">ZPY_PIPZ_BINS</span></code></dt><dd><p>Installing an app via <code class="docutils literal notranslate"><span class="pre">pipz</span></code> puts <code class="docutils literal notranslate"><span class="pre">requirements.{in,txt}</span></code> in
-<code class="docutils literal notranslate"><span class="pre">$ZPY_PIPZ_PROJECTS/&lt;appname&gt;</span></code>, and executables in <code class="docutils literal notranslate"><span class="pre">$ZPY_PIPZ_BINS</span></code>.</p>
-<p>These are normally <code class="docutils literal notranslate"><span class="pre">~/.local/share/python</span></code> and <code class="docutils literal notranslate"><span class="pre">~/.local/bin</span></code>.</p>
 </dd>
 </dl>
 </div>
