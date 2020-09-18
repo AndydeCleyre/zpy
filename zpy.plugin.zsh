@@ -18,7 +18,7 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
 ## Syntax highlighter, reading stdin.
 .zpy_hlt () {  # <syntax>
     emulate -L zsh
-    [[ $1 ]] || return 1
+    [[ $1 ]] || return
     rehash
     if [[ $1 == diff ]]; then
         local diffhi
@@ -149,18 +149,20 @@ zpy () {  # [<zpy-function>...]
 .zpy_path_hash () {  # <path>
     emulate -L zsh
     unset REPLY
-    [[ $1 ]] || return 1
+    [[ $1 ]] || return
     if (( $+commands[md5sum] )); then
         REPLY="${$(md5sum =(<<<${1:P}))%% *}"
     else
         REPLY="$(md5 -qs ${1:P})"
     fi
+    [[ $REPLY ]] || return
 }
 
 .zpy_venvs_path () {  # [<proj-dir>]
     emulate -L zsh
     unset REPLY
-    .zpy_path_hash ${${1:-$PWD}:P}
+    [[ $ZPY_VENVS_WORLD ]] || return
+    .zpy_path_hash ${${1:-$PWD}:P} || return
     REPLY="${ZPY_VENVS_WORLD}/${REPLY}"
 }
 
@@ -178,10 +180,10 @@ venvs_path () {  # [-i|<proj-dir>]
     if [[ $1 == --help ]]; then zpy $0; return; fi
     local REPLY
     if [[ $1 == -i ]]; then
-        .zpy_chooseproj
+        .zpy_chooseproj || return
         venvs_path "$REPLY"
     else
-        .zpy_venvs_path $@
+        .zpy_venvs_path $@ || return
         print -rn -- $REPLY
     fi
 }
@@ -192,9 +194,6 @@ venvs_path () {  # [-i|<proj-dir>]
     print -rPu2 \
         '%F{yellow}> You probably want to activate a venv with 'activate' (or 'a8'), first.' \
         "%B::%b ${${${PWD:P}/#~\//~/}/%${PWD:t}/%B${PWD:t}%b}%f"
-    # read -q "?Continue anyway [yN]? "
-    # [[ $REPLY == y ]] && zf_rm -rf $orphaned_venv
-            # print '\n'
 }
 
 # Install and upgrade packages.
@@ -251,7 +250,7 @@ pips () {  # [<reqs-txt>...]
     if (( ! $+commands[pip-compile] )); then .zpy_please_activate pip-compile; return 1; fi
     local faildir
     if [[ $1 == --faildir ]]; then faildir=${2:a}; shift 2; fi
-    [[ $1 ]] || return 1
+    [[ $1 ]] || return
     local reqsin=$1; shift
     local reqstxt=${reqsin:r}.txt outswitch
     for outswitch in -o --output-file; do
@@ -284,7 +283,7 @@ pips () {  # [<reqs-txt>...]
         pipcompile_args+=(${@[$@[(i)--]+1,-1]})
         shift -p "$(( $#pipcompile_args+1 ))"
     fi
-    [[ $1 ]] || return 1
+    [[ $1 ]] || return
     local reqsin=$1; shift
     local reqs=($@)
     local reqstxt=${reqsin:r}.txt
@@ -462,9 +461,9 @@ reqshow () {  # [<folder>...]
 
 .zpy_envin () {  # <venv-name> <venv-init-cmd...> [-- <reqs-txt>...]
     emulate -L zsh
-    [[ $2 && $1 ]] || return 1
+    [[ $2 && $1 ]] || return
     local REPLY
-    .zpy_venvs_path
+    .zpy_venvs_path || return
     local vpath=$REPLY
 
     local venv=$vpath/$1; shift
@@ -583,7 +582,7 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
         return
     fi
     local projdir=${${1:-$PWD}:P}
-    .zpy_venvs_path $projdir
+    .zpy_venvs_path $projdir || return
     local activator=$REPLY/$venv_name/bin/activate
     if [[ ! -r $activator ]]; then
         trap "cd ${(q-)PWD}" EXIT INT QUIT
@@ -608,8 +607,8 @@ alias da8="deactivate"
 .zpy_whichvpy () {  # <venv-name> <script>
     emulate -L zsh
     unset REPLY
-    [[ $2 && $1 ]] || return 1
-    .zpy_venvs_path ${2:a:h}
+    [[ $2 && $1 ]] || return
+    .zpy_venvs_path ${2:a:h} || return
     REPLY=$REPLY/$1/bin/python
 }
 
@@ -643,7 +642,7 @@ vpyshebang () {  # [--py 2|pypy|current] <script>...
         if [[ $vpyscript ]]; then
             shebang="#!${vpyscript}"
         else
-            .zpy_whichvpy $venv_name $1
+            .zpy_whichvpy $venv_name $1 || return
             shebang="#!${REPLY}"
         fi
         lines=("${(@f)$(<$1)}")
@@ -686,7 +685,6 @@ vrun () {  # [--py 2|pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-ar
             fi
             .zpy_venvs_path $projdir
             path=($REPLY/$vname/bin $path)
-            # TODO: error if venvs_path/vname doesn't exist?
         fi
         $@
     )
@@ -734,7 +732,7 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
         return 1
     fi
     local REPLY
-    .zpy_venvs_path $projdir
+    .zpy_venvs_path $projdir || return
     local venv=${REPLY}/${venv_name}
 
     if [[ $linkonly ]]; then
@@ -759,7 +757,7 @@ prunevenvs () {  # [-y]
     local noconfirm=$1 orphaned_venv proj REPLY
     for proj in ${ZPY_VENVS_WORLD}/*/project(@N:P); do
         if [[ ! -d $proj ]]; then
-            .zpy_venvs_path $proj
+            .zpy_venvs_path $proj || return
             orphaned_venv=$REPLY
             print -rl "Missing: ${proj/#~\//~/}" "Orphan: $(du -hs $orphaned_venv)"
             if [[ $noconfirm ]]; then
@@ -776,10 +774,8 @@ prunevenvs () {  # [-y]
     emulate -L zsh
     local vname=venv vrun_args=()
     if [[ $1 == --py ]]; then vrun_args+=($1 $2); shift 2; fi
-    [[ -d $1 ]] || return 1
+    [[ -d $1 ]] || return
     vrun_args+=($1)
-    # local REPLY
-    # .zpy_venvs_path $1
     local cells=() proj_cell="${${1:P}/#~\//~/}"
     rehash
     if (( $+commands[jq] )); then
@@ -846,7 +842,7 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
             shift 2
         fi
     done
-    [[ $1 ]] || return 1
+    [[ $1 ]] || return
     (
         set -e
         cd $1
@@ -979,7 +975,7 @@ if pyproject.is_file():
     zf_mkdir -p ${jsonfile:h}
     [[ -r $jsonfile ]] || >$jsonfile <<<'{}'
     local REPLY
-    .zpy_venvs_path
+    .zpy_venvs_path || return
     local pypath=${REPLY}/${venv_name}/bin/python
     print -rPu2 \
         "%F{cyan}> %F{magenta}writing%F{cyan} interpreter ${pypath/#~\//~/}" \
@@ -1046,7 +1042,7 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
 
 .zpy_is_under () {  # <kid_path> <ok_parent>...
     emulate -L zsh
-    [[ $2 && $1 ]] || return 1
+    [[ $2 && $1 ]] || return
     local kid=${1:a} folder ancestor; shift
     for 1; do
         folder=$kid
@@ -1062,7 +1058,7 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
 .zpy_pipzlistrow () {  # <projects_home> <bin>
     # TODO: Still a bit slow (roughly 'pip list' * app-count)
     emulate -L zsh -o extendedglob
-    [[ $2 && $1 ]] || return 1
+    [[ $2 && $1 ]] || return
     rehash
     local projects_home=${1:a}
     local bin=$2
@@ -1114,7 +1110,7 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
 .zpy_pkgspec2name () {  # <pkgspec>
     emulate -L zsh
     unset REPLY
-    [[ $1 ]] || return 1
+    [[ $1 ]] || return
     local pkgspec=${1##*\#egg=} badspec
     # NOTE: this could break on comments, though irrelevant when used by pipz as we do
     # e.g. 'pipz install "<url>#egg=<name>  # hey look at me"'
@@ -1135,7 +1131,7 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
 .zpy_all_replies () {  # <func> <arg>...
     emulate -L zsh
     reply=()
-    [[ $2 && $1 ]] || return 1
+    [[ $2 && $1 ]] || return
     local REPLY f=$1; shift
     for 1; do $f $1 || return; reply+=($REPLY); done
 }
@@ -1144,7 +1140,7 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
     emulate -L zsh
     local faildir
     if [[ $1 == --faildir ]]; then faildir=${2:a}; shift 2; fi
-    [[ $2 && $1 ]] || return 1
+    [[ $2 && $1 ]] || return
     local projects_home=${1:a}
     local pkg=$2
     local REPLY
@@ -1183,13 +1179,13 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
         unset REPLY
         local reply
     fi
-    [[ $1 ]] || return 1
+    [[ $1 ]] || return
     local pkgs=($1/*(/:t))
     reply=(${(f)"$(
         print -rln -- $pkgs \
         | fzf $fzf_args --header=$fzf_header --prompt=$fzf_prompt
     )"})
-    [[ $reply ]] || return 1
+    [[ $reply ]] || return
     if [[ ! $multi ]]; then
         REPLY=$reply[1]
     fi
@@ -1197,12 +1193,12 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
 
 .zpy_pipzunlinkbins () {  # <projects_home> <bins_home> <pkgspec>...
     emulate -L zsh
-    [[ $3 && $2 && $1 ]] || return 1
+    [[ $3 && $2 && $1 ]] || return
     local projects_home=$1; shift
     local bins_home=$1; shift
     local reply REPLY
-    .zpy_all_replies .zpy_pkgspec2name $@ || return 1
-    .zpy_all_replies .zpy_venvs_path ${projects_home}/${^reply}
+    .zpy_all_replies .zpy_pkgspec2name $@ || return
+    .zpy_all_replies .zpy_venvs_path ${projects_home}/${^reply} || return
     local vpaths=($reply)
     local binlinks=(${bins_home}/*(@Ne['.zpy_is_under ${REPLY:P} $vpaths']))
     if [[ $binlinks ]]; then
@@ -1213,13 +1209,13 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
 
 .zpy_pipzrmvenvs () {  # <projects_home> <bins_home> <pkgspec>...
     emulate -L zsh
-    [[ $3 && $2 && $1 ]] || return 1
+    [[ $3 && $2 && $1 ]] || return
     local projects_home=$1; shift
     local bins_home=$1; shift
     local REPLY
     for 1; do
-        .zpy_pkgspec2name $1 || return 1
-        .zpy_venvs_path ${projects_home}/${REPLY}
+        .zpy_pkgspec2name $1 || return
+        .zpy_venvs_path ${projects_home}/${REPLY} || return
         zf_rm -rf $REPLY
     done
 }
@@ -1236,14 +1232,14 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
         if [[ $1 == --auto1 ]]; then fzf_args+=(-1); shift; fi
         if [[ $1 == --header ]]; then fzf_header=$2; shift 2; fi
     done
-    [[ $1 && $bins_home && $projects_home ]] || return 1
+    [[ $1 && $bins_home && $projects_home ]] || return
     zf_mkdir -p $bins_home
     local bins pkgname projdir vpath bin REPLY
     for 1; do
-        .zpy_pkgspec2name $1 || return 1
+        .zpy_pkgspec2name $1 || return
         pkgname=$REPLY
         projdir=${projects_home}/${pkgname}
-        .zpy_venvs_path $projdir
+        .zpy_venvs_path $projdir || return
         vpath=$REPLY
         bins=("${vpath}/venv/bin/"*(N:t))
         if [[ $bins_whitelist ]]; then
@@ -1339,14 +1335,14 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         if [[ $@ ]]; then
             pkgs=($@)
         else
-            .zpy_pipzchoosepkg --multi --header 'Uninstalling . . .' $ZPY_PIPZ_PROJECTS || return 1
+            .zpy_pipzchoosepkg --multi --header 'Uninstalling . . .' $ZPY_PIPZ_PROJECTS || return
             pkgs=($reply)
         fi
         .zpy_pipzunlinkbins $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
         .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
         local projdir ret=0
         for pkg in $pkgs; do
-            .zpy_pkgspec2name $pkg || return 1
+            .zpy_pkgspec2name $pkg || return
             projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}
             if [[ -d $projdir ]]; then
                 zf_rm -r $projdir
@@ -1364,10 +1360,10 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         if [[ $1 == --all ]]; then pipz upgrade ${ZPY_PIPZ_PROJECTS}/*(/:t); return; fi
         local pkgnames
         if [[ $@ ]]; then
-            .zpy_all_replies .zpy_pkgspec2name $@ || return 1
+            .zpy_all_replies .zpy_pkgspec2name $@ || return
             pkgnames=($reply)
         else
-            .zpy_pipzchoosepkg --multi --header 'Upgrading . . .' $ZPY_PIPZ_PROJECTS || return 1
+            .zpy_pipzchoosepkg --multi --header 'Upgrading . . .' $ZPY_PIPZ_PROJECTS || return
             pkgnames=($reply)
         fi
         print -rPu2 \
@@ -1407,7 +1403,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         print
         local bins=() venvs_path_whitelist=()
         if [[ $# -gt 0 ]]; then
-            .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^@:l}
+            .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^@:l} || return
             venvs_path_whitelist=($reply)
         else
             venvs_path_whitelist=($ZPY_VENVS_WORLD)
@@ -1447,7 +1443,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         elif [[ $@ ]]; then
             pkgs=($@)
         else
-            .zpy_pipzchoosepkg --multi --header 'Reinstalling . . .' $ZPY_PIPZ_PROJECTS || return 1
+            .zpy_pipzchoosepkg --multi --header 'Reinstalling . . .' $ZPY_PIPZ_PROJECTS || return
             pkgs=($reply)
         fi
         .zpy_pipzunlinkbins $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
@@ -1469,7 +1465,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         linkbins_args+=(--header "Injecting [${(j:, :)@[2,-1]}] ->")
         local projdir=${ZPY_PIPZ_PROJECTS}/${1:l}
         if ! [[ $2 && $1 && -d $projdir ]]; then; zpy "$0 inject"; return 1; fi
-        .zpy_venvs_path $projdir
+        .zpy_venvs_path $projdir || return
         local vpath=$REPLY
         local vbinpath="${vpath}/venv/bin/"
         local blacklist=(${vbinpath}*(N:t))
@@ -1498,10 +1494,10 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         shift
         if ! [[ $2 && $1 ]]; then; zpy "$0 runpkg"; return 1; fi
         local pkg=$1; shift
-        .zpy_pkgspec2name $pkg || return 1
+        .zpy_pkgspec2name $pkg || return
         local pkgname=$REPLY
         local projdir=${TMPPREFIX}_pipz/${pkgname}
-        .zpy_venvs_path $projdir
+        .zpy_venvs_path $projdir || return
         local vpath=$REPLY
         local venv=${vpath}/venv
         [[ -d $venv ]] || python3 -m venv $venv
@@ -1522,7 +1518,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         if [[ $1 ]]; then
             projdir=${ZPY_PIPZ_PROJECTS}/${1:l}; shift
         else
-            .zpy_pipzchoosepkg $ZPY_PIPZ_PROJECTS || return 1
+            .zpy_pipzchoosepkg $ZPY_PIPZ_PROJECTS || return
             projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}
             [[ $2 ]] && shift
         fi
@@ -1875,7 +1871,7 @@ _vrun () {
     local vname=venv
     if (( words[(i)--py] < NORMARG )); then
         local reply
-        .zpy_argvenv ${words[${words[(i)--py]} + 1]} || return 1
+        .zpy_argvenv ${words[${words[(i)--py]} + 1]} || return
         vname=$reply[1]
     fi
     if [[ $line[1] ]]; then
@@ -2058,9 +2054,9 @@ compdef _pipz pipz 2>/dev/null
     local json=$folder/pypi.json txt=$folder/pypi.txt
     if [[ $1 == --refresh ]] || [[ ! -r $txt ]]; then
         if (( $+commands[wget] )); then
-            wget -qO $json https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json || return 1
+            wget -qO $json https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json || return
         else
-            curl -s -o $json https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json || return 1
+            curl -s -o $json https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json || return
         fi
         if (( $+commands[jq] )); then
             jq -r '.rows[].project' <$json >$txt
