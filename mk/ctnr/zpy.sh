@@ -133,7 +133,7 @@ esac
 
 # Remind user of a few useful commands
 ctnr_urun sh -c 'printf "%s\n" \
-  "zpy zpy envin pipc pips pipacs pipz" \
+  "zpy zpy envin pipacs pipz" \
 >> ~/.zshrc'
 
 # Cut some fat
