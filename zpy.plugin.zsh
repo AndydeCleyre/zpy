@@ -288,7 +288,9 @@ pips () {  # [<reqs-txt>...]
     local reqs=($@)
     local reqstxt=${reqsin:r}.txt
     local before=$(mktemp)
-    <$reqstxt >$before 2>/dev/null || true
+    if [[ -e $reqstxt ]]; then
+        <$reqstxt >$before
+    fi
 
     pipi -q pip-tools wheel
 
