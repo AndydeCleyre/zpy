@@ -170,7 +170,7 @@ zpy () {  # [<zpy-function>...]
     emulate -L zsh
     unset REPLY
     local projdirs=(${ZPY_VENVS_WORLD}/*/project(@N-/:P))
-    REPLY=$(print -rln -- $projdirs | fzf --reverse -0 -1)
+    REPLY=$(print -rln -- $projdirs | fzf --reverse -0 -1 --preview='<{}/*.in')
 }
 
 # Get path of folder containing all venvs for the current folder or specified proj-dir.
@@ -1182,6 +1182,7 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
         local reply
     fi
     [[ $1 ]] || return
+    fzf_args+=(--preview="zsh -fc '. $ZPYSRC; .zpy_hlt ini <$1/{}/*'")
     local pkgs=($1/*(/:t))
     reply=(${(f)"$(
         print -rln -- $pkgs \
