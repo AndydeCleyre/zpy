@@ -6,10 +6,10 @@ ZPY_SRC=${0:P}
 ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
 ## User may want to override these:
-ZPY_VENVS_WORLD=${ZPY_VENVS_WORLD:-${XDG_DATA_HOME:-~/.local/share}/venvs}
-## Each project is associated with: $ZPY_VENVS_WORLD/<hash of proj-dir>/<venv-name>
+ZPY_VENVS_HOME=${ZPY_VENVS_HOME:-${XDG_DATA_HOME:-~/.local/share}/venvs}
+## Each project is associated with: $ZPY_VENVS_HOME/<hash of proj-dir>/<venv-name>
 ## <venv-name> is one or more of: venv, venv2, venv-pypy, venv-<pyver>
-## $(venvs_path <proj-dir>) evals to $ZPY_VENVS_WORLD/<hash of proj-dir>
+## $(venvs_path <proj-dir>) evals to $ZPY_VENVS_HOME/<hash of proj-dir>
 ZPY_PIPZ_PROJECTS=${ZPY_PIPZ_PROJECTS:-${XDG_DATA_HOME:-~/.local/share}/python}
 ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
 ## Installing an app via pipz puts requirements.{in,txt} in $ZPY_PIPZ_PROJECTS/<appname>
@@ -210,18 +210,18 @@ zpy () {  # [<zpy-function>...]
 .zpy_venvs_path () {  # [<proj-dir>]
     emulate -L zsh
     unset REPLY
-    [[ $ZPY_VENVS_WORLD ]] || return
+    [[ $ZPY_VENVS_HOME ]] || return
 
     .zpy_path_hash ${${1:-$PWD}:P} || return
-    REPLY="${ZPY_VENVS_WORLD}/${REPLY}"
+    REPLY="${ZPY_VENVS_HOME}/${REPLY}"
 }
 
 .zpy_chooseproj () {
     emulate -L zsh
     unset REPLY
-    [[ $ZPY_VENVS_WORLD ]] || return
+    [[ $ZPY_VENVS_HOME ]] || return
 
-    local projdirs=(${ZPY_VENVS_WORLD}/*/project(@N-/:P))
+    local projdirs=(${ZPY_VENVS_HOME}/*/project(@N-/:P))
     REPLY=$(print -rln -- $projdirs | fzf --reverse -0 -1 --preview='<{}/*.in')
 }
 
@@ -1021,13 +1021,13 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
 prunevenvs () {  # [-y]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
-    [[ $ZPY_VENVS_WORLD ]] || return
+    [[ $ZPY_VENVS_HOME ]] || return
 
     local noconfirm
     if [[ $1 == -y ]] noconfirm=1
 
     local proj REPLY orphaned_venv
-    for proj ( ${ZPY_VENVS_WORLD}/*/project(@N:P) ) {
+    for proj ( ${ZPY_VENVS_HOME}/*/project(@N:P) ) {
         if [[ ! -d $proj ]] {
             .zpy_venvs_path $proj || return
             orphaned_venv=$REPLY
@@ -1110,7 +1110,7 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
     [[ $ZPY_PROCS        ]] || return
-    [[ $ZPY_VENVS_WORLD ]] || return
+    [[ $ZPY_VENVS_HOME ]] || return
 
     local extra_args=()
     if [[ $1 == --py ]] {
@@ -1125,7 +1125,7 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
     if ! [[ -v NO_COLOR ]] cells=(%F{cyan}${^cells}%f)
     cells+=(${(f)"$(
         zargs -P $ZPY_PROCS -rl \
-        -- ${@:-${ZPY_VENVS_WORLD}/*/project(@N-/)} \
+        -- ${@:-${ZPY_VENVS_HOME}/*/project(@N-/)} \
         -- .zpy_pipcheckoldcells $extra_args
     )"})
 
@@ -1198,7 +1198,7 @@ pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [<proj-dir>...]
 
     if [[ $1 == --help ]] { zpy $0; return }
     [[ $ZPY_PROCS        ]] || return
-    [[ $ZPY_VENVS_WORLD ]] || return
+    [[ $ZPY_VENVS_HOME ]] || return
 
     local extra_args=()
     while [[ $1 == --(py|only-sync-if-changed) ]] {
@@ -1208,7 +1208,7 @@ pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [<proj-dir>...]
 
     local faildir=$(mktemp -d) failures=()
     zargs -P $ZPY_PROCS -rl \
-    -- ${@:-${ZPY_VENVS_WORLD}/*/project(@N-/:P)} \
+    -- ${@:-${ZPY_VENVS_HOME}/*/project(@N-/:P)} \
     -- .zpy_pipup $extra_args --faildir $faildir
     failures=($faildir/*(N:t))
     zf_rm -rf $faildir
@@ -1821,7 +1821,7 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
 # Package manager for venv-isolated scripts (pipx clone; py3 only).
 pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
     emulate -L zsh +o promptsubst -o globdots -o localtraps +o monitor
-    [[ $ZPY_PIPZ_PROJECTS && $ZPY_PIPZ_BINS && $ZPY_VENVS_WORLD && $ZPY_PROCS ]] || return
+    [[ $ZPY_PIPZ_PROJECTS && $ZPY_PIPZ_BINS && $ZPY_VENVS_HOME && $ZPY_PROCS ]] || return
 
     local reply REPLY
     local subcmds=(
@@ -1947,7 +1947,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         print -rPl \
             "projects     %B@%b ${ZPY_PIPZ_PROJECTS/#~\//~/}" \
-            "venvs        %B@%b ${ZPY_VENVS_WORLD/#~\//~/}" \
+            "venvs        %B@%b ${ZPY_VENVS_HOME/#~\//~/}" \
             "apps exposed %B@%b ${ZPY_PIPZ_BINS/#~\//~/}"
 
         (( ${path[(I)$ZPY_PIPZ_BINS]} )) \
@@ -1962,7 +1962,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^@:l} || return
             venvs_path_goodlist=($reply)
         } else {
-            venvs_path_goodlist=($ZPY_VENVS_WORLD)
+            venvs_path_goodlist=($ZPY_VENVS_HOME)
         }
 
         local bins=(${ZPY_PIPZ_BINS}/*(@Ne['.zpy_is_under ${REPLY:P} $venvs_path_goodlist']))
@@ -2471,7 +2471,7 @@ _zpy_projects () {
     # TODO: can I get properly styled "Project" header?
     # TODO: Project completions are too lenient
     _tags globbed-files
-    _files -x 'Project:' -F blacklist -/ -g '${ZPY_VENVS_WORLD}/*/project(@N-/:P)'
+    _files -x 'Project:' -F blacklist -/ -g '${ZPY_VENVS_HOME}/*/project(@N-/:P)'
 }
 
 _vrun () {
