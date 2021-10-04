@@ -401,7 +401,14 @@ pips () {  # [<reqs-txt>...]
     cachedir=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash}
 
     local badrets
-    pip-compile --cache-dir $cachedir --no-header -o $reqstxt $@ $reqsin 2>&1 \
+    # --write-relative-to-output
+    # --read-relative-to-input
+    pip-compile \
+      --cache-dir=$cachedir \
+      --no-header \
+      --annotation-style=line \
+      -o $reqstxt \
+      $@ $reqsin 2>&1 \
     | .zpy_hlt ini
     badrets=(${pipestatus:#0})
 
