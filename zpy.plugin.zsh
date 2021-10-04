@@ -335,6 +335,7 @@ pips () {  # [<reqs-txt>...]
         local p_a_args=(syncing env $reqstxts)
         if [[ $VIRTUAL_ENV && -L ${VIRTUAL_ENV:h}/project ]] p_a_args=(--proj ${VIRTUAL_ENV:h}/project(:P) $p_a_args)
         .zpy_log action $p_a_args
+        # --read-relative-to-input
         pip-sync -q --pip-args --disable-pip-version-check $reqstxts
         ret=$?
 
