@@ -1132,17 +1132,28 @@ prunevenvs () {  # [-y]
     print -rl -- $cells
 }
 
-# 'pip list -o' for all or specified projects.
-pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
+# 'pip list -o' (show outdated) for the current or specified folders.
+# Use --all to instead act on all known projects, or -i to interactively choose.
+pipcheckold () {  # [--py 2|pypy|current] [--all|-i|<proj-dir>...]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
-    [[ $ZPY_PROCS        ]] || return
+    [[ $ZPY_PROCS      ]] || return
     [[ $ZPY_VENVS_HOME ]] || return
 
-    local extra_args=()
-    if [[ $1 == --py ]] {
-        extra_args+=($1 $2); shift 2
+    local extra_args=() projects=() reply
+    while [[ $1 == -(-py|-all|i) ]] {
+        if [[ $1 == --py ]] { extra_args+=($1 $2); shift 2 }
+        if [[ $1 == --all ]] {
+            projects=(${ZPY_VENVS_HOME}/*/project(@N-/))
+            shift
+        } elif [[ $1 == -i ]] {
+            .zpy_chooseproj --multi || return
+            projects=($reply)
+            shift
+        }
     }
+    projects=(${projects:-${@:-$PWD}})
+
     local cells=(
         "%BPackage%b"
         "%BVersion%b"
@@ -1152,7 +1163,7 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
     if ! [[ -v NO_COLOR ]] cells=(%F{cyan}${^cells}%f)
     cells+=(${(f)"$(
         zargs -P $ZPY_PROCS -rl \
-        -- ${@:-${ZPY_VENVS_HOME}/*/project(@N-/)} \
+        -- $projects \
         -- .zpy_pipcheckoldcells $extra_args
     )"})
 
@@ -1189,9 +1200,8 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
     return ret
 }
 
-# 'pipcs -U' (upgrade-compile, sync) in a venv-activated subshell for the current folder.
-# Pass --all to instead act on all known projects, -i to interactively choose,
-# or pass a list of project paths.
+# 'pipcs -U' (upgrade-compile, sync) in a venv-activated subshell for the current or specified folders.
+# Use --all to instead act on all known projects, or -i to interactively choose.
 pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
     emulate -L zsh
     # things that might have --allprojects (--all):
@@ -1211,6 +1221,7 @@ pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir
     # pipz cd|inject|runpip|upgrade|reinstall|uninstall|list (names which are really projs)
 
     # overlap, and projs only:
+    # pipup
     # pipcheckold:    currently default-all, TODO: default-cwd, add --all, add -i
     # pipz upgrade:   currently default-int, TODO: nothing (has --all)
     # pipz reinstall: currently default-int, TODO: nothing (has --all)
@@ -2316,6 +2327,8 @@ _pipcheckold () {
     _arguments \
         '(* -)--help[Show usage information]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+        '(--help -i *)--all[Show outdated dependencies for every known project]' \
+        '(--help --all *)-i[Choose projects to check interactively]' \
         '(-)*: :_zpy_projects'
 }
 compdef _pipcheckold pipcheckold
