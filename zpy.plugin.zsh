@@ -460,6 +460,7 @@ pips () {  # [<reqs-txt>...]
         reqstxt=${reqsin}.txt
     }
 
+    pipi -q pip
     pipi -q pip-tools wheel
 
     .zpy_pipc $zpypipc_args $reqsin -q ${${${reqs/*/-P}:^reqs}:--U} $pipcompile_args
@@ -743,6 +744,7 @@ reqshow () {  # [<folder>...]
     . $venv/bin/activate || return
 
     if { .zpy_netcheck } {
+        pipi -q pip
         pipi -q pip-tools wheel
     } else {
         pipi --no-upgrade -q pip-tools wheel
@@ -865,6 +867,7 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
         # TODO: account for pipz install --activate?
     } elif { . $activator } {
         if { .zpy_netcheck } {
+            pipi -q pip
             pipi -q pip-tools wheel
         } else {
             pipi --no-upgrade -q pip-tools wheel
