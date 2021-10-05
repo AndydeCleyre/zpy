@@ -1222,7 +1222,7 @@ pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir
 
     # overlap, and projs only:
     # pipup
-    # pipcheckold:    currently default-all, TODO: default-cwd, add --all, add -i
+    # pipcheckold
     # pipz upgrade:   currently default-int, TODO: nothing (has --all)
     # pipz reinstall: currently default-int, TODO: nothing (has --all)
     # pipz uninstall: currently default-int, TODO: nothing (has --all)
@@ -1871,7 +1871,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         install     "Install apps from PyPI or filesystem into isolated venvs"
         uninstall   "Remove apps"
         upgrade     "Install newer versions of apps and their dependencies"
-        list        "Show each installed app with its version, commands, and Python runtime"
+        list        "Show one or more installed app with its version, commands, and Python runtime"
         inject      "Add extra packages to an installed app's isolated venv"
         reinstall   "Reinstall apps, preserving any version specs and package injections"
         cd          "Enter or run a command from an app's project (requirements.{in,txt}) folder"
@@ -1983,8 +1983,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             return ret
         }
     ;;
-    list)  # [<pkgname>...]  ## subcmd: pipz list
-    # Without args, list all installed.
+    list)  # [--all|<pkgname>...]  ## subcmd: pipz list
+    # Without args, interactively choose which installed apps to list.
         if [[ $2 == --help ]] { zpy "$0 $1"; return }
         shift
 
@@ -2001,11 +2001,16 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         print
 
         local venvs_path_goodlist=()
-        if [[ $# -gt 0 ]] {
+        if [[ $1 == --all ]] {
+            venvs_path_goodlist=($ZPY_VENVS_HOME)
+            shift
+        } elif [[ $1 ]] {
             .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^@:l} || return
             venvs_path_goodlist=($reply)
         } else {
-            venvs_path_goodlist=($ZPY_VENVS_HOME)
+            .zpy_pipzchoosepkg --multi $ZPY_PIPZ_PROJECTS || return
+            .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^reply} || return
+            venvs_path_goodlist=($reply)
         }
 
         local bins=(${ZPY_PIPZ_BINS}/*(@Ne['.zpy_is_under ${REPLY:P} $venvs_path_goodlist']))
@@ -2656,8 +2661,9 @@ _pipz () {
             local pkgs=($ZPY_PIPZ_PROJECTS/*(/N:t))
             pkgs=(${pkgs:|blacklist})
             _arguments \
-                '(*)--help[Show usage information]' \
-                "(--help)*:Installed Package Name:($pkgs)"
+                '(* -)--help[Show usage information]' \
+                '(--help *)--all[List all installed apps]' \
+                "(-)*:Installed Package Name:($pkgs)"
         ;;
         runpkg)
             local pkgname REPLY pkgcmd
