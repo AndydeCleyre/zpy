@@ -218,11 +218,30 @@ zpy () {  # [<zpy-function>...]
 
 .zpy_chooseproj () {
     emulate -L zsh
-    unset REPLY
     [[ $ZPY_VENVS_HOME ]] || return
 
+    # TODO: should this absorb .zpy_pipzchoosepkg?
+
+    local multi fzf_args=(--reverse -0 --preview='<{}/*.in')
+    if [[ $1 == --multi ]] {
+        unset reply
+        fzf_args+=(-m)
+        multi=1
+        shift
+    } else {
+        unset REPLY
+        local reply
+    }
+
     local projdirs=(${ZPY_VENVS_HOME}/*/project(@N-/:P))
-    REPLY=$(print -rln -- $projdirs | fzf --reverse -0 -1 --preview='<{}/*.in')
+    reply=(${(f)"$(
+        print -rln -- $projdirs \
+        | fzf $fzf_args
+    )"})
+
+    [[ $reply ]] || return
+
+    if [[ ! $multi ]] REPLY=$reply[1]
 }
 
 # Get path of folder containing all venvs for the current folder or specified proj-dir.
@@ -1170,14 +1189,11 @@ pipcheckold () {  # [--py 2|pypy|current] [<proj-dir>...]
     return ret
 }
 
-# 'pipcs -U' (upgrade-compile, sync) for all or specified projects.
-pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [<proj-dir>...]
+# 'pipcs -U' (upgrade-compile, sync) in a venv-activated subshell for the current folder.
+# Pass --all to instead act on all known projects, -i to interactively choose,
+# or pass a list of project paths.
+pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
     emulate -L zsh
-    # TODO: should this get an interactive mode? YES
-    # maybe interactive without projdir, and add --all?
-    # or without projdir use cwd, and have --all and -i, probably.
-    # lemme think:
-
     # things that might have --allprojects (--all):
     # zpy (not projs actually)
     # pipup
@@ -1195,7 +1211,6 @@ pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [<proj-dir>...]
     # pipz cd|inject|runpip|upgrade|reinstall|uninstall|list (names which are really projs)
 
     # overlap, and projs only:
-    # pipup:          currently default-all, TODO: default-cwd, add --all, add -i
     # pipcheckold:    currently default-all, TODO: default-cwd, add --all, add -i
     # pipz upgrade:   currently default-int, TODO: nothing (has --all)
     # pipz reinstall: currently default-int, TODO: nothing (has --all)
@@ -1205,23 +1220,30 @@ pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [<proj-dir>...]
     # TODO: maybe drop sublp
 
     if [[ $1 == --help ]] { zpy $0; return }
-    [[ $ZPY_PROCS        ]] || return
+    [[ $ZPY_PROCS      ]] || return
     [[ $ZPY_VENVS_HOME ]] || return
 
-    local extra_args=()
-    while [[ $1 == --(py|only-sync-if-changed) ]] {
+    local extra_args=() projects=() reply
+    while [[ $1 == -(-py|-only-sync-if-changed|-all|i) ]] {
         if [[ $1 == --py                   ]] { extra_args+=($1 $2); shift 2 }
         if [[ $1 == --only-sync-if-changed ]] { extra_args+=($1);    shift   }
+        if [[ $1 == --all ]] {
+            projects=(${ZPY_VENVS_HOME}/*/project(@N-/:P))
+            shift
+        } elif [[ $1 == -i ]] {
+            .zpy_chooseproj --multi || return
+            projects=($reply)
+            shift
+        }
     }
+    projects=(${projects:-${@:-$PWD}})
 
     local faildir=$(mktemp -d) failures=()
     zargs -P $ZPY_PROCS -rl \
-    -- ${@:-${ZPY_VENVS_HOME}/*/project(@N-/:P)} \
+    -- $projects \
     -- .zpy_pipup $extra_args --faildir $faildir
     failures=($faildir/*(N:t))
     zf_rm -rf $faildir
-
-    # TODO: hold diff output until HERE?
 
     if [[ $failures ]] {
         .zpy_log error "FAILED $0 call; Problems upgrading" $failures
@@ -1663,6 +1685,8 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
     }
 
     [[ $1 ]] || return
+
+    # TODO: combine fzf_args?
 
     local pkgs=($1/*(/:t))
     fzf_args+=(--preview="zsh -fc '. $ZPY_SRC; .zpy_hlt ini <$1/{}/*'")
@@ -2334,6 +2358,8 @@ _pipup () {
         '(* -)--help[Show usage information]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
         "(--help)--only-sync-if-changed[Don't bother syncing if the lockfile didn't change]" \
+        '(--help -i *)--all[Upgrade every known project]' \
+        '(--help --all *)-i[Choose projects to upgrade interactively]' \
         '(-)*: :_zpy_projects'
 }
 compdef _pipup pipup
