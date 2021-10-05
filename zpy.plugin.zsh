@@ -1207,29 +1207,26 @@ pipcheckold () {  # [--py 2|pypy|current] [--all|-i|<proj-dir>...]
 # Use --all to instead act on all known projects, or -i to interactively choose.
 pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
     emulate -L zsh
-    # things that might have --allprojects (--all):
-    # zpy (not projs actually)
-    # pipup
-    # pipcheckold
-    # pipz upgrade|reinstall|uninstall|list (names which are really projs)
+    # default-all:
+    # zpy: should this be default-int, with an --all flag?
 
     # things that might have --interactive (-i):
     # zpy (not projs)
     # venvs_path
-    # pipup
     # activate
     # vrun
     # vlauncher
-    # pipcheckold
-    # pipz cd|inject|runpip|upgrade|reinstall|uninstall|list (names which are really projs)
+    # pipz cd|inject|runpip (names which are really projs)
 
-    # overlap, and projs only:
+    # default-cwd, has --all and -i:
     # pipup
     # pipcheckold
-    # pipz upgrade:   currently default-int, TODO: nothing (has --all)
-    # pipz reinstall: currently default-int, TODO: nothing (has --all)
-    # pipz uninstall: currently default-int, TODO: nothing (has --all)
-    # pipz list:      currently default-all, TODO: MAYBE: default-int, add --all (see how fast we can get it...)
+
+    # default-int, has --all:
+    # pipz upgrade
+    # pipz reinstall
+    # pipz uninstall
+    # pipz list
 
     # TODO: maybe drop sublp
 
