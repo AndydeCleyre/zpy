@@ -585,19 +585,19 @@ pipcs () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [--only-sync-if-changed] [<r
     }
 
     local origtxts=(${snapshot}/**/*(DN.))
-    local txts=(${origtxts#$snapshot})
+    local newtxts=(${origtxts#$snapshot})
 
     if [[ ! $do_sync ]] {
-        local origtxt txt
-        for origtxt txt ( ${origtxts:^txts} ) {
-            if ! { diff -q $origtxt $txt &>/dev/null } {
+        local origtxt newtxt
+        for origtxt newtxt ( ${origtxts:^newtxts} ) {
+            if ! { diff -q $origtxt $newtxt &>/dev/null } {
                 do_sync=1
                 break
             }
         }
     }
 
-    if [[ $do_sync ]] pips $txts
+    if [[ $do_sync ]] pips $newtxts
 }
 
 # Add loose requirements to [<category>-]requirements.in (add).
