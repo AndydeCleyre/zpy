@@ -286,7 +286,7 @@ pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
     if (( ret )) {
         local log_args=(error "FAILED $0 call" "$0 $@" $VIRTUAL_ENV)
         if [[ $VIRTUAL_ENV ]] && [[ -L ${VIRTUAL_ENV:h}/project ]] {
-            log_args+=${VIRTUAL_ENV:h}/project(:P:t)
+            log_args+=${${:-${VIRTUAL_ENV:h}/project}:P:t}
         }
         .zpy_log $log_args
         return ret
