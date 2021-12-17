@@ -1376,10 +1376,11 @@ keycrumbs = '''${(j: :)@}'''.split()
 d = data
 for key in keycrumbs[:-1]:
     d = d[key]
-if '''${value}''' in ('true', 'false'):
-    d[keycrumbs[-1]] = ${(C)value}
-else:
-    d[keycrumbs[-1]] = '''${value}'''
+
+value = '''${value}'''
+value = {'true': True, 'false': False}.get(value.lower(), value)
+
+d[keycrumbs[-1]] = value
 
 jsonfile.write_text(dumps(data, indent=4))
         "
