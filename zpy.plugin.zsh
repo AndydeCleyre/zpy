@@ -1499,14 +1499,19 @@ vpypyright () {  # [--py 2|pypy|current]
     emulate -L zsh
     [[ -d $1 ]] || return
 
-    local origtxts=(${1:a}/**/*(DN.))
-    local txts=(${origtxts#${1:a}})
+    # Original text file contents have been copied into the snapshot dir,
+    # at <snapshot dir>/<original full path>
 
-    local origtxt txt lines=() label
-    for origtxt txt ( ${origtxts:^txts} ) {
-        label=${txt:a:h:h:t}/${txt:a:h:t}${${txt:a:h:t}:+/}${txt:t}
+    local origtxts=(${1:a}/**/*(DN.))
+    local newtxts=(${origtxts#${1:a}})
+
+    local origtxt newtxt lines=() label
+    for origtxt newtxt ( ${origtxts:^newtxts} ) {
+        if [[ ! $(<$origtxt) ]] continue
+
+        label=${newtxt:a:h:h:t}/${newtxt:a:h:t}${${newtxt:a:h:t}:+/}${newtxt:t}
         lines=(${(f)"$(
-            diff -wu -L $label $origtxt -L $label $txt
+            diff -wu -L $label $origtxt -L $label $newtxt
         )"})
         if (( ? )) {
             lines=(${(M)lines:#[-+@][^ ]*})
