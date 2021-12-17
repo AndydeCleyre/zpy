@@ -253,7 +253,7 @@ venvs_path () {  # [-i|<proj-dir>]
     local REPLY
     if [[ $1 == -i ]] {
         .zpy_chooseproj || return
-        venvs_path "$REPLY"
+        venvs_path $REPLY
     } else {
         .zpy_venvs_path $@ || return
         print -rn -- $REPLY
