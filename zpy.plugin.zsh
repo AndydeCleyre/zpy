@@ -216,7 +216,7 @@ zpy () {  # [<zpy-function>...]
     REPLY="${ZPY_VENVS_HOME}/${REPLY}"
 }
 
-.zpy_chooseproj () {
+.zpy_chooseproj () {  # [--multi]
     emulate -L zsh
     [[ $ZPY_VENVS_HOME ]] || return
 
@@ -491,7 +491,7 @@ pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compi
     }
 
     local snapshotdir=$(mktemp -d) faildir=$(mktemp -d) failures=()
-    local zpypipc_args=(--faildir $faildir --snapshotdir $snapshotdir)  # also .zpypipu
+    local zpypipc_args=(--faildir $faildir --snapshotdir $snapshotdir)  # for either .zpy_pipc or .zpy_pipu
     if [[ $upgrade ]] {
         zargs -P $ZPY_PROCS -ri___ \
         -- ${@:-*requirements.in(N)} \
@@ -1207,28 +1207,11 @@ pipcheckold () {  # [--py 2|pypy|current] [--all|-i|<proj-dir>...]
 # Use --all to instead act on all known projects, or -i to interactively choose.
 pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
     emulate -L zsh
-    # default-all:
-    # zpy: should this be default-int, with an --all flag?
-
-    # things that might have --interactive (-i):
-    # zpy (not projs)
-    # venvs_path
-    # activate
+    # TODO:
+    # things that *might* gain --interactive (-i):
     # vrun
     # vlauncher
     # pipz cd|inject|runpip (names which are really projs)
-
-    # default-cwd, has --all and -i:
-    # pipup
-    # pipcheckold
-
-    # default-int, has --all:
-    # pipz upgrade
-    # pipz reinstall
-    # pipz uninstall
-    # pipz list
-
-    # TODO: maybe drop sublp
 
     if [[ $1 == --help ]] { zpy $0; return }
     [[ $ZPY_PROCS      ]] || return
@@ -1262,7 +1245,7 @@ pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir
     }
 }
 
-# Inject loose requirements.in dependencies into a flit-flavored pyproject.toml.
+# Inject loose requirements.in dependencies into a PEP 621 pyproject.toml.
 # Run either from the folder housing pyproject.toml, or one below.
 # To categorize, name files <category>-requirements.in.
 pypc () {
@@ -1360,7 +1343,6 @@ if pyproject.is_file():
     if (( $+commands[jq] )) {
         local keypath=".\"${(j:".":)@}\""
         if [[ $value != (true|false) ]] value=${(qqq)value}
-        # TODO: is this a useless print/subshell? Why not just jq?
         print -r -- "$(
             jq --argjson val "$value" "${keypath}=\$val" "$jsonfile"
         )" >$jsonfile
@@ -1530,7 +1512,6 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
     pdir=${plink:P}
 
     if [[ ! -L $plink ]] || { ! .zpy_is_under $pdir $projects_home } return
-    # if [[ -L $plink ]] && { .zpy_is_under $pdir $projects_home } {
 
     rehash
 
@@ -1580,19 +1561,7 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
         vrun $pdir python -V
     )"})
 
-    # This may be a bit faster, but less accurate
-    # local venvcfg=${plink:h}/venv/pyvenv.cfg
-    # if [[ -r $venvcfg ]] {
-    #     local cfglines=(${(f)"$(<$venvcfg)"})
-    #     local pyverlines=(${${(M)cfglines:#version = *}##version = })
-    # } else {
-    #     local pyverlines=(${(f)"$(
-    #         vrun $pdir python -V
-    #     )"})
-    # }
-
     print -rl -- "${bin:t}" "${piplistline[1,2]}" "${pyverlines[-1]}"
-    # }
 }
 
 .zpy_pkgspec2name () {  # <pkgspec>
@@ -1793,10 +1762,6 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
                 --prompt='Which scripts should be added to the path? Choose one with <enter> or more with <tab>. '
             )"})
         }
-# TODO: in .zpy_print... shorten venv paths: ~/.local/share/venvs/45a…/venv
-# vpath_parts=("${(s:/:)vpath}")
-# vpath_parts[-2]=${vpath_parts[-2][1,3]}…
-# vpath=${(j:/:)vpath_parts}
         for bin ( $bins ) {
             if [[ $linkonly ]] {
                 vlauncher --link-only $projdir $bin $bins_home
@@ -1811,55 +1776,9 @@ sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
     rehash
 }
 
-# TODO: policy: namespace private funcs as '.zpy_kebab-case'
-
 # TODO: readme: links to doc pages, as alphabetical grid:
-#              pipcs        vlauncher
-#             pipi         vpy
-# activate (a8)            pips         vpypyright
-# envin          pipup        vpyshebang
-# envout (da8)         pipz         vpysublp
-# pipa           prunevenvs   vpyvscode
-# pipac          pypc         vrun
-# pipacs         reqshow      whichpyproj
-# pipc           sublp        zpy
-# pipcheckold    venvs_path
 
-# envin flyover
-# pipa
-# pipc
-# pips
-# pipacs
-# pipac
-# pipcs -U
-
-# venvs_path
-# envin detail
-# envout (da8)
-# activate (a8)
-
-# vpy
-# vpyshebang
-# vlauncher
-# vrun
-
-# vpysublp
-# vpyvscode
-# vpypyright
-# pypc
-
-# pipz
-
-# pipcheckold
-# pipup
-# sublp  # TODO: hmmm, drop it? vpysublp enough?
-# pipi
-# reqshow
-# zpy
-# prunevenvs
-# whichpyproj  # TODO: probably kill/privatize whichpyproj.... maybe
-
-
+# TODO: probably kill/privatize whichpyproj.... maybe
 
 # Package manager for venv-isolated scripts (pipx clone; py3 only).
 pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
@@ -1944,18 +1863,11 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
             if [[ -d $projdir ]] {
                 zf_rm -r $projdir
-                # TODO: cluster local var declarations
-                # TODO: blacklist -> badlist
-                # TODO: whitelist -> goodlist
-                # TODO: all op msgs: blue:: projdir%blue
-                # TODO: sync op msgs: 'env' -> name of venv
-                # TODO: compile op msgs: 'red-> cyan txt' -> 'red-> txt%red'
-                # TODO: append op msgs: 'cyan infile' -> 'yellow infile'
             } else {
                 .zpy_log error "FAILED to find project for ($0) uninstall" "${projdir/#~\//~/}"
                 ret=1
             }
-        }  # TODO: all my traps -- do they not exit with interrupt? need to explicitly return?
+        }
 
         return ret
     ;;
@@ -1972,8 +1884,6 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             .zpy_pipzchoosepkg --multi --header 'Upgrading . . .' $ZPY_PIPZ_PROJECTS || return
         }
         pkgnames=($reply)
-
-        # TODO: pipz-list: is the pyver check the slow part? make that a flag, not default?
 
         pipup --only-sync-if-changed ${ZPY_PIPZ_PROJECTS}/${^pkgnames}
         local ret=$?
@@ -2037,7 +1947,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     reinstall)  # [--cmd <cmd>[,<cmd>...]] [--activate] [--all|<pkgname>...]  ## subcmd: pipz reinstall
     # Without --cmd, interactively choose.
     # Without --activate, 'vlauncher --link-only' is used.
-    # Without --all or <pkgspec>, interactively choose.
+    # Without --all or <pkgname>, interactively choose.
         if [[ $2 == --help ]] { zpy "$0 $1"; return }
         shift
 
@@ -2198,10 +2108,9 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
 ## Completions
 ## -----------
-# if { type compdef &>/dev/null } {
 if (( $+functions[compdef] )) {
 
-_zpy_helpmsg () {  # funcname
+_zpy_helpmsg () {  # <zpy-function>
     setopt localoptions extendedglob
     local msg=(${(f)"$(.zpy $1)"})
     msg=(${msg//#(#b)([^#]*)/%B$match[1]%b})
@@ -2474,7 +2383,6 @@ _venvs_path () {
         '(- :)--help[Show usage information]' \
         '(--help 1)-i[Interactively choose a project]' \
         '(-)1::Project:_zpy_projects'
-        # '(-)1::Project:_path_files -/'
 }
 compdef _venvs_path venvs_path
 
@@ -2751,7 +2659,6 @@ tfile.write_text('\n'.join(r['project'] for r in data['rows']))
             "
         }
     }
-    # reply=("${(fq-)$(<$txt)}")
     reply=(${(f)"$(<$txt)"})
 }
 
