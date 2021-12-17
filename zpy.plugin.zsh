@@ -955,20 +955,21 @@ vrun () {  # [--py 2|pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-ar
 
     local do_enter do_activate activate_args=() projdir
     while [[ $1 == --(py|cd|activate) ]] {
-        if [[ $1 == --cd       ]] { do_enter=1;            shift   }
-        if [[ $1 == --activate ]] { do_activate=1;         shift   }
+        if [[ $1 == --cd       ]] { do_enter=1;    shift }
+        if [[ $1 == --activate ]] { do_activate=1; shift }
         if [[ $1 == --py       ]] {
             if ! { .zpy_argvenv $2 } { zpy $0; return 1 }
-                                    activate_args=($1 $2); shift 2 }
+            activate_args=($1 $2); shift 2
+        }
     }
     if ! [[ $2 && $1 ]] { zpy $0; return 1 }
-                                    projdir=${1:a};        shift
+    projdir=${1:a}; shift
 
     zf_mkdir -p $projdir
     (
         set -e
 
-        if [[ $do_enter    ]] cd $projdir
+        if [[ $do_enter ]] cd $projdir
 
         if [[ $do_activate ]] {
             activate $activate_args $projdir
