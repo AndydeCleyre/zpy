@@ -610,7 +610,7 @@ pipa () {  # [-c <category>] <pkgspec>...
 
     if [[ ! $1 ]] { zpy $0; return 1 }
 
-    .zpy_log action appending "$reqsin"
+    .zpy_log action appending $reqsin
 
     print -rl -- $@ >>$reqsin
 
