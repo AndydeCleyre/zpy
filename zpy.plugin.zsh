@@ -1747,10 +1747,10 @@ vpypyright () {  # [--py 2|pypy|current]
     projects_home=$1; shift
     bins_home=$1;     shift
 
-    local bins_whitelist=() bins_blacklist=() linkonly=1 fzf_args=(--reverse -m -0) fzf_header=Installing
+    local bins_showlist=() bins_hidelist=() linkonly=1 fzf_args=(--reverse -m -0) fzf_header=Installing
     while [[ $1 == --(cmd|activate|no-cmd|auto1|header) ]] {
-        if [[ $1 == --cmd      ]] { bins_whitelist=(${(s:,:)2}); shift 2 }
-        if [[ $1 == --no-cmd   ]] { bins_blacklist=(${(s:,:)2}); shift 2 }
+        if [[ $1 == --cmd      ]] { bins_showlist=(${(s:,:)2}); shift 2 }
+        if [[ $1 == --no-cmd   ]] { bins_hidelist=(${(s:,:)2}); shift 2 }
         if [[ $1 == --activate ]] { unset linkonly;              shift   }
         if [[ $1 == --auto1    ]] { fzf_args+=(-1);              shift   }
         if [[ $1 == --header   ]] { fzf_header=$2;               shift 2 }
@@ -1771,10 +1771,10 @@ vpypyright () {  # [--py 2|pypy|current]
         vpath=$REPLY
 
         bins=("${vpath}/venv/bin/"*(N:t))
-        if [[ $bins_whitelist ]] {
-            bins=(${bins:*bins_whitelist})
+        if [[ $bins_showlist ]] {
+            bins=(${bins:*bins_showlist})
         } else {
-            bins=(${bins:|bins_blacklist})
+            bins=(${bins:|bins_hidelist})
             bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|(pip|python|pypy)(|<->*)|*.so|__pycache__)})
             if [[ $pkgname != pip-tools ]] bins=(${bins:#pip-(compile|sync)})
             if [[ $pkgname != wheel     ]] bins=(${bins:#wheel})
@@ -2174,9 +2174,9 @@ _envin () {
         '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
         '(-)*: :->reqstxts'
     if [[ $state == reqstxts ]] {
-        local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
+        local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
         _arguments \
-            '(-)*:requirements.txt:_files -F blacklist -g "*.txt"'
+            '(-)*:requirements.txt:_files -F blocklist -g "*.txt"'
     }
 }
 compdef _envin envin
@@ -2221,9 +2221,9 @@ _pipc () {
         "(--help -U)-u[Upgrade specific dependencies]:Package Names (comma-separated):_values -s , 'Package Names (comma-separated)' $pkgs" \
         '(-)*: :->reqsins'
     if [[ $state == reqsins ]] {
-        local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
+        local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
         _arguments \
-            '*:requirements.in:_files -F blacklist -g "*.in"' \
+            '*:requirements.in:_files -F blocklist -g "*.in"' \
             '(*)--[pip-compile Arguments]:pip-compile Argument: '
     }
 }
@@ -2251,9 +2251,9 @@ _pipcs () {
         "(--help)--only-sync-if-changed[Don't bother syncing if the lockfile didn't change]" \
         '(-)*: :->reqsins'
     if [[ $state == reqsins ]] {
-        local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
+        local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
         _arguments \
-            '*:requirements.in:_files -F blacklist -g "*.in"' \
+            '*:requirements.in:_files -F blocklist -g "*.in"' \
             '(*)--[pip-compile Arguments]:pip-compile Argument: '
     }
 }
@@ -2295,9 +2295,9 @@ _pips () {
         '(- *)--help[Show usage information]' \
         '(--help)*: :->reqstxts'
     if [[ $state == reqstxts ]] {
-        local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
+        local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
         _arguments \
-            '(--help)*:requirements.txt:_files -F blacklist -g "*.txt"'
+            '(--help)*:requirements.txt:_files -F blocklist -g "*.txt"'
     }
 }
 compdef _pips pips
@@ -2432,11 +2432,11 @@ _vpyshebang () {
 compdef _vpyshebang vpyshebang
 
 _zpy_projects () {
-    local blacklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
+    local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
     # TODO: can I get properly styled "Project" header?
     # TODO: Project completions are too lenient
     _tags globbed-files
-    _files -x 'Project:' -F blacklist -/ -g '${ZPY_VENVS_HOME}/*/project(@N-/:P)'
+    _files -x 'Project:' -F blocklist -/ -g '${ZPY_VENVS_HOME}/*/project(@N-/:P)'
 }
 
 _vrun () {
@@ -2526,16 +2526,16 @@ _pipz () {
                 '(-)*:Package Spec:_zpy_pypi_pkg --or-local'
         ;;
         reinstall)
-            local blacklist=(${(Q)words[2,-1]})
-            while [[ $blacklist[1] == --(help|activate|all|cmd) ]] {
-                if [[ $blacklist[1] == --cmd ]] {
-                    blacklist=($blacklist[3,-1])
+            local blocklist=(${(Q)words[2,-1]})
+            while [[ $blocklist[1] == --(help|activate|all|cmd) ]] {
+                if [[ $blocklist[1] == --cmd ]] {
+                    blocklist=($blocklist[3,-1])
                 } else {
-                    blacklist=($blacklist[2,-1])
+                    blocklist=($blocklist[2,-1])
                 }
             }
             local pkgs=($ZPY_PIPZ_PROJECTS/*(/N:t))
-            pkgs=(${pkgs:|blacklist})
+            pkgs=(${pkgs:|blocklist})
             _arguments \
                 '(* -)--help[Show usage information]' \
                 '(--help)--cmd[Specify commands to add to your path, rather than interactively choosing]:Command (comma-separated): ' \
@@ -2552,27 +2552,27 @@ _pipz () {
                 '(-)*:Extra Package Spec:_zpy_pypi_pkg --or-local'
         ;;
         uninstall)
-            local blacklist=(${(Q)words[2,-1]})
+            local blocklist=(${(Q)words[2,-1]})
             local pkgs=($ZPY_PIPZ_PROJECTS/*(/N:t))
-            pkgs=(${pkgs:|blacklist})
+            pkgs=(${pkgs:|blocklist})
             _arguments \
                 '(* -)--help[Show usage information]' \
                 '(--help *)--all[Uninstall all installed apps]' \
                 "(-)*:Installed Package Name:($pkgs)"
         ;;
         upgrade)
-            local blacklist=(${(Q)words[2,-1]})
+            local blocklist=(${(Q)words[2,-1]})
             local pkgs=($ZPY_PIPZ_PROJECTS/*(/N:t))
-            pkgs=(${pkgs:|blacklist})
+            pkgs=(${pkgs:|blocklist})
             _arguments \
                 '(* -)--help[Show usage information]' \
                 '(--help *)--all[Upgrade all installed apps]' \
                 "(-)*:Installed Package Name:($pkgs)"
         ;;
         list)
-            local blacklist=(${(Q)words[2,-1]})
+            local blocklist=(${(Q)words[2,-1]})
             local pkgs=($ZPY_PIPZ_PROJECTS/*(/N:t))
-            pkgs=(${pkgs:|blacklist})
+            pkgs=(${pkgs:|blocklist})
             _arguments \
                 '(* -)--help[Show usage information]' \
                 '(--help *)--all[List all installed apps]' \
