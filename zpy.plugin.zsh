@@ -1344,7 +1344,9 @@ if pyproject.is_file():
     local value=$1; shift
 
     zf_mkdir -p ${jsonfile:h}
-    [[ -r $jsonfile ]] || >$jsonfile <<<'{}'
+    if [[ ! -r $jsonfile ]] || [[ ! $(<$jsonfile) ]] {
+        >$jsonfile <<<'{}'
+    }
 
     if (( $+commands[jq] )) {
         local keypath=".\"${(j:".":)@}\""
