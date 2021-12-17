@@ -1671,11 +1671,16 @@ vpypyright () {  # [--py 2|pypy|current]
     fzf_header='Packages:'
     fzf_prompt='Which package? '
     while [[ $1 == --(header|multi) ]] {
-        if [[ $1 == --header ]] { fzf_header=$2;           shift 2 }
+        if [[ $1 == --header ]] {
+            fzf_header=$2; shift 2
+        }
         if [[ $1 == --multi  ]] {
-                                  fzf_prompt='Which packages? Choose one with <enter> or more with <tab>. '
-                                  fzf_args+=(-m); multi=1; shift   }
+            fzf_prompt='Which packages? Choose one with <enter> or more with <tab>. '
+            fzf_args+=(-m)
+            multi=1; shift
+        }
     }
+    fzf_args+=(--header=$fzf_header --prompt=$fzf_prompt)
 
     if [[ $multi ]] {
         unset reply
@@ -1686,13 +1691,11 @@ vpypyright () {  # [--py 2|pypy|current]
 
     [[ $1 ]] || return
 
-    # TODO: combine fzf_args?
+    fzf_args+=(--preview="zsh -fc '. $ZPY_SRC; .zpy_hlt ini <$1/{}/*'")
 
     local pkgs=($1/*(/:t))
-    fzf_args+=(--preview="zsh -fc '. $ZPY_SRC; .zpy_hlt ini <$1/{}/*'")
     reply=(${(f)"$(
-        print -rln -- $pkgs \
-        | fzf $fzf_args --header=$fzf_header --prompt=$fzf_prompt
+        print -rln -- $pkgs | fzf $fzf_args
     )"})
 
     [[ $reply ]] || return
