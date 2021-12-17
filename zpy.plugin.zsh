@@ -265,7 +265,6 @@ venvs_path () {  # [-i|<proj-dir>]
 
     .zpy_log error 'FAILED to find' "$1" \
       "You probably want to activate a venv with 'activate' (or 'a8'), first." \
-      "But we'll try anyway." \
       "${${${PWD:P}/#~\//~/}/%${PWD:t}/%B${PWD:t}%b}"
 }
 
