@@ -726,19 +726,16 @@ reqshow () {  # [<folder>...]
 
     local venv_cmd=($@)        # <venv-init-cmd...>
 
-    # abbreviate the hash portion of the venv path, for display:
-    local short_venv="${venv/#~\//~/}"
-    local short_venv_parts=("${(s:/:)short_venv}")
-    short_venv_parts[-2]=${short_venv_parts[-2][1,3]}…
-    short_venv=${(j:/:)short_venv_parts}
+    local short_venv
+    .zpy_shortvenv $venv_path
+    short_venv=$REPLY
 
     # create venv if necessary:
     local ret
     if [[ ! -r $venv/bin/activate ]] || ! { $venv/bin/pip &>/dev/null } {
-        .zpy_log action 'creating' "venv %B@%b $short_venv"
+        .zpy_log action creating $short_venv
         zf_rm -rf $venv
         $venv_cmd $venv
-        # TODO: account for pipz install --activate?
     }
     ret=$?
 
@@ -1402,13 +1399,31 @@ jsonfile.write_text(dumps(data, indent=4))
 
     local jsonfile=$1; shift
 
-    local REPLY pypath
+    local REPLY pypath venv_path
     .zpy_venvs_path || return
-    pypath=${REPLY}/${venv_name}/bin/python
+    venv_path=${REPLY}/${venv_name}
+    pypath=${venv_path}/bin/python
 
-    .zpy_log action injecting "${jsonfile/#~\//~/}" "interpreter ${pypath/#~\//~/}"
+    local short_pypath
+    .zpy_shortvenv $venv_path
+    short_pypath=${REPLY}/bin/python
+
+    .zpy_log action injecting $jsonfile "interpreter $short_pypath"
 
     .zpy_insertjson $jsonfile $pypath $@
+}
+
+# Abbreviate the hash portion of the venv path, for display.
+.zpy_shortvenv () {  # <venv-path>
+    emulate -L zsh
+    unset REPLY
+
+    local short_venv="${1/#~\//~/}"
+    local short_venv_parts=("${(s:/:)short_venv}")
+    short_venv_parts[-2]=${short_venv_parts[-2][1,3]}…
+    short_venv=${(j:/:)short_venv_parts}
+
+    REPLY=$short_venv
 }
 
 # Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
@@ -1451,7 +1466,11 @@ vpypyright () {  # [--py 2|pypy|current]
     .zpy_venvs_path || return
     vpath=$REPLY
 
-    .zpy_log action injecting "${jsonfile/#~\//~/}" "venv ${vpath/#~\//~/}/$venv_name"
+    local short_venv
+    .zpy_shortvenv ${vpath}/${venv_name}
+    short_venv=$REPLY
+
+    .zpy_log action injecting $jsonfile "venv $short_venv"
 
     .zpy_insertjson $jsonfile $vpath venvPath
     .zpy_insertjson $jsonfile $venv_name venv
