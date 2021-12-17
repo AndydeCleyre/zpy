@@ -409,7 +409,7 @@ pips () {  # [<reqs-txt>...]
         }
     }
 
-    .zpy_log action compiling "$reqstxt" $reqsin
+    .zpy_log action compiling $reqstxt $reqsin
 
     if [[ $snapshotdir ]] {
         local origtxt=${snapshotdir}${reqstxt:a}
