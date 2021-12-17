@@ -375,7 +375,6 @@ pips () {  # [<reqs-txt>...]
 .zpy_pipc () {  # [--faildir <faildir>] [--snapshotdir <snapshotdir>] <reqs-in> [<pip-compile-arg>...]
     emulate -L zsh
     rehash
-    if (( ! $+commands[pip-compile] )) { .zpy_please_activate pip-compile; return 1 }
 
     local faildir snapshotdir
     while [[ $1 == --(fail|snapshot)dir ]] {
@@ -383,7 +382,16 @@ pips () {  # [<reqs-txt>...]
         if [[ $1 == --snapshotdir ]] { snapshotdir=${2:a}; shift 2 }
     }
 
-    [[ $1 ]] || return
+    if (( ! $+commands[pip-compile] )) {
+        .zpy_please_activate pip-compile
+        if [[ $faildir ]] print -n >>$faildir/${PWD:t}
+        return 1
+    }
+
+    if ! [[ $1 ]] {
+        if [[ $faildir ]] print -n >>$faildir/${PWD:t}
+        return 1
+    }
 
     local reqsin=$1; shift
 
