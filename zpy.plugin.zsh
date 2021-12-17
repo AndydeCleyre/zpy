@@ -1481,22 +1481,6 @@ vpypyright () {  # [--py 2|pypy|current]
     .zpy_insertjson $jsonfile true useLibraryCodeForTypes
 }
 
-# Launch a new or existing Sublime Text project for the working folder, setting venv interpreter.
-sublp () {  # [--py 2|pypy|current] [<subl-arg>...]
-    # would it be worth it to accept --py later, aside from as first flag?
-    emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
-
-    local vpysublp_args=()
-    if [[ $1 == --py ]] { vpysublp_args=($1 $2); shift 2 }
-
-    vpysublp $vpysublp_args
-
-    local REPLY
-    .zpy_get_sublp
-    subl --project "$REPLY" $@
-}
-
 .zpy_is_under () {  # <kid_path> <ok_parent>...
     emulate -L zsh
     [[ $2 && $1 ]] || return
@@ -2337,24 +2321,6 @@ _reqshow () {
         '(--help)*: :_zpy_projects'
 }
 compdef _reqshow reqshow
-
-_sublp () {
-    _zpy_helpmsg ${0[2,-1]}
-    if (( $+_comps[subl] )) {
-    # Theoretically may act as false negative, though should be fine for subl
-        if (( CURRENT < 3 )) || [[ $words[2] == --py ]] {
-            _arguments \
-                '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)'
-        }
-        $_comps[subl]
-    } else {
-        _arguments \
-            '(- *)--help[Show usage information]' \
-            '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
-            '(-)*:File or Folder:_files'
-    }
-}
-compdef _sublp sublp
 
 () {
     emulate -L zsh
