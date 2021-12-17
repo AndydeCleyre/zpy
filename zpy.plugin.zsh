@@ -748,12 +748,7 @@ reqshow () {  # [<folder>...]
 
     . $venv/bin/activate || return
 
-    if { .zpy_netcheck } {
-        pipi -q pip
-        pipi -q pip-tools wheel
-    } else {
-        pipi --no-upgrade -q pip-tools wheel
-    }
+    .zpy_minimum_piptools || return
 
     pips $reqstxts
 }
@@ -869,16 +864,21 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
         zf_mkdir -p $projdir
         cd $projdir
         envin $envin_args
-        # TODO: account for pipz install --activate?
     } elif { . $activator } {
-        if { .zpy_netcheck } {
-            pipi -q pip
-            pipi -q pip-tools wheel
-        } else {
-            pipi --no-upgrade -q pip-tools wheel
-        }
+        .zpy_minimum_piptools || return
     } else {
         return
+    }
+}
+
+.zpy_minimum_piptools () {
+    emulate -L zsh
+
+    if { .zpy_netcheck } {
+        pipi -q pip || return
+        pipi -q pip-tools wheel
+    } else {
+        pipi --no-upgrade -q pip-tools wheel
     }
 }
 
