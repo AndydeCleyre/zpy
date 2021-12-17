@@ -298,13 +298,14 @@ pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
 
     local proj=$PWD
     if [[ $1 == --proj ]] { proj=$2; shift 2 }
+    proj=${${proj:P}/#~\//\~/}
 
     [[ $2 && $1 ]] || return
 
     local action output input=()
     action=$1; shift
-    output=$1; shift
-    input=($@)
+    output=${1/#~\//\~/}; shift
+    input=(${@/#~\//\~/})
 
     local -A c=(
         default     cyan
@@ -327,14 +328,14 @@ pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
         parts+=(
             "%F{$c[$action]}%B->%b"
             "%F{$c[default]}$output"
-            "%F{$c[proj]}%B::%b ${${${proj:P}/#~\//~/}/%${proj:t}/%B${proj:t}%b}%f"
+            "%F{$c[proj]}%B::%b ${proj/%${proj:t}/%B${proj:t}%b}%f"
         )
     } else {
         parts+=('>' "%B$action%b")
         if [[ $input ]] parts+=("${(j:%B|%b:)input}")
         parts+=(
             '%B->%b' "$output" '%B::%b'
-            "${${${proj:P}/#~\//~/}/%${proj:t}/%B${proj:t}%b}"
+            "${proj/%${proj:t}/%B${proj:t}%b}"
         )
     }
 
