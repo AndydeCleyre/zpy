@@ -265,7 +265,7 @@ venvs_path () {  # [-i|<proj-dir>]
 
     .zpy_log error 'FAILED to find' "$1" \
       "You probably want to activate a venv with 'activate' (or 'a8'), first." \
-      "${${${PWD:P}/#~\//~/}/%${PWD:t}/%B${PWD:t}%b}"
+      "${${PWD:P}/%${PWD:P:t}/%B${PWD:P:t}%b}"
 }
 
 # Install and upgrade packages.
@@ -534,8 +534,8 @@ pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compi
     error)
         shift
         local title="> $1:"; shift
-        local subject=$1; shift
-        local lines=('  '${^@})
+        local subject=${1/#~\//\~/}; shift
+        local lines=('  '${^@/#~\//\~/})
         if ! [[ -v NO_COLOR ]] {
             title="%F{red}$title %F{yellow}$subject"
             lines[-1]="${lines[-1]}%f"
@@ -1030,7 +1030,7 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
     if [[ -d $dest ]] dest=$dest/$cmd
 
     if [[ -e $dest ]] {
-        .zpy_log error "ABORTING because the destination exists" "${dest/#~\//~/}" "${projdir/#~\//~/}"
+        .zpy_log error "ABORTING because the destination exists" $dest $projdir
         return 1
     }
 
@@ -1042,7 +1042,7 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
         local cmdpath=${venv}/bin/${cmd}
 
         if [[ ! -x $cmdpath ]] {
-            .zpy_log error 'FAILED to find executable' "${cmdpath/#~\//~/}" "${projdir/#~\//~/}"
+            .zpy_log error 'FAILED to find executable' $cmdpath $projdir
             return 1
         }
 
@@ -1785,6 +1785,7 @@ vpypyright () {  # [--py 2|pypy|current]
                 --prompt='Which scripts should be added to the path? Choose one with <enter> or more with <tab>. '
             )"})
         }
+
         for bin ( $bins ) {
             if [[ $linkonly ]] {
                 vlauncher --link-only $projdir $bin $bins_home
@@ -1889,7 +1890,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             if [[ -d $projdir ]] {
                 zf_rm -r $projdir
             } else {
-                .zpy_log error "FAILED to find project for ($0) uninstall" "${projdir/#~\//~/}"
+                .zpy_log error "FAILED to find project for ($0) uninstall" $projdir
                 ret=1
             }
         }
@@ -2111,7 +2112,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     if [[ -d $dest ]] dest=$dest/$1
 
     if [[ -e $dest ]] {
-        .zpy_log error 'ABORTING because destination exists' "${dest/#~\//~/}"
+        .zpy_log error 'ABORTING because destination exists' $dest
         return 1
     }
 
