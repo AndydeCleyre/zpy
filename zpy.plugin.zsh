@@ -727,7 +727,7 @@ reqshow () {  # [<folder>...]
     local venv_cmd=($@)        # <venv-init-cmd...>
 
     local short_venv
-    .zpy_shortvenv $venv_path
+    .zpy_shortvenv $venv
     short_venv=$REPLY
 
     # create venv if necessary:
