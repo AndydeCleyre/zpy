@@ -1749,8 +1749,8 @@ vpypyright () {  # [--py 2|pypy|current]
 
     local bins_showlist=() bins_hidelist=() linkonly=1 fzf_args=(--reverse -m -0) fzf_header=Installing
     while [[ $1 == --(cmd|activate|no-cmd|auto1|header) ]] {
-        if [[ $1 == --cmd      ]] { bins_showlist=(${(s:,:)2}); shift 2 }
-        if [[ $1 == --no-cmd   ]] { bins_hidelist=(${(s:,:)2}); shift 2 }
+        if [[ $1 == --cmd      ]] { bins_showlist=(${(s:,:)2});  shift 2 }
+        if [[ $1 == --no-cmd   ]] { bins_hidelist=(${(s:,:)2});  shift 2 }
         if [[ $1 == --activate ]] { unset linkonly;              shift   }
         if [[ $1 == --auto1    ]] { fzf_args+=(-1);              shift   }
         if [[ $1 == --header   ]] { fzf_header=$2;               shift 2 }
@@ -1858,6 +1858,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         # new array: pkgspec2name each $@
         # filter array: ${arr:|failures}
         .zpy_pipzlinkbins $linkbins_args $@
+
+        # TODO: track failures from .zpy_pipzlinkbins?
 
         if [[ $failures ]] {
             .zpy_log error "FAILED to ($0) install" $failures
