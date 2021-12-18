@@ -1029,11 +1029,6 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
     local projdir=${1:P} cmd=$2 dest=${3:a}
     if [[ -d $dest ]] dest=$dest/$cmd
 
-    if [[ -e $dest ]] {
-        .zpy_log error "ABORTING because the destination exists" $dest $projdir
-        return 1
-    }
-
     local REPLY venv
     .zpy_venvs_path $projdir || return
     venv=${REPLY}/${venv_name}
@@ -1046,8 +1041,19 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
             return 1
         }
 
-        zf_ln -s "${cmdpath}" $dest
+        if ! { zf_ln -s $cmdpath $dest 2>/dev/null } {
+            if [[ ${dest:P} != ${cmdpath:P} ]] {
+                .zpy_log error 'ABORTING symlink creation' 'destination exists' $dest $projdir
+                return 1
+            }
+        }
     } else {
+
+        if [[ -e $dest ]] {
+            .zpy_log error 'ABORTING launcher creation' 'destination exists' $dest $projdir
+            return 1
+        }
+
         print -rl -- '#!/bin/sh -e' ". ${venv}/bin/activate" "exec $cmd \$@" >$dest
         zf_chmod 0755 $dest
     }
@@ -1786,13 +1792,21 @@ vpypyright () {  # [--py 2|pypy|current]
             )"})
         }
 
+        local src dest
         for bin ( $bins ) {
             if [[ $linkonly ]] {
                 vlauncher --link-only $projdir $bin $bins_home
             } else {
                 zf_mkdir -p ${vpath}/venv/pipz_launchers
                 vlauncher $projdir $bin ${vpath}/venv/pipz_launchers
-                zf_ln -s ${vpath}/venv/pipz_launchers/${bin} $bins_home/
+
+                src=${vpath}/venv/pipz_launchers/${bin}
+                dest=${bins_home}/${bin}
+                if ! { zf_ln -s $src $dest 2>/dev/null } {
+                    if [[ ${src:P} != ${dest:P} ]] {
+                        .zpy_log error 'ABORTING launcher creation' 'destination exists' $dest
+                    }
+                }
             }
         }
     }
@@ -2112,7 +2126,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     if [[ -d $dest ]] dest=$dest/$1
 
     if [[ -e $dest ]] {
-        .zpy_log error 'ABORTING because destination exists' $dest
+        .zpy_log error 'ABORTING launcher creation' 'destination exists' $dest
         return 1
     }
 
