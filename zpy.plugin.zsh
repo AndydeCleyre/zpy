@@ -1018,10 +1018,13 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
 
     local linkonly venv_name=venv reply
     while [[ $1 == --(link-only|py) ]] {
-        if [[ $1 == --link-only ]] { linkonly=1;          shift   }
-        if [[ $1 == --py        ]] {
+        if [[ $1 == --link-only ]] {
+            linkonly=1; shift
+        }
+        if [[ $1 == --py ]] {
             if ! { .zpy_argvenv $2 } { zpy $0; return 1 }
-                                     venv_name=$reply[1]; shift 2 }
+            venv_name=$reply[1]; shift 2
+        }
     }
 
     if ! [[ $3 && $2 && $1 ]] { zpy $0; return 1 }
