@@ -1769,7 +1769,7 @@ vpypyright () {  # [--py 2|pypy|current]
 
     zf_mkdir -p $bins_home
 
-    local pkgname projdir vpath bins bin REPLY
+    local pkgname projdir vpath bins bin src dest REPLY
     for 1 {
         .zpy_pkgspec2name $1 || return
         pkgname=$REPLY
@@ -1795,7 +1795,6 @@ vpypyright () {  # [--py 2|pypy|current]
             )"})
         }
 
-        local src dest
         for bin ( $bins ) {
             if [[ $linkonly ]] {
                 vlauncher --link-only $projdir $bin $bins_home
