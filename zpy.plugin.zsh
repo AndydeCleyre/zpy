@@ -1702,7 +1702,7 @@ vpypyright () {  # [--py 2|pypy|current]
 
     fzf_args+=(--preview="zsh -fc '. $ZPY_SRC; .zpy_hlt ini <$1/{}/*'")
 
-    local pkgs=($1/*(/:t))
+    local pkgs=($1/*(N/:t))
     reply=(${(f)"$(
         print -rln -- $pkgs | fzf $fzf_args
     )"})
