@@ -1,0 +1,20 @@
+name: Bump PyPI requirements
+on:
+  schedule:
+    - cron: '53 8 * * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: get up on this
+        uses: actions/checkout@v2
+
+      - name: hit it
+        run: ./mk/reqs.sh
+
+      - name: push it
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git commit -am 'Bump PyPI requirements [Automated]' && git push || true
