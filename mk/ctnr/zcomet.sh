@@ -78,6 +78,7 @@ ctnr_run -u rm -f /home/$user/.zshrc
 typeset -U path=(~/.local/bin \$path)
 precmd () { rehash }
 
+# Plugins:
 . ~/zcomet/zcomet.zsh
 () {
   for plugin (
@@ -91,13 +92,15 @@ precmd () { rehash }
 }
 zcomet compinit
 
-setopt HIST_IGNORE_ALL_DUPS
-
+# Shell vars:
 AGKOZAK_LEFT_PROMPT_ONLY=1
+AGKOZAK_PROMPT_DIRTRIM=4
+AGKOZAK_PROMPT_DIRTRIM_STRING=…
 WORDCHARS=\${WORDCHARS//[\/]}
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=4
 
-# Good History:
+# History:
+setopt HIST_IGNORE_ALL_DUPS
 autoload -Uz history-search-end
 zle -N history-beginning-search-backward-end history-search-end
 zle -N history-beginning-search-forward-end  history-search-end
