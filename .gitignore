@@ -1,5 +1,6 @@
 /build
 /.directory
+/doc/mkdocs/site
 __pycache__
 *.sublime-*
 venv
