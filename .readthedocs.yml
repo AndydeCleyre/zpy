@@ -2,6 +2,6 @@ version: 2
 formats: all
 python:
   install:
-    - requirements: doc/sphinx/requirements.txt
-sphinx:
-  configuration: doc/sphinx/conf.py
+    - requirements: doc/mkdocs/requirements.txt
+mkdocs:
+  configuration: doc/mkdocs/mkdocs.yml

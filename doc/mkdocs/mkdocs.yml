@@ -1,0 +1,51 @@
+site_name: 'zpy: Managing Python Environments in Zsh'
+site_url: https://andydecleyre.github.io/zpy/
+repo_url: https://github.com/andydecleyre/zpy
+docs_dir: ../src
+# site_dir:
+markdown_extensions:
+  - pymdownx.superfences
+theme:
+  name: material
+  favicon: img/favicon.png
+  icon:
+    logo: material/ticket-percent
+  font:
+    text: Kanit
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - toc.integrate
+    - header.autohide
+  palette:
+    - scheme: slate
+      primary: lime
+      accent: light green
+      toggle:
+        icon: material/weather-sunny
+        name: Light Background
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Dark Background
+nav:
+  - index.md
+  - start.md
+  - Examples:
+    - new_proj.md
+    - new_proj_activate.md
+    - new_proj_pipacs.md
+    - new_proj_pipac.md
+    - new_proj_pips_envin.md
+    - new_proj_upgrade.md
+    - new_proj_pyproject.md
+    - new_proj_run.md
+    - existing_projects.md
+    - pipz.md
+    - python_versions.md
+  - Reference:
+    - deps.md
+    - install.md
+    - help_all.md
