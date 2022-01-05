@@ -1,11 +1,13 @@
 #!/bin/sh -e
 gitroot="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+cd "${gitroot}/doc/mkdocs"
 
-"${gitroot}/mk/doc/sphinx.sh"
+if [ ! -d venv ]; then
+  python3 -m venv venv
+fi
+# shellcheck disable=SC1091
+. ./venv/bin/activate
 
-rm -rf "${gitroot}/docs"
-cp -r "${gitroot}/build/sphinx" "${gitroot}/docs"
+pip install -qr requirements.txt
 
-touch "${gitroot}/docs/.nojekyll"
-
-rm -r "${gitroot}/build/sphinx"
+mkdocs gh-deploy
