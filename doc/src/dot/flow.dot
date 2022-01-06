@@ -1,0 +1,29 @@
+# dot -Tsvg flow.dot >src/svg/flow.svg 
+digraph {
+    bgcolor = "#242936";
+    edge [color = "#d5ff80"];
+    node [fontcolor = "#ff974e"; fontname = "Iosevka Term Custom, ui-monospace, monospace"];
+    
+    node [color = "#90b1ff"; shape = box];
+    "requirements.in";
+    "dev-requirements.in";
+
+    node [color = "#5ccacd"; shape = egg];
+    "venv";
+    "human";
+
+    node [color = "#ab4736"; shape = diamond];
+    "requirements.txt";
+    "dev-requirements.txt";
+
+    "requirements.in" -> "requirements.txt";
+    "dev-requirements.in" -> "dev-requirements.txt";
+    "dev-requirements.in" -> "pyproject.toml";
+    "requirements.in" -> "pyproject.toml";
+
+    "requirements.txt" -> "venv";
+    "dev-requirements.txt" -> "venv";
+
+    "human" -> "requirements.in";
+    "human" -> "dev-requirements.in";
+}

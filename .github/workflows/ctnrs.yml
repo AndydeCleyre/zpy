@@ -1,0 +1,26 @@
+name: Build zcomet and zpy containers and push to quay.io
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: login to container registry
+        run: podman login -u "$QUAY_USER" -p "$QUAY_TOKEN" quay.io
+        env:
+          QUAY_USER: ${{ secrets.QUAY_USER }}
+          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+
+      - name: build containers
+        run: |
+          for distro in alpine fedora ubuntu; do
+            ./mk/ctnr/zpy.sh "$GITHUB_REF_NAME" "$distro"
+          done
+
+      - name: push container images
+        run: |
+          for img in $(podman images -n -f reference=andykluger --format={{.Repository}}:{{.Tag}}); do
+            podman push "$img"
+          done

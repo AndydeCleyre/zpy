@@ -1,0 +1,14 @@
+name: Build GitHub Pages
+on: 
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: mkdocs deploy
+        run: ./mk/doc/gh-pages.sh
