@@ -77,6 +77,7 @@ ctnr_run -u rm -f /home/$user/.zshrc
 <<EOF ctnr_append -u /home/$user/.zshrc
 typeset -U path=(~/.local/bin \$path)
 precmd () { rehash }
+zstyle ':completion:*:*:*:*:*' menu select
 
 # Plugins:
 . ~/zcomet/zcomet.zsh
