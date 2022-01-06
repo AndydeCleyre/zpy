@@ -2,7 +2,9 @@
 zpy: Zsh helpers for Python venvs, with pip-tools
 =================================================
 
-|repo| |docsite| |container-alpine| |container-fedora| |container-ubuntu| |container-ci| |contact|
+|repo| |docsite| |reqs-ci| |contact|
+
+|container-ci| |container-alpine| |container-fedora| |container-ubuntu|
 
 ``zpy`` is a set of Zsh functions,
 mostly wrapping
@@ -90,7 +92,7 @@ Replace "alpine" with "ubuntu" or "fedora" if you prefer.
    :alt: Demo container - Alpine Linux
    :target: https://quay.io/repository/andykluger/zpy-alpine
 
-.. |container-fedora| image:: https://img.shields.io/badge/Container-Quay.io-green?logo=fedora
+.. |container-fedora| image:: https://img.shields.io/badge/Container-Quay.io-green?logo=red-hat
    :alt: Demo container - Fedora
    :target: https://quay.io/repository/andykluger/zpy-fedora
 
@@ -101,6 +103,10 @@ Replace "alpine" with "ubuntu" or "fedora" if you prefer.
 .. |container-ci| image:: https://github.com/AndydeCleyre/zpy/actions/workflows/ctnrs.yml/badge.svg?branch=develop
    :alt: Demo containers - GitHub Actions
    :target: https://github.com/AndydeCleyre/zpy/actions/workflows/ctnrs.yml
+
+.. |reqs-ci| image:: https://github.com/AndydeCleyre/zpy/actions/workflows/reqs.yml/badge.svg?branch=develop
+   :alt: Bump PyPI requirements - GitHub Actions
+   :target: https://github.com/AndydeCleyre/zpy/actions/workflows/reqs.yml
 
 .. |contact| image:: https://img.shields.io/badge/Contact-Telegram-blue?logo=telegram
    :alt: Contact developer on Telegram
