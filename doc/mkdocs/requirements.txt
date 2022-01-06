@@ -9,7 +9,7 @@ mkdocs==1.2.3             # via -r requirements.in, mkdocs-material
 mkdocs-material==8.1.4    # via -r requirements.in
 mkdocs-material-extensions==1.0.3  # via mkdocs-material
 packaging==21.3           # via mkdocs
-pygments==2.11.1          # via mkdocs-material
+pygments==2.11.2          # via mkdocs-material
 pymdown-extensions==9.1   # via mkdocs-material
 pyparsing==3.0.6          # via packaging
 python-dateutil==2.8.2    # via ghp-import
