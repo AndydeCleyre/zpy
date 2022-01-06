@@ -10,4 +10,4 @@ fi
 
 pip install -qr requirements.txt
 
-mkdocs gh-deploy
+mkdocs gh-deploy --force
