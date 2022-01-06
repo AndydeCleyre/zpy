@@ -11,8 +11,9 @@ theme:
   icon:
     logo: material/ticket-percent
   font:
-    text: Kanit
-    code: JetBrains Mono
+    # text: Overpass
+    text: Jost
+    code: Overpass Mono
   features:
     - navigation.instant
     - navigation.sections
