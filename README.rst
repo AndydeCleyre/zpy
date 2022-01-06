@@ -2,7 +2,7 @@
 zpy: Zsh helpers for Python venvs, with pip-tools
 =================================================
 
-|repo| |docsite| |reqs-ci| |contact|
+|repo| |docsite| |ghpages| |reqs-ci| |contact|
 
 |container-ci| |container-alpine| |container-fedora| |container-ubuntu|
 
@@ -116,3 +116,6 @@ Replace "alpine" with "ubuntu" or "fedora" if you prefer.
    :alt: Documentation Status
    :target: https://zpy.readthedocs.io/en/latest/
 
+.. |ghpages| image:: https://github.com/AndydeCleyre/zpy/actions/workflows/gh-pages.yml/badge.svg?branch=master
+   :alt: Build GitHub Pages
+   :target: https://andydecleyre.github.io/zpy/
