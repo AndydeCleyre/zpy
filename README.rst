@@ -19,7 +19,9 @@ __ https://github.com/jazzband/pip-tools
 
 They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 
-Check out zpy.rtfd.io for installation and usage docs!
+Check out zpy.rtfd.io__ for installation and usage docs!
+
+__ https://zpy.rtfd.io
 
 The short version of installation:
 
