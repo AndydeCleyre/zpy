@@ -13,7 +13,7 @@ theme:
   font:
     # text: Overpass
     text: Jost
-    code: Overpass Mono
+    code: JetBrains Mono
   features:
     - navigation.instant
     - navigation.sections
