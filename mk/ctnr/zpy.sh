@@ -106,6 +106,19 @@ printf 'zpy_version: %s\n' "$zpy_version"
 ctnr_run -u mkdir -p /home/${user}/.local/bin
 ctnr_run -u zsh -ic '.zpy_mkbin vpy ~/.local/bin/vpy'
 
+# Set aliases
+<<EOF ctnr_append -u /home/${user}/.zshrc
+alias e="\$EDITOR"
+alias h="highlight"
+
+EOF
+
+# Print aliases
+<<EOF ctnr_append -u /home/${user}/.zshrc
+print -rl '' '# Aliases:' | .zpy_hlt zsh
+grep '^alias ' \$HOME/.zshrc | .zpy_hlt zsh
+EOF
+
 # Inform user about Py2 support
 case $distro in
   fedora)
@@ -132,18 +145,6 @@ print -rl '# For python2 support:' \\
 EOF
   ;;
 esac
-
-# Set aliases
-<<EOF ctnr_append -u /home/${user}/.zshrc
-alias e="\$EDITOR"
-alias h="highlight"
-EOF
-
-# Print aliases
-<<EOF ctnr_append -u /home/${user}/.zshrc
-print -rl '' '# Aliases:' | .zpy_hlt zsh
-grep '^alias ' \$HOME/.zshrc | .zpy_hlt zsh
-EOF
 
 # Remind user of a few useful commands
 <<EOF ctnr_append -u /home/${user}/.zshrc
