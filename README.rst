@@ -39,12 +39,12 @@ Examples
 Basic usage of ``envin`` and ``pipacs``:
 
 .. image:: https://gist.githubusercontent.com/AndydeCleyre/306d250c59a754b9a3399251b4ca0c65/raw/0ae1d1a9e8f5b72dbf78aba4a5ef138909932851/envin_pipacs.svg?sanitize=true
-   :alt: Animated envin and pipacs
+   :alt: Animated envin and pipacs demo
 
 Basic usage of ``pipz`` (the last frame gets mangled in the SVG only):
 
 .. image:: https://gist.github.com/AndydeCleyre/de117a9aec8360413b8547e1a5ab3484/raw/c58e242b36b6ca721ffae89463554e09b79f7a9c/pipz.svg?sanitize=true
-   :alt: Animated pipz
+   :alt: Animated pipz demo
 
 There are about 25 user-facing functions in total:
 
