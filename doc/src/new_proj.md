@@ -10,7 +10,7 @@ The project folder will usually include, at a minimum,
 We'll create an example project to demonstrate some of the most useful `zpy` commands:
 
 ```console
-$ mkdir newproj
-$ cd newproj
+% mkdir newproj
+% cd newproj
 ```
 

@@ -4,24 +4,24 @@ Let's create a small script in our project,
 which requires the venv to succeed:
 
 ```console
-$ print -rl '#!/usr/bin/env python3' 'import bs4' 'print("SUCCESS")' >do_thing.py
-$ chmod +x do_thing.py
+% print -rl '#!/usr/bin/env python3' 'import bs4' 'print("SUCCESS")' >do_thing.py
+% chmod +x do_thing.py
 ```
 
 We can ensure we've got a proper environment and run it:
 
 ```console
-$ envin
-> syncing dev-requirements.txt|requirements.txt -> env :: ~/newproj
-(venv) $ ./do_thing.py
-SUCCESS
+% envin
+[venv] % ./do_thing.py
 ```
+
+![Animated demo: envin, run script](https://gist.github.com/AndydeCleyre/27bfa0e10a1b42191f777530a500263e/raw/0554370718428b26755902f5c6b12375cabc2d59/envin_do_thing.svg?sanitize=true)
 
 But what if we don't want to manually activate its environment?
 
 ```console
-(venv) $ envout
-$ ./do_thing.py
+[venv] % envout
+% ./do_thing.py
 ```
 ```python
 Traceback (most recent call last):
@@ -33,7 +33,7 @@ ModuleNotFoundError: No module named 'bs4'
 ## `vpy`
 
 ```console
-$ vpy do_thing.py
+% vpy do_thing.py
 SUCCESS
 ```
 
@@ -50,8 +50,8 @@ For something similar and more flexible, see [`vrun` below](`new_proj_run.md#vru
 ## `vpyshebang`
 
 ```console
-$ vpyshebang do_thing.py
-$ cat do_thing.py
+% vpyshebang do_thing.py
+% cat do_thing.py
 ```
 ```python
 #!/home/andy/.local/share/venvs/3f6372258375d0a2f18efd20d84fc2b5/venv/bin/python
@@ -68,7 +68,7 @@ If you find that unsightly, inflexible, or would just like `vpy` available outsi
 create a "standalone" `vpy` script:
 
 ```console
-$ .zpy_mkbin vpy ~/.local/bin
+% .zpy_mkbin vpy ~/.local/bin
 ```
 
 Next time you use `vpyshebang`, it will use the path to that script, instead.
@@ -78,14 +78,14 @@ Next time you use `vpyshebang`, it will use the path to that script, instead.
 The minimal form of `vrun` is
 
 ```console
-$ vrun <proj-dir> <cmd>...
+% vrun <proj-dir> <cmd>...
 ```
 
 The command passed will be run in a subshell
 whose `PATH` is prepended with `<proj-dir>`'s associated `<venv>/bin`.
 
 ```console
-$ vrun .. which python
+% vrun .. which python
 ```
 
 This is much faster than activating and usually sufficient,
@@ -101,8 +101,8 @@ You can use `vlauncher` to generate a small POSIX launcher script,
 for running a command in a given project's activated venv:
 
 ```console
-$ vlauncher ~/newproj 'which python' start.sh
-$ cat start.sh
+% vlauncher ~/newproj 'which python' start.sh
+% cat start.sh
 ```
 ```shell
 #!/bin/sh -e

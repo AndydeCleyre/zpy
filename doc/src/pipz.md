@@ -13,11 +13,8 @@ Well `pipz` accomplishes the same, with nearly the same interface,
 using Zsh and the other zpy functions.
 
 ```console
-$ pipz install tldr yt-dlp
-```
-
-```console
-$ pipz list --all
+% pipz install tldr yt-dlp
+% pipz list --all
 ```
 ```
 projects     @ ~/.local/share/python
@@ -31,16 +28,26 @@ tldr               tldr 3.0.0         Python 3.9.7
 yt-dlp             yt-dlp 2021.12.27  Python 3.9.7
 ```
 
-The paths printed on the first three lines of output reflect the environment variables
+The paths printed on the first three lines of output may be overridden with the environment variables
 `ZPY_PIPZ_PROJECTS`, 
 `ZPY_VENVS_HOME`, and
 `$ZPY_PIPZ_BINS`,
 respectively.
 
+![Animated demo: pipz install, list](https://gist.github.com/AndydeCleyre/5ad45d78336fc2cc4625b0dc6b450849/raw/777e77607786beb65b2d6e00fb27c507c5e7abfa/pipz_install_list.svg?sanitize=true)
+
+!!! note
+
+    The last frame is mangled in this animation, but not in real usage.
+
+---
+
 ```console
-$ zpy pipz
+% zpy pipz
 ```
 ```shell
 # Package manager for venv-isolated scripts (pipx clone; py3 only).
 pipz [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
 ```
+
+---

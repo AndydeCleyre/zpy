@@ -18,7 +18,7 @@ If you want to have multiple venvs available for a single project, each with the
 
 ```console
 $ pyenv shell 3.7.9
-$ envin --py current  # or activate --py current
+$ envin --py current  # or: activate --py current
 ```
 
 Instead of the venv path being for example `~/.local/share/venvs/646…/venv`, it will be `~/.local/share/venvs/646…/venv-python-3.7.9`.

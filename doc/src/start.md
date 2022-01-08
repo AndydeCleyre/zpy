@@ -13,6 +13,6 @@ For more details and recommended plugin manager commands, see [Installation](ins
 For now, let's just source it in the current session:
 
 ```console
-$ git clone https://github.com/andydecleyre/zpy
-$ . ./zpy/zpy.plugin.zsh
+% git clone https://github.com/andydecleyre/zpy
+% . ./zpy/zpy.plugin.zsh
 ```

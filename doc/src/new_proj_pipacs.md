@@ -14,18 +14,10 @@ we'll use `pipacs` to:
   install everything as listed in `requirements.txt` *and* uninstall everything else
 
 ```console
-(venv) $ pipacs beautifulsoup4
-> appending -> requirements.in :: ~/newproj
-beautifulsoup4
-> compiling requirements.in -> requirements.txt :: ~/newproj
+[venv] % pipacs beautifulsoup4
 ```
-```ini
-beautifulsoup4==4.10.0    # via -r requirements.in
-soupsieve==2.2.1          # via beautifulsoup4
-```
-```console
-> syncing requirements.txt -> env :: ~/newproj
-```
+
+![Animated demo: pipacs](https://gist.githubusercontent.com/AndydeCleyre/b422097e220806b31c4d1c80ed0ed6b5/raw/ee65dd02265b3e5e7b85996bc6dfd22175a3b78c/guide_pipacs.svg?sanitize=true)
 
 Being such a popular package,
 we were able to tab-complete the name `beautifulsoup4`,
@@ -46,16 +38,20 @@ as for any set of `zpy` functions, can be viewed at once,
 by providing them as arguments to the `zpy` function:
 
 ```console
-$ zpy pipa pipc pips pipac pipcs
+% zpy pipa pipc pips pipac pipcs
 ```
 
 Without any arguments, running `zpy` displays help for *all* `zpy` functions.
 
+---
+
 ```console
-$ zpy pipacs
+% zpy pipacs
 ```
 ```shell
 # Add to requirements.in, compile it to requirements.txt, then sync to that (add, compile, sync).
 # Use -c to affect categorized requirements, and -h to include hashes.
 pipacs [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
 ```
+
+---
