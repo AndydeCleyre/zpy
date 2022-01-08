@@ -6,10 +6,10 @@ we may wish to *sync* our venv state to match
 either or both:
 
 ```console
-(venv) $ pips requirements.txt      # install regular deps, uninstall dev deps
-(venv) $ pips dev-requirements.txt  # install dev deps, uninstall regular deps
-(venv) $ pips requirements.txt dev-requirements.txt  # install multiple dep groups
-(venv) $ pips                                        # install all dep groups
+[venv] % pips requirements.txt      # install regular deps, uninstall dev deps
+[venv] % pips dev-requirements.txt  # install dev deps, uninstall regular deps
+[venv] % pips requirements.txt dev-requirements.txt  # install multiple dep groups
+[venv] % pips                                        # install all dep groups
 ```
 
 You may also use `envin` as a drop-in replacement for `pips` in the above examples,
@@ -32,22 +32,29 @@ your system would be in exactly the same state.
 
 So how do they differ?
 
-- The project folder:
-  - `envin` *always* operates on a venv associated with the *current folder*
-  - `activate` uses the current folder *by default*,
-    but *also* accepts a *project path argument*,
-    or `-i` to *select the project* folder interactively
-- Existing venv behavior:
-  - `envin` *always* syncs the venv according to `requirements.txt` files
-  - `activate` *only* syncs when creating a *new venv*;
-    otherwise, it's activated *as-is*
-- Dependency groups (`<category>-requirements.txt`):
-  - `activate`, when syncing at all, *always* syncs according to *all* `requirements.txt` files
-  - `envin` syncs according to *all* `requirements.txt` files *by default*,
-    but *also* accepts any number of *lockfile arguments*, just like `pips`
+### The project folder:
+
+- `envin` *always* operates on a venv associated with the *current folder*
+- `activate` uses the current folder *by default*,
+  but *also* accepts a *project path argument*,
+  or `-i` to *select the project* folder interactively
+
+### Existing venv behavior:
+
+- `envin` *always* syncs the venv according to `requirements.txt` files
+- `activate` *only* syncs when creating a *new venv*;
+  otherwise, it's activated *as-is*
+
+### Dependency groups (`<category>-requirements.txt`):
+
+- `activate`, when syncing at all, *always* syncs according to *all* `requirements.txt` files
+- `envin` syncs according to *all* `requirements.txt` files *by default*,
+  but *also* accepts any number of *lockfile arguments*, just like `pips`
+
+---
 
 ```console
-$ zpy activate envin
+% zpy activate envin
 ```
 ```shell
 # Activate the venv for the current folder or specified project, if it exists.
@@ -64,13 +71,15 @@ activate [--py 2|pypy|current] [-i|<proj-dir>]
 envin [--py 2|pypy|current] [<reqs-txt>...]
 ```
 
+---
+
 # Deactivation
 
 These are standard Python virtual environments,
 and so can be deactivated with:
 
 ```console
-(venv) $ deactivate
+[venv] % deactivate
 ```
 
 For symmetry with `a8` and `envin`, `zpy` adds two aliases for the same command:

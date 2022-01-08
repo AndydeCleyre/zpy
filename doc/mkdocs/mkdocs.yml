@@ -5,6 +5,7 @@ docs_dir: ../src
 # site_dir:
 markdown_extensions:
   - pymdownx.superfences
+  - admonition
 theme:
   name: material
   favicon: img/favicon.png

@@ -4,10 +4,9 @@ Let's clone [`fastapi`](https://github.com/tiangolo/fastapi),
 which uses a `pyproject.toml` without `setup.py` or `requirements.txt`:
 
 ```console
-$ git clone https://github.com/tiangolo/fastapi
-$ cd fastapi
-$ envin
-> creating -> venv @ ~/.local/share/venvs/498…/venv :: ~/Code/fastapi
+% git clone https://github.com/tiangolo/fastapi
+% cd fastapi
+% envin
 ```
 
 Since no `(*-)requirements.txt` files were found,
@@ -16,7 +15,7 @@ Since no `(*-)requirements.txt` files were found,
 You *may* compile a `requirements.txt` directly from `pyproject.toml`:
 
 ```console
-$ pipcs pyproject.toml -- -o requirements.txt --extra dev,test
+[venv] % pipcs pyproject.toml -- -o requirements.txt --extra dev,test
 ```
 
 But the resulting lockfile doesn't include `fastapi` itself.
@@ -25,7 +24,7 @@ It's recommended to instead create a `requirements.in`,
 referencing the current project:
 
 ```console
-$ pipacs '-e .[dev,test]'
+[venv] % pipacs '-e .[dev,test]'
 ```
 
 If a project uses a `requirements.txt` already,

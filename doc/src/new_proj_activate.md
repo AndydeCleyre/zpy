@@ -1,9 +1,7 @@
 # Create a venv with `activate`
 
 ```console
-$ activate  # there's also an alias: a8
-> creating -> ~/.local/share/venvs/f43…/venv :: ~/newproj
-(venv) $
+% activate  # there's also an alias: a8
 ```
 
 Congrats, you've created a virtual environment and activated it for your current shell!
@@ -17,7 +15,7 @@ If you want to access it as `./venv` (e.g. for another tool to easily find),
 run:
 
 ```console
-(venv) $ ln -s $VIRTUAL_ENV
+[venv] % ln -s $VIRTUAL_ENV
 ```
 
 There's a bit more to `activate` if you need it;
@@ -25,8 +23,10 @@ like all `zpy` commands,
 it's documented via a `--help` flag as well as
 what aims to be *thorough* tab completion assistance.
 
+---
+
 ```console
-$ activate --help
+% activate --help
 ```
 ```shell
 # Activate the venv for the current folder or specified project, if it exists.
@@ -35,3 +35,5 @@ $ activate --help
 # Pass --py to use another interpreter and named venv.
 activate [--py 2|pypy|current] [-i|<proj-dir>]
 ```
+
+---

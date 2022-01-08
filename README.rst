@@ -16,6 +16,7 @@ and isolated Python app installation.
 
 At least a few are very handy.
 None of them should get in your way.
+All have thorough tab completion.
 
 __ https://github.com/jazzband/pip-tools
 
@@ -38,12 +39,41 @@ Examples
 Basic usage of ``envin`` and ``pipacs``:
 
 .. image:: https://gist.githubusercontent.com/AndydeCleyre/306d250c59a754b9a3399251b4ca0c65/raw/0ae1d1a9e8f5b72dbf78aba4a5ef138909932851/envin_pipacs.svg?sanitize=true
-   :alt: Animated envin and pipacs
+   :alt: Animated envin and pipacs demo
 
 Basic usage of ``pipz`` (the last frame gets mangled in the SVG only):
 
 .. image:: https://gist.github.com/AndydeCleyre/de117a9aec8360413b8547e1a5ab3484/raw/c58e242b36b6ca721ffae89463554e09b79f7a9c/pipz.svg?sanitize=true
-   :alt: Animated pipz
+   :alt: Animated pipz demo
+
+There are about 25 user-facing functions in total:
+
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+| ``activate/a8`` | ``envin``       | ``envout/da8``                                                                                            |
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+| ``pipa``        | ``pipac``       | ``pipacs``                                                                                                |
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+| ``pipc``        | ``pipcs``       | ``pips``                                                                                                  |
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+| ``pipcheckold`` | ``pipup``       | ``pypc``                                                                                                  |
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+| ``vlauncher``   | ``vpy``         | ``vrun``                                                                                                  |
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+| ``pipi``        | ``prunevenvs``  | ``reqshow``                                                                                               |
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+| ``venvs_path``  | ``whichpyproj`` | ``zpy``                                                                                                   |
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+| ``vpypyright``  | ``vpysublp``    | ``vpyvscode``                                                                                             |
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+| ``vpyshebang``  |                 | ``pipz install``/``uninstall``/``upgrade``/``list``/``inject``/``reinstall``/``cd``/``runpip``/``runpkg`` |
++-----------------+-----------------+-----------------------------------------------------------------------------------------------------------+
+
+For details, either run ``zpy`` (which displays all help text),
+see the reference__, or follow the short guide__.
+
+__ https://zpy.readthedocs.io/en/latest/help_all/
+
+__ https://zpy.readthedocs.io/en/latest/start/
 
 Guiding Ideas
 -------------

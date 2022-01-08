@@ -9,6 +9,8 @@ jobs:
 
       - name: get up on this
         uses: actions/checkout@v2
+        with:
+            ref: develop
 
       - name: hit it
         run: ./mk/reqs.sh
