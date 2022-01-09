@@ -42,6 +42,12 @@ respectively.
 
 ---
 
+If you track your dotfiles, you might include `~/.local/share/python`,
+which only has `<pkgname>/requirements.{in,txt}` files.
+With those in place, you can run `pipz reinstall` to get the apps back.
+
+---
+
 ```console
 % zpy pipz
 ```
