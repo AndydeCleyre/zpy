@@ -40,6 +40,12 @@ respectively.
 
     The last frame is mangled in this animation, but not in real usage.
 
+Example installing an app package from git:
+
+```console
+% pipz install 'subdl @ git+https://github.com/alexanderwink/subdl'
+```
+
 ---
 
 If you track your dotfiles, you might include `~/.local/share/python`,
