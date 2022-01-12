@@ -43,7 +43,7 @@ $ brew install fzf highlight pcre2 python zsh
 ### OpenSUSE
 
 ```console
-$ sudo zypper in curl fzf highlight python3 zsh
+$ sudo zypper in curl diffutils fzf highlight python3 zsh
 ```
 
 ## All Dependencies
