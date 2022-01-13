@@ -874,12 +874,7 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
 .zpy_minimum_piptools () {
     emulate -L zsh
 
-    if { .zpy_netcheck } {
-        pipi -q pip || return
-        pipi -q pip-tools wheel
-    } else {
-        pipi --no-upgrade -q pip-tools wheel
-    }
+    pipi --no-upgrade -q pip-tools wheel
 }
 
 # Alias for 'activate'.

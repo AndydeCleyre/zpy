@@ -2,9 +2,11 @@
 zpy: Zsh helpers for Python venvs, with pip-tools
 =================================================
 
-|repo| |docsite| |ghpages| |reqs-ci| |contact|
+|repo| |docsite| |contact|
 
-|container-ci| |container-alpine| |container-fedora| |container-ubuntu|
+|ghpages| |reqs-ci| |container-ci| 
+
+|container-alpine| |container-fedora| |container-ubuntu|
 
 ``zpy`` is a set of Zsh functions,
 mostly wrapping
@@ -32,6 +34,8 @@ The short version of installation:
 - Source this repo's ``zpy.plugin.zsh`` in your ``.zshrc``, or use a Zsh plugin manager to add ``andydecleyre/zpy``
 
 __ https://github.com/junegunn/fzf
+
+.. contents::
 
 Examples
 --------
@@ -102,8 +106,8 @@ __ https://flit.readthedocs.io/en/latest/
 
 __ https://github.com/AndydeCleyre/zpy/issues
 
-Preview
--------
+Try it in a Container
+---------------------
 
 Try it in isolation with docker or podman with one of these commands:
 
@@ -134,7 +138,7 @@ Replace "alpine" with "ubuntu" or "fedora" if you prefer.
    :alt: Demo containers - GitHub Actions
    :target: https://github.com/AndydeCleyre/zpy/actions/workflows/ctnrs.yml
 
-.. |reqs-ci| image:: https://github.com/AndydeCleyre/zpy/actions/workflows/reqs.yml/badge.svg?branch=develop
+.. |reqs-ci| image:: https://github.com/AndydeCleyre/zpy/actions/workflows/reqs.yml/badge.svg
    :alt: Bump PyPI requirements - GitHub Actions
    :target: https://github.com/AndydeCleyre/zpy/actions/workflows/reqs.yml
 

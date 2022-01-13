@@ -25,13 +25,13 @@ $ sudo pacman -S --needed fzf highlight python zsh
 ### Debian/Ubuntu
 
 ```console
-$ sudo apt --no-install-recommends install fzf highlight pcre2-utils python3{,-venv} zsh
+$ sudo apt --no-install-recommends install fzf highlight python3{,-venv} wget zsh
 ```
 
 ### Fedora
 
 ```console
-$ sudo dnf --setopt=install_weak_deps=False install diffutils fzf highlight pcre-tools python3 zsh
+$ sudo dnf --setopt=install_weak_deps=False install diffutils fzf highlight python3 zsh
 ```
 
 ### MacOS
@@ -43,7 +43,7 @@ $ brew install fzf highlight pcre2 python zsh
 ### OpenSUSE
 
 ```console
-$ sudo zypper in fzf highlight pcre2-tools python3 zsh
+$ sudo zypper in curl diffutils fzf highlight python3 zsh
 ```
 
 ## All Dependencies
