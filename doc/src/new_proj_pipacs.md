@@ -25,8 +25,6 @@ reducing the risk of mistyping.
 The complete-able package list comes from
 [hugovk/top-pypi-packages](https://github.com/hugovk/top-pypi-packages).
 
-Then, the active venv's installed packages are synced to match that lockfile.
-
 ## When `pipacs` does too much
 
 You won't always want to add, compile, and sync all at once.
