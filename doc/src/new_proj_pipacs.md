@@ -2,7 +2,7 @@
 
 The `acs` in `pipacs` is for "add, compile, sync."
 
-Instead of using `pip install` to add a library,
+Instead of using `pip install` directly to add a library,
 beautifulsoup4,
 to our new project,
 we'll use `pipacs` to:
