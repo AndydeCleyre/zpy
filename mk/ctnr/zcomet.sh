@@ -82,6 +82,7 @@ zstyle ':completion:*:*:*:*:*' menu select
 # Plugins:
 . ~/zcomet/zcomet.zsh
 () {
+  local plugin
   for plugin (
     agkozak/agkozak-zsh-prompt
     zdharma-continuum/fast-syntax-highlighting
