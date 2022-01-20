@@ -4,8 +4,10 @@ repo_url: https://github.com/andydecleyre/zpy
 docs_dir: ../src
 # site_dir:
 markdown_extensions:
-  - pymdownx.superfences
   - admonition
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
 theme:
   name: material
   favicon: img/favicon.png
