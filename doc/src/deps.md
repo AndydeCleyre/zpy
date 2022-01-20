@@ -3,9 +3,6 @@
 The primary requirements are Zsh, Python, and [`fzf`](https://github.com/junegunn/fzf),
 with optional additions for minor enhancements or Python2 support.
 
-There are also a handful of required commands that you almost certainly already have,
-itemized at [All Dependencies](deps.md#all-dependencies).
-
 ## Suggested Dependencies by Platform
 
 In all cases, `highlight` is optional.
