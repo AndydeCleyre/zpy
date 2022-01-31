@@ -4,8 +4,10 @@ repo_url: https://github.com/andydecleyre/zpy
 docs_dir: ../src
 # site_dir:
 markdown_extensions:
-  - pymdownx.superfences
   - admonition
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
 theme:
   name: material
   favicon: img/favicon.png
@@ -34,8 +36,8 @@ theme:
         name: Dark Background
 nav:
   - index.md
-  - start.md
-  - Examples:
+  - Guide:
+    - start.md
     - new_proj.md
     - new_proj_activate.md
     - new_proj_pipacs.md
@@ -47,7 +49,7 @@ nav:
     - existing_projects.md
     - pipz.md
     - python_versions.md
-  - Reference:
+  - Details:
+    - help_all.md
     - deps.md
     - install.md
-    - help_all.md

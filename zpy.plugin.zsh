@@ -468,8 +468,7 @@ pips () {  # [<reqs-txt>...]
         reqstxt=${reqsin}.txt
     }
 
-    pipi -q pip
-    pipi -q pip-tools wheel
+    .zpy_maximum_piptools
 
     .zpy_pipc $zpypipc_args $reqsin -q ${${${reqs/*/-P}:^reqs}:--U} $pipcompile_args
     local ret=$?
@@ -874,7 +873,13 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
 .zpy_minimum_piptools () {
     emulate -L zsh
 
-    pipi --no-upgrade -q pip-tools wheel
+    pipi --no-upgrade -q pip-tools wheel 'pip<22.0.0'  # https://github.com/jazzband/pip-tools/issues/1558
+}
+
+.zpy_maximum_piptools () {
+    emulate -L zsh
+
+    pipi -q pip-tools wheel 'pip<22.0.0'  # https://github.com/jazzband/pip-tools/issues/1558
 }
 
 # Alias for 'activate'.
