@@ -873,13 +873,13 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
 .zpy_minimum_piptools () {
     emulate -L zsh
 
-    pipi --no-upgrade -q pip-tools wheel 'pip<22.0.0'  # https://github.com/jazzband/pip-tools/issues/1558
+    pipi --no-upgrade -q 'pip-tools>=6.5.0' wheel
 }
 
 .zpy_maximum_piptools () {
     emulate -L zsh
 
-    pipi -q pip-tools wheel 'pip<22.0.0'  # https://github.com/jazzband/pip-tools/issues/1558
+    pipi -q pip-tools wheel
 }
 
 # Alias for 'activate'.
