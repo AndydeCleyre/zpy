@@ -59,6 +59,18 @@ esac
 buildah rm "$ctnr" 2>/dev/null || true
 buildah from -q --name "$ctnr" "docker.io/library/$distro:$basetag"
 
+# Configure package manager
+case $distro in
+  fedora)
+    printf '%s\n' 'fastestmirror=1' 'max_parallel_downloads=10' \
+    | ctnr_append /etc/dnf/dnf.conf
+  ;;
+  *)
+    # sometimes defaults are faster than taking time to find the fastest mirror
+    printf '%s\n' "Using default repos for $distro"
+  ;;
+esac
+
 # Upgrade and install packages
 ctnr_pkg_upgrade
 # shellcheck disable=SC2086
