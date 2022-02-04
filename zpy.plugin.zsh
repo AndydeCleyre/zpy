@@ -879,7 +879,7 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
 .zpy_maximum_piptools () {
     emulate -L zsh
 
-    pipi -q pip-tools wheel
+    pipi -q pip-tools wheel pip
 }
 
 # Alias for 'activate'.
