@@ -1728,13 +1728,11 @@ vpypyright () {  # [--py 2|pypy|current]
     rehash
 }
 
-.zpy_pipzrmvenvs () {  # <projects_home> <bins_home> <pkgspec>...
+.zpy_pipzrmvenvs () {  # <projects_home> <pkgspec>...
     emulate -L zsh
-    [[ $3 && $2 && $1 ]] || return
+    [[ $2 && $1 ]] || return
 
-    local projects_home bins_home
-    projects_home=$1; shift
-    bins_home=$1;     shift
+    local projects_home=$1; shift
 
     local REPLY
     for 1 {
@@ -1891,7 +1889,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         }
 
         .zpy_pipzunlinkbins $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
-        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
+        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $pkgs
 
         local pkg projdir ret=0
         for pkg ( $pkgs ) {
@@ -2006,7 +2004,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         }
 
         .zpy_pipzunlinkbins $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
-        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
+        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $pkgs
         zf_rm -f ${ZPY_PIPZ_PROJECTS}/${^pkgs}/requirements.txt
 
         zargs -P $ZPY_PROCS -ri___ \
