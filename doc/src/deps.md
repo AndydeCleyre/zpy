@@ -80,9 +80,10 @@ In all cases, `highlight` is optional.
     - [highlight](https://repology.org/project/highlight/versions)
       *or* [bat](https://repology.org/project/bat/versions)
       -- for pretty syntax highlighting
-    - [delta](https://repology.org/project/git-delta/versions)
-      *or* [diff-so-fancy](https://repology.org/project/diff-so-fancy/versions)
-      *or* diff-highlight (from git + perl)
+    - [delta](https://github.com/dandavison/delta)
+      *or* [diff-so-fancy](https://github.com/so-fancy/diff-so-fancy)
+      *or* [riff](https://github.com/walles/riff)
+      *or* [colordiff](https://repology.org/project/colordiff/versions)
       -- for more pretty syntax highlighting
     - [jq](https://repology.org/project/jq/versions)
       *or* [jello](https://pypi.org/project/jello/)
