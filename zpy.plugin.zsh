@@ -1307,12 +1307,11 @@ if pyproject.is_file():
         pyproject_reqs = reqs_from_reqsin(reqsin)
         print(pyproject_reqs)
         extras_catg = reqsin.name.rsplit(suffix, 1)[0].rstrip('-.')
+        toml_data.setdefault('project', {})
         if not extras_catg:
             toml_data['project']['dependencies'] = pyproject_reqs
         else:
-            # toml_data['project'].setdefault('optional-dependencies', {})  # enable on close of tomlkit #49
-            if 'optional-dependencies' not in toml_data['project']:         # remove when #49 is fixed
-                toml_data['project']['optional-dependencies'] = {}          # remove when #49 is fixed
+            toml_data['project'].setdefault('optional-dependencies', {})
             toml_data['project']['optional-dependencies'][extras_catg] = pyproject_reqs
     pyproject.write_text(tomlkit.dumps(toml_data))
     "
@@ -1728,13 +1727,11 @@ vpypyright () {  # [--py 2|pypy|current]
     rehash
 }
 
-.zpy_pipzrmvenvs () {  # <projects_home> <bins_home> <pkgspec>...
+.zpy_pipzrmvenvs () {  # <projects_home> <pkgspec>...
     emulate -L zsh
-    [[ $3 && $2 && $1 ]] || return
+    [[ $2 && $1 ]] || return
 
-    local projects_home bins_home
-    projects_home=$1; shift
-    bins_home=$1;     shift
+    local projects_home=$1; shift
 
     local REPLY
     for 1 {
@@ -1891,7 +1888,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         }
 
         .zpy_pipzunlinkbins $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
-        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
+        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $pkgs
 
         local pkg projdir ret=0
         for pkg ( $pkgs ) {
@@ -2006,7 +2003,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         }
 
         .zpy_pipzunlinkbins $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
-        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS $pkgs
+        .zpy_pipzrmvenvs $ZPY_PIPZ_PROJECTS $pkgs
         zf_rm -f ${ZPY_PIPZ_PROJECTS}/${^pkgs}/requirements.txt
 
         zargs -P $ZPY_PROCS -ri___ \
