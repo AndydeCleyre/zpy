@@ -1307,12 +1307,11 @@ if pyproject.is_file():
         pyproject_reqs = reqs_from_reqsin(reqsin)
         print(pyproject_reqs)
         extras_catg = reqsin.name.rsplit(suffix, 1)[0].rstrip('-.')
+        toml_data.setdefault('project', {})
         if not extras_catg:
             toml_data['project']['dependencies'] = pyproject_reqs
         else:
-            # toml_data['project'].setdefault('optional-dependencies', {})  # enable on close of tomlkit #49
-            if 'optional-dependencies' not in toml_data['project']:         # remove when #49 is fixed
-                toml_data['project']['optional-dependencies'] = {}          # remove when #49 is fixed
+            toml_data['project'].setdefault('optional-dependencies', {})
             toml_data['project']['optional-dependencies'][extras_catg] = pyproject_reqs
     pyproject.write_text(tomlkit.dumps(toml_data))
     "
