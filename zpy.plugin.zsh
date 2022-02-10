@@ -29,14 +29,14 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
     if [[ $1 == diff ]] {
         local diffhi args=()
         for diffhi (
-            $commands[riff]
-            $commands[delta]
-            $commands[diff-so-fancy]
-            $commands[colordiff]
+            riff
+            delta
+            diff-so-fancy
+            colordiff
         ) {
-            if [[ -x $diffhi && -f $diffhi ]] {
-                if [[ $diffhi:t == riff ]] args+=(--no-pager)
-                if [[ $diffhi:t == delta ]] args+=(--paging never --color-only)
+            if (( $+commands[$diffhi] )) {
+                if [[ $diffhi == riff ]] args+=(--no-pager)
+                if [[ $diffhi == delta ]] args+=(--paging never --color-only)
                 # delta will use BAT_THEME
                 BAT_THEME=${BAT_THEME:-ansi} \
                 $diffhi $args
