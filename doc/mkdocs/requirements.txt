@@ -1,6 +1,6 @@
 click==8.0.3              # via mkdocs
 ghp-import==2.0.2         # via mkdocs
-importlib-metadata==4.11.0  # via markdown, mkdocs
+importlib-metadata==4.11.1  # via markdown, mkdocs
 jinja2==3.0.3             # via mkdocs, mkdocs-material
 markdown==3.3.6           # via mkdocs, mkdocs-material, pymdown-extensions
 markupsafe==2.0.1         # via jinja2
