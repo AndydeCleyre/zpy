@@ -37,6 +37,9 @@ __ https://github.com/junegunn/fzf
 
 .. contents::
 
+.. image:: https://github.com/AndydeCleyre/zpy/raw/master/doc/src/img/flow.svg
+   :alt: Information flow diagram
+
 Examples
 --------
 
