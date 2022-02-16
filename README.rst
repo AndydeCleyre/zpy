@@ -43,6 +43,26 @@ __ https://github.com/junegunn/fzf
 Examples
 --------
 
+.. code:: console
+
+  % envin                       # create venv if necessary, activate it, and (un)install pkgs to match all found requirements.txt files
+  % envin dev-requirements.txt  # as above, but match the env's pkgs to only the given file(s)
+
+.. code:: console
+
+  [venv] % pipacs beautifulsoup4  # add pkg to requirements.in, compile locked dep tree to requirements.txt, install to match
+
+.. code:: console
+
+  [venv] % pips requirements.txt      # install regular deps, uninstall others
+  [venv] % pips dev-requirements.txt  # install dev deps, uninstall others
+  [venv] % pips dev-requirements.txt requirements.txt  # install multiple dep groups
+  [venv] % pips                       # install all dep groups
+
+.. code:: console
+
+  [venv] % pipz install tldr visidata jello lice rich-cli subdl yt-dlp  # install tools from PyPI with isolated venvs and locked versions
+
 Basic usage of ``envin`` and ``pipacs``:
 
 .. image:: https://gist.githubusercontent.com/AndydeCleyre/306d250c59a754b9a3399251b4ca0c65/raw/0ae1d1a9e8f5b72dbf78aba4a5ef138909932851/envin_pipacs.svg?sanitize=true
