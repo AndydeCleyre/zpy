@@ -80,7 +80,8 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
         BAT_THEME=${BAT_THEME:-ansi} \
         batcat --color always --paging never -p -l $1
     } elif (( $+commands[rich] )) {
-        rich --force-terminal --lexer $1 -
+        local content=$(<&0)
+        if [[ $content ]]  rich --force-terminal --lexer $1 - <<<$content
     } else {
         >&1
     }
