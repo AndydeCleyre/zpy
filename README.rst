@@ -90,6 +90,8 @@ Guiding Ideas
   less-standard tools (pipenv, poetry, pip-tools, zpy, etc.);
   ``pip install -r *requirements.txt`` ought to be sufficient
 - It's nice to keep the venv folder *outside* of the project itself
+- Not every manageable project *needs* a ``pyproject.toml`` or to be packaged
+- Lockfiles are good
 - Tab completion is wonderful
 
 - These functions **don't**:
