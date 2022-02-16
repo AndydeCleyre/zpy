@@ -37,9 +37,6 @@ __ https://github.com/junegunn/fzf
 
 .. contents::
 
-.. image:: https://github.com/AndydeCleyre/zpy/raw/master/doc/src/img/flow.svg
-   :alt: Information flow diagram
-
 Examples
 --------
 
@@ -83,6 +80,9 @@ __ https://zpy.readthedocs.io/en/latest/start/
 
 Guiding Ideas
 -------------
+
+.. image:: https://github.com/AndydeCleyre/zpy/raw/master/doc/src/img/flow.svg
+   :alt: Information flow diagram
 
 - You should not have to manually specify the dependencies anywhere other than
   ``*requirements.in`` files
