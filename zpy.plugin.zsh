@@ -1540,15 +1540,16 @@ vpypyright () {  # [--py 2|pypy|current]
     local piplistline=()
     if (( $+commands[jq] )) {
     # Slower than the pure ZSH fallback below?
+        local pattern=${${pdir:t}//-/[._-]}
         piplistline=($(
             vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
-            | jq -r '.[] | select(.name|test("^'${${${pdir:t}//[^[:alnum:].]##/-}:gs/./\\\\.}'$"; "i")) | .name,.version'
+            | jq -r '.[] | select(.name|test("^'${pattern}'$"; "i")) | .name,.version'
         ))
     } elif (( $+commands[jello] )) {
         # Slower than the pure ZSH fallback below?
         piplistline=($(
             vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
-            | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower() == "'${${pdir:t}//[^[:alnum:].]##/-}'"]'
+            | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'"]'
         ))
     } elif (( $+commands[wheezy.template] )) {
         # Slower than the pure ZSH fallback below?
@@ -1556,7 +1557,7 @@ vpypyright () {  # [--py 2|pypy|current]
             '@require(_)'
 
             '@for pkg in _:'
-            '@if pkg["name"].lower() == "'${${pdir:t}//[^[:alnum:].]##/-}'":'
+            '@if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'":'
 
             '@pkg["name"]'
             '@pkg["version"]'
@@ -1573,7 +1574,9 @@ vpypyright () {  # [--py 2|pypy|current]
             vrun $pdir python -m pip --disable-pip-version-check list --pre
         )"})
         lines=($lines[3,-1])
-        piplistline=(${(zM)lines:#(#i)${${pdir:t}//[^[:alnum:].]##/-} *})
+
+        local pattern=${${pdir:t}//-/[._-]}
+        piplistline=(${(zM)lines:#(#i)${~pattern} *})
     }
     # Preserve the table layout in case something goes surprising and we don't get a version cell:
     piplistline+=('????')
@@ -1599,7 +1602,7 @@ vpypyright () {  # [--py 2|pypy|current]
     if [[ $pkgspec == (git|hg|bzr|svn)+* ]] {
         badspec=1
     } else {
-        REPLY=${${(j: :)${${(s: :)pkgspec:l}:#-*}}%%[ \[<>=#~;@&]*}
+        REPLY=${${${(j: :)${${(s: :)pkgspec:l}:#-*}}%%[ \[<>=#~;@&]*}//[._]/-}
     }
 
     if [[ $badspec || ! $REPLY ]] {
@@ -1948,7 +1951,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             venvs_path_goodlist=($ZPY_VENVS_HOME)
             shift
         } elif [[ $1 ]] {
-            .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^@:l} || return
+            .zpy_all_replies .zpy_pkgspec2name $@ || return
+            .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^reply} || return
             venvs_path_goodlist=($reply)
         } else {
             .zpy_pipzchoosepkg --multi $ZPY_PIPZ_PROJECTS || return
@@ -1995,7 +1999,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         if [[ $do_all ]] {
             pkgs=(${ZPY_PIPZ_PROJECTS}/*(/N:t))
         } elif [[ $@ ]] {
-            pkgs=($@)
+            .zpy_all_replies .zpy_pkgspec2name $@ || return
+            pkgs=($reply)
         } else {
             .zpy_pipzchoosepkg --multi --header 'Reinstalling . . .' $ZPY_PIPZ_PROJECTS || return
             pkgs=($reply)
@@ -2025,7 +2030,10 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         }
         linkbins_args+=(--header "Injecting [${(j:, :)@[2,-1]}] ->")
 
-        local projdir=${ZPY_PIPZ_PROJECTS}/${1:l}
+        local pkgname projdir
+        .zpy_pkgspec2name $1 || return
+        pkgname=$REPLY
+        projdir=${ZPY_PIPZ_PROJECTS}/${pkgname}
 
         if ! [[ $2 && $1 && -d $projdir ]] { zpy "$0 inject"; return 1 }
 
@@ -2043,7 +2051,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             activate
             pipacs ${@[2,-1]}
         )
-        .zpy_pipzlinkbins $linkbins_args $1
+        .zpy_pipzlinkbins $linkbins_args $pkgname
     ;;
     runpip)  # [--cd] <pkgname> <pip-arg>...  ## subcmd: pipz runpip
     # With --cd, run pip from within the project folder.
@@ -2055,7 +2063,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         if ! [[ $2 && $1 ]] { zpy "$0 runpip"; return 1 }
 
-        vrun $vrun_args ${ZPY_PIPZ_PROJECTS}/${1:l} python -m pip ${@[2,-1]}
+        .zpy_pkgspec2name $1 || return
+        vrun $vrun_args ${ZPY_PIPZ_PROJECTS}/${REPLY} python -m pip ${@[2,-1]}
     ;;
     runpkg)  # <pkgspec> <cmd> [<cmd-arg>...]  ## subcmd: pipz runpkg
         if [[ $2 == --help ]] { zpy "$0 $1"; return   }
@@ -2088,7 +2097,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         local projdir
         if [[ $1 ]] {
-            projdir=${ZPY_PIPZ_PROJECTS}/${1:l}; shift
+            .zpy_pkgspec2name $1 || return
+            projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}; shift
         } else {
             .zpy_pipzchoosepkg $ZPY_PIPZ_PROJECTS || return
             projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}
@@ -2624,8 +2634,12 @@ _pipz () {
                 "(--help)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
                 '(--help)*::: :->cmd'
             if [[ $state == cmd ]] {
+                local REPLY pkgname
+                .zpy_pkgspec2name ${line[1]} || return
+                pkgname=$REPLY
+
                 trap "cd ${(q-)PWD}" EXIT INT QUIT
-                cd $ZPY_PIPZ_PROJECTS/${(Q)line[1]:l}
+                cd $ZPY_PIPZ_PROJECTS/${(Q)pkgname}
                 _normal -P
             }
         ;;
