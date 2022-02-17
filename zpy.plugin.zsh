@@ -1974,23 +1974,30 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         local bins=(${ZPY_PIPZ_BINS}/*(@Ne['.zpy_is_under ${REPLY:P} $venvs_path_goodlist']))
 
-        local cells=(
-            "%BCommand%b"
-            "%BPackage%b"
-            "%BRuntime%b"
-        )
-        if ! [[ -v NO_COLOR ]]  cells=(%F{cyan}${^cells}%f)
+        local header=("Command" "Package" "Runtime")
+        local cells=()
         cells+=(${(f)"$(
             zargs -P $ZPY_PROCS -rl \
             -- $bins \
             -- .zpy_pipzlistrow $ZPY_PIPZ_PROJECTS
         )"})
 
-        local table=()
-        if [[ $#cells -gt 3 ]] {
-            table=(${(f)"$(print -rPaC 3 -- $cells)"})
-            print -- $table[1]
-            print -l -- ${(i)table[2,-1]}
+        if [[ $cells ]] {
+            local rows=() i
+            for (( i=1; i<=$#cells; i+=3 ))  rows+=(${(j:,:)cells[i,i+2]})
+            rows=(${(i)rows})
+
+            if (( $+commands[rich] )) {
+                rows=(${(j:,:)header} $rows)
+                rich --csv - <<<${(F)rows}
+            } else {
+                header=(%B${^header}%b)
+                if ! [[ -v NO_COLOR ]]  header=(%F{cyan}${^header}%f)
+
+                cells=($header ${(j:,:s:,:)rows})
+
+                print -rPaC 3 -- $cells
+            }
         }
     ;;
     reinstall)  # [--cmd <cmd>[,<cmd>...]] [--activate] [--all|<pkgname>...]  ## subcmd: pipz reinstall
