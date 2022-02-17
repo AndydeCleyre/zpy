@@ -40,25 +40,44 @@ __ https://github.com/junegunn/fzf
 Examples
 --------
 
-.. code:: console
+- Install tools from PyPI or git, each with its own isolated venv:
 
-  % envin                       # create venv if necessary, activate it, and (un)install pkgs to match all found requirements.txt files
-  % envin dev-requirements.txt  # as above, but match the env's pkgs to only the given file(s)
+  .. code:: console
 
-.. code:: console
+    % pipz install tldr jello rich-cli yt-dlp 'visidata @ git+https://github.com/saulpw/visidata@develop'
 
-  [venv] % pipacs beautifulsoup4  # add pkg to requirements.in, compile locked dep tree to requirements.txt, install to match
+- Create a venv for the current folder (if necessary), activate it, and **sync** installed pkgs to match ``requirements.txt`` files:
 
-.. code:: console
+  .. code:: console
 
-  [venv] % pips requirements.txt      # install regular deps, uninstall others
-  [venv] % pips dev-requirements.txt  # install dev deps, uninstall others
-  [venv] % pips dev-requirements.txt requirements.txt  # install multiple dep groups
-  [venv] % pips                       # install all dep groups
+    % envin                       # match all (*-)requirements.txt files
+    % envin dev-requirements.txt  # match specific files
 
-.. code:: console
+- **Add** a pkg to ``requirements.in``, **compile** a locked dep tree as ``requirements.txt``, and **sync** installed packages:
 
-  [venv] % pipz install tldr visidata jello lice rich-cli subdl yt-dlp  # install tools from PyPI with isolated venvs and locked versions
+  .. code:: console
+
+    % pipacs beautifulsoup4
+
+- **Compile** all ``(*-)requirements.in`` files, upgrading versions where possible, then **sync** to match:
+
+  .. code:: console
+
+    % pipcs -U
+
+- Inject "loose" requirements (as written in ``requirements.in``) into ``pyproject.toml``:
+
+  .. code:: console
+
+    % pypc
+
+There are about 25 user-facing functions in total.
+For details,
+see the reference__ and the short guide__.
+
+__ https://zpy.readthedocs.io/en/latest/help_all/
+
+__ https://zpy.readthedocs.io/en/latest/start/
 
 Basic usage of ``envin`` and ``pipacs``:
 
@@ -69,14 +88,6 @@ Basic usage of ``pipz``:
 
 .. image:: https://gist.github.com/AndydeCleyre/de117a9aec8360413b8547e1a5ab3484/raw/c58e242b36b6ca721ffae89463554e09b79f7a9c/pipz.svg?sanitize=true
    :alt: Animated pipz demo
-
-There are about 25 user-facing functions in total.
-For details,
-see the reference__ and the short guide__.
-
-__ https://zpy.readthedocs.io/en/latest/help_all/
-
-__ https://zpy.readthedocs.io/en/latest/start/
 
 Guiding Ideas
 -------------
