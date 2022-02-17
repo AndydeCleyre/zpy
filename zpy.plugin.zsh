@@ -315,7 +315,7 @@ pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
     local parts=()
     if ! [[ -v NO_COLOR ]] {
         parts+=(
-            "%F{$c[default]}>"
+            "%F{$c[default]}==>"
             "%B%F{$c[$action]}$action%b"
         )
         if [[ $input ]]  parts+=("%F{$c[default]}${(j:%B|%b:)input}")
@@ -526,7 +526,7 @@ pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compi
     case $1 {
     error)
         shift
-        local title="> $1:"; shift
+        local title="==> $1:"; shift
         local subject=${1/#~\//\~/}; shift
         local lines=('  '${^@/#~\//\~/})
         if ! [[ -v NO_COLOR ]] {
