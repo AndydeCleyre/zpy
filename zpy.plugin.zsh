@@ -1166,21 +1166,25 @@ pipcheckold () {  # [--py 2|pypy|current] [--all|-i|<proj-dir>...]
     }
     projects=(${projects:-${@:-$PWD}})
 
-    local cells=(
-        "%BPackage%b"
-        "%BVersion%b"
-        "%BLatest%b"
-        "%BProject%b"
-    )
-    if ! [[ -v NO_COLOR ]]  cells=(%F{cyan}${^cells}%f)
+    local header=(Package Version Latest Project) cells=()
     cells+=(${(f)"$(
         zargs -P $ZPY_PROCS -rl \
         -- $projects \
         -- .zpy_pipcheckoldcells $extra_args
     )"})
 
-    if [[ $#cells -gt 4 ]] {
-        print -rPaC 4 -- $cells
+    if [[ $cells ]] {
+        if (( $+commands[rich] )) {
+            local rows=(${(j:,:)header}) i
+            for (( i=1; i<=$#cells; i+=$#header ))  rows+=(${(j:,:)cells[i,i+$#header-1]})
+
+            rich --csv - <<<${(F)rows}
+        } else {
+            header=(%B${^header}%b)
+            if ! [[ -v NO_COLOR ]]  header=(%F{cyan}${^header}%f)
+
+            print -rPaC 4 -- $header $cells
+        }
     }
 }
 
@@ -1974,7 +1978,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         local bins=(${ZPY_PIPZ_BINS}/*(@Ne['.zpy_is_under ${REPLY:P} $venvs_path_goodlist']))
 
-        local header=("Command" "Package" "Runtime")
+        local header=(Command Package Runtime)
         local cells=()
         cells+=(${(f)"$(
             zargs -P $ZPY_PROCS -rl \
@@ -1984,11 +1988,12 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         if [[ $cells ]] {
             local rows=() i
-            for (( i=1; i<=$#cells; i+=3 ))  rows+=(${(j:,:)cells[i,i+2]})
+            for (( i=1; i<=$#cells; i+=$#header ))  rows+=(${(j:,:)cells[i,i+$#header-1]})
             rows=(${(i)rows})
 
             if (( $+commands[rich] )) {
                 rows=(${(j:,:)header} $rows)
+
                 rich --csv - <<<${(F)rows}
             } else {
                 header=(%B${^header}%b)
