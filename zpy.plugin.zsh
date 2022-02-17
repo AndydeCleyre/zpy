@@ -1337,6 +1337,18 @@ if pyproject.is_file():
     REPLY=$spfile
 }
 
+# TODO: anywhere jq is tried, try all: jq, jello, dasel, wheezy.template
+# MAYBE: add yaml-path (again)? Check performance...
+# THEN: update deps.md
+# - .zpy_pipcheckoldcells (current: jq, jello, wheezy.template, zsh) (add dasel)
+# - .zpy_pipzlistrow (current: jq, jello, wheezy.template, zsh) (add dasel)
+# - .zpy_insertjson (current: jq, dasel, python)
+# - .zpy_pypi_pkgs (current: jq, dasel, jello, python)
+
+
+# TODO: tables printed, maybe try rich --csv
+# THEN: update deps.md
+
 .zpy_insertjson () {  # <jsonfile> <value> <keycrumb>...
     # Does not currently handle spaces within any keycrumb (or need to)
     emulate -L zsh
