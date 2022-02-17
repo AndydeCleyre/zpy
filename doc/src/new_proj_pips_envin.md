@@ -6,10 +6,10 @@ we may wish to *sync* our venv state to match
 either or both:
 
 ```console
-[venv] % pips requirements.txt      # install regular deps, uninstall dev deps
-[venv] % pips dev-requirements.txt  # install dev deps, uninstall regular deps
-[venv] % pips requirements.txt dev-requirements.txt  # install multiple dep groups
-[venv] % pips                                        # install all dep groups
+[venv] % pips requirements.txt      # install regular deps, uninstall others
+[venv] % pips dev-requirements.txt  # install dev deps, uninstall others
+[venv] % pips dev-requirements.txt requirements.txt  # install multiple dep groups
+[venv] % pips                       # install all dep groups
 ```
 
 You may also use `envin` as a drop-in replacement for `pips` in the above examples,

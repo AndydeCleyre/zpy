@@ -79,6 +79,7 @@ In all cases, `highlight` is optional.
 
     - [highlight](https://repology.org/project/highlight/versions)
       *or* [bat](https://repology.org/project/bat/versions)
+      *or* [rich-cli](https://github.com/Textualize/rich-cli)
       -- for pretty syntax highlighting
     - [delta](https://github.com/dandavison/delta)
       *or* [diff-so-fancy](https://github.com/so-fancy/diff-so-fancy)

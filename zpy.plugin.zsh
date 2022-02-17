@@ -28,15 +28,11 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
 
     if [[ $1 == diff ]] {
         local diffhi args=()
-        for diffhi (
-            $commands[riff]
-            $commands[delta]
-            $commands[diff-so-fancy]
-            $commands[colordiff]
-        ) {
-            if [[ -x $diffhi && -f $diffhi ]] {
-                if [[ $diffhi:t == riff ]] args+=(--no-pager)
-                if [[ $diffhi:t == delta ]] args+=(--paging never --color-only)
+        for diffhi ( riff delta diff-so-fancy colordiff ) {
+            if (( $+commands[$diffhi] )) {
+                if [[ $diffhi == riff ]]   args+=(--no-pager)
+                if [[ $diffhi == delta ]]  args+=(--paging never --color-only)
+
                 # delta will use BAT_THEME
                 BAT_THEME=${BAT_THEME:-ansi} \
                 $diffhi $args
@@ -83,6 +79,9 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
     } elif (( $+commands[batcat] )) {
         BAT_THEME=${BAT_THEME:-ansi} \
         batcat --color always --paging never -p -l $1
+    } elif (( $+commands[rich] )) {
+        local content=$(<&0)
+        if [[ $content ]]  rich --force-terminal --lexer $1 - <<<$content
     } else {
         >&1
     }
@@ -172,7 +171,7 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
                 print -rl -- ${lines##[[:space:]]#}
             }
 
-            if [[ $1 != ${@[-1]} ]] print
+            if [[ $1 != ${@[-1]} ]]  print
         }
     }
 }
@@ -236,7 +235,7 @@ zpy () {  # [<zpy-function>...]
 
     [[ $reply ]] || return
 
-    if [[ ! $multi ]] REPLY=$reply[1]
+    if [[ ! $multi ]]  REPLY=$reply[1]
 }
 
 # Get path of folder containing all venvs for the current folder or specified proj-dir.
@@ -311,15 +310,15 @@ pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
         creating    yellow
         injecting   yellow
     )
-    if ! (( $+c[$action] )) c[$action]=$c[default]
+    if ! (( $+c[$action] ))  c[$action]=$c[default]
 
     local parts=()
     if ! [[ -v NO_COLOR ]] {
         parts+=(
-            "%F{$c[default]}>"
+            "%F{$c[default]}==>"
             "%B%F{$c[$action]}$action%b"
         )
-        if [[ $input ]] parts+=("%F{$c[default]}${(j:%B|%b:)input}")
+        if [[ $input ]]  parts+=("%F{$c[default]}${(j:%B|%b:)input}")
         parts+=(
             "%F{$c[$action]}%B->%b"
             "%F{$c[default]}$output"
@@ -327,7 +326,7 @@ pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
         )
     } else {
         parts+=('>' "%B$action%b")
-        if [[ $input ]] parts+=("${(j:%B|%b:)input}")
+        if [[ $input ]]  parts+=("${(j:%B|%b:)input}")
         parts+=(
             '%B->%b' "$output" '%B::%b'
             "${proj/%${proj:t}/%B${proj:t}%b}"
@@ -347,7 +346,7 @@ pips () {  # [<reqs-txt>...]
     local reqstxts=(${@:-*requirements.txt(N)}) ret
     if [[ $reqstxts ]] {
         local p_a_args=(syncing env $reqstxts)
-        if [[ $VIRTUAL_ENV && -L ${VIRTUAL_ENV:h}/project ]] p_a_args=(--proj ${VIRTUAL_ENV:h}/project(:P) $p_a_args)
+        if [[ $VIRTUAL_ENV && -L ${VIRTUAL_ENV:h}/project ]]  p_a_args=(--proj ${VIRTUAL_ENV:h}/project(:P) $p_a_args)
         .zpy_log action $p_a_args
         # --read-relative-to-input
         pip-sync -q --pip-args --disable-pip-version-check $reqstxts
@@ -356,7 +355,7 @@ pips () {  # [<reqs-txt>...]
         local reqstxt                       #
         for reqstxt ( $reqstxts ) {         # can remove if pip-tools #896 is resolved
             pipi --no-upgrade -qr $reqstxt  # (by merging pip-tools #907)
-            if (( ? )) ret=1                #
+            if (( ? ))  ret=1               #
         }                                   #
         rehash
 
@@ -379,12 +378,12 @@ pips () {  # [<reqs-txt>...]
 
     if (( ! $+commands[pip-compile] )) {
         .zpy_please_activate pip-compile
-        if [[ $faildir ]] print -n >>$faildir/${PWD:t}
+        if [[ $faildir ]]  print -n >>$faildir/${PWD:t}
         return 1
     }
 
     if ! [[ $1 ]] {
-        if [[ $faildir ]] print -n >>$faildir/${PWD:t}
+        if [[ $faildir ]]  print -n >>$faildir/${PWD:t}
         return 1
     }
 
@@ -435,7 +434,7 @@ pips () {  # [<reqs-txt>...]
     | .zpy_hlt ini
     badrets=(${pipestatus:#0})
 
-    if [[ $badrets && $faildir ]] print -n >>$faildir/${PWD:t}
+    if [[ $badrets && $faildir ]]  print -n >>$faildir/${PWD:t}
 
     [[ ! $badrets ]]
 }
@@ -527,7 +526,7 @@ pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compi
     case $1 {
     error)
         shift
-        local title="> $1:"; shift
+        local title="==> $1:"; shift
         local subject=${1/#~\//\~/}; shift
         local lines=('  '${^@/#~\//\~/})
         if ! [[ -v NO_COLOR ]] {
@@ -566,7 +565,7 @@ pipcs () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [--only-sync-if-changed] [<r
     pipc_args+=($@ ${pipcompile_args:+--} $pipcompile_args)
 
     local do_sync
-    if [[ ! $only_sync_if_changed ]] do_sync=1
+    if [[ ! $only_sync_if_changed ]]  do_sync=1
 
     local ret REPLY snapshot
     pipc $pipc_args
@@ -591,7 +590,7 @@ pipcs () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [--only-sync-if-changed] [<r
         }
     }
 
-    if [[ $do_sync ]] pips $newtxts
+    if [[ $do_sync ]]  pips $newtxts
 }
 
 # Add loose requirements to [<category>-]requirements.in (add).
@@ -658,8 +657,8 @@ pipacs () {  # [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
     }
 
     local reqstxt=requirements.txt
-    if [[ $1 == -h ]] shift
-    if [[ $1 == -c ]] reqstxt=${2}-requirements.txt
+    if [[ $1 == -h ]]  shift
+    if [[ $1 == -c ]]  reqstxt=${2}-requirements.txt
 
     pips $reqstxt
 }
@@ -678,11 +677,11 @@ reqshow () {  # [<folder>...]
         reqsfiles+=($1/*requirements*.{txt,in}(N))
 
         for rf ( $reqsfiles ) {
-            if [[ $rf != ${reqsfiles[1]} ]] print
+            if [[ $rf != ${reqsfiles[1]} ]]  print
             print -r -- '==>' $rf '<=='
             .zpy_hlt ini <$rf
         }
-        if [[ $1 != ${@[-1]} ]] print
+        if [[ $1 != ${@[-1]} ]]  print
     }
 }
 
@@ -922,7 +921,7 @@ vpyshebang () {  # [--py 2|pypy|current] <script>...
     if [[ ! $1 ]] { zpy $0; return 1 }
 
     local vpyscript
-    if [[ $venv_name == venv ]] vpyscript=$commands[vpy]
+    if [[ $venv_name == venv ]]  vpyscript=$commands[vpy]
 
     local shebang REPLY lines
     for 1 {
@@ -964,7 +963,7 @@ vrun () {  # [--py 2|pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-ar
     (
         set -e
 
-        if [[ $do_enter ]] cd $projdir
+        if [[ $do_enter ]]  cd $projdir
 
         if [[ $do_activate ]] {
             activate $activate_args $projdir
@@ -1025,7 +1024,7 @@ vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher
     if ! [[ $3 && $2 && $1 ]] { zpy $0; return 1 }
 
     local projdir=${1:P} cmd=$2 dest=${3:a}
-    if [[ -d $dest ]] dest=$dest/$cmd
+    if [[ -d $dest ]]  dest=$dest/$cmd
 
     local REPLY venv
     .zpy_venvs_path $projdir || return
@@ -1064,7 +1063,7 @@ prunevenvs () {  # [-y]
     [[ $ZPY_VENVS_HOME ]] || return
 
     local noconfirm
-    if [[ $1 == -y ]] noconfirm=1
+    if [[ $1 == -y ]]  noconfirm=1
 
     local proj REPLY orphaned_venv
     for proj ( ${ZPY_VENVS_HOME}/*/project(@N:P) ) {
@@ -1167,21 +1166,25 @@ pipcheckold () {  # [--py 2|pypy|current] [--all|-i|<proj-dir>...]
     }
     projects=(${projects:-${@:-$PWD}})
 
-    local cells=(
-        "%BPackage%b"
-        "%BVersion%b"
-        "%BLatest%b"
-        "%BProject%b"
-    )
-    if ! [[ -v NO_COLOR ]] cells=(%F{cyan}${^cells}%f)
+    local header=(Package Version Latest Project) cells=()
     cells+=(${(f)"$(
         zargs -P $ZPY_PROCS -rl \
         -- $projects \
         -- .zpy_pipcheckoldcells $extra_args
     )"})
 
-    if [[ $#cells -gt 4 ]] {
-        print -rPaC 4 -- $cells
+    if [[ $cells ]] {
+        if (( $+commands[rich] )) {
+            local rows=(${(j:,:)header}) i
+            for (( i=1; i<=$#cells; i+=$#header ))  rows+=(${(j:,:)cells[i,i+$#header-1]})
+
+            rich --csv - <<<${(F)rows}
+        } else {
+            header=(%B${^header}%b)
+            if ! [[ -v NO_COLOR ]]  header=(%F{cyan}${^header}%f)
+
+            print -rPaC 4 -- $header $cells
+        }
     }
 }
 
@@ -1208,7 +1211,7 @@ pipcheckold () {  # [--py 2|pypy|current] [--all|-i|<proj-dir>...]
     )
     ret=$?
 
-    if (( ret )) && [[ $faildir ]] print -n >>$faildir/${1:t}
+    if (( ret )) && [[ $faildir ]]  print -n >>$faildir/${1:t}
 
     return ret
 }
@@ -1338,6 +1341,18 @@ if pyproject.is_file():
     REPLY=$spfile
 }
 
+# TODO: anywhere jq is tried, try all: jq, jello, dasel, wheezy.template
+# MAYBE: add yaml-path (again)? Check performance...
+# THEN: update deps.md
+# - .zpy_pipcheckoldcells (current: jq, jello, wheezy.template, zsh) (add dasel)
+# - .zpy_pipzlistrow (current: jq, jello, wheezy.template, zsh) (add dasel)
+# - .zpy_insertjson (current: jq, dasel, python)
+# - .zpy_pypi_pkgs (current: jq, dasel, jello, python)
+
+
+# TODO: tables printed, maybe try rich --csv
+# THEN: update deps.md
+
 .zpy_insertjson () {  # <jsonfile> <value> <keycrumb>...
     # Does not currently handle spaces within any keycrumb (or need to)
     emulate -L zsh
@@ -1353,14 +1368,14 @@ if pyproject.is_file():
 
     if (( $+commands[jq] )) {
         local keypath=".\"${(j:".":)@}\""
-        if [[ $value != (true|false) ]] value=${(qqq)value}
+        if [[ $value != (true|false) ]]  value=${(qqq)value}
         print -r -- "$(
             jq --argjson val "$value" "${keypath}=\$val" "$jsonfile"
         )" >$jsonfile
     } elif (( $+commands[dasel] )) {
         local keypath=".${(j:.:)@}"
         local vartype=string
-        if [[ $value == (true|false) ]] vartype=bool
+        if [[ $value == (true|false) ]]  vartype=bool
         dasel put $vartype -f $jsonfile -p json $keypath $value
     } else {
         python3 -c "
@@ -1491,8 +1506,8 @@ vpypyright () {  # [--py 2|pypy|current]
     local kid=${1:a}; shift
 
     for 1 {
-        if [[ $kid == ${1:a} ]] return
-        if [[ $kid == ${${1:a}%/}/* ]] return
+        if [[ $kid == ${1:a} ]]  return
+        if [[ $kid == ${${1:a}%/}/* ]]  return
     }
 
     return 1
@@ -1510,7 +1525,7 @@ vpypyright () {  # [--py 2|pypy|current]
 
     local origtxt newtxt lines=() label
     for origtxt newtxt ( ${origtxts:^newtxts} ) {
-        if [[ ! $(<$origtxt) ]] continue
+        if [[ ! $(<$origtxt) ]]  continue
 
         label=${newtxt:a:h:h:t}/${newtxt:a:h:t}${${newtxt:a:h:t}:+/}${newtxt:t}
         lines=(${(f)"$(
@@ -1541,15 +1556,16 @@ vpypyright () {  # [--py 2|pypy|current]
     local piplistline=()
     if (( $+commands[jq] )) {
     # Slower than the pure ZSH fallback below?
+        local pattern=${${pdir:t}//-/[._-]}
         piplistline=($(
             vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
-            | jq -r '.[] | select(.name|test("^'${${${pdir:t}//[^[:alnum:].]##/-}:gs/./\\\\.}'$"; "i")) | .name,.version'
+            | jq -r '.[] | select(.name|test("^'${pattern}'$"; "i")) | .name,.version'
         ))
     } elif (( $+commands[jello] )) {
         # Slower than the pure ZSH fallback below?
         piplistline=($(
             vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
-            | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower() == "'${${pdir:t}//[^[:alnum:].]##/-}'"]'
+            | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'"]'
         ))
     } elif (( $+commands[wheezy.template] )) {
         # Slower than the pure ZSH fallback below?
@@ -1557,7 +1573,7 @@ vpypyright () {  # [--py 2|pypy|current]
             '@require(_)'
 
             '@for pkg in _:'
-            '@if pkg["name"].lower() == "'${${pdir:t}//[^[:alnum:].]##/-}'":'
+            '@if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'":'
 
             '@pkg["name"]'
             '@pkg["version"]'
@@ -1574,7 +1590,9 @@ vpypyright () {  # [--py 2|pypy|current]
             vrun $pdir python -m pip --disable-pip-version-check list --pre
         )"})
         lines=($lines[3,-1])
-        piplistline=(${(zM)lines:#(#i)${${pdir:t}//[^[:alnum:].]##/-} *})
+
+        local pattern=${${pdir:t}//-/[._-]}
+        piplistline=(${(zM)lines:#(#i)${~pattern} *})
     }
     # Preserve the table layout in case something goes surprising and we don't get a version cell:
     piplistline+=('????')
@@ -1600,7 +1618,7 @@ vpypyright () {  # [--py 2|pypy|current]
     if [[ $pkgspec == (git|hg|bzr|svn)+* ]] {
         badspec=1
     } else {
-        REPLY=${${(j: :)${${(s: :)pkgspec:l}:#-*}}%%[ \[<>=#~;@&]*}
+        REPLY=${${${(j: :)${${(s: :)pkgspec:l}:#-*}}%%[ \[<>=#~;@&]*}//[._]/-}
     }
 
     if [[ $badspec || ! $REPLY ]] {
@@ -1634,7 +1652,7 @@ vpypyright () {  # [--py 2|pypy|current]
 
     local REPLY pkgname
     if ! { .zpy_pkgspec2name $pkg } {
-        if [[ $faildir ]] print -n >>$faildir/$pkgname
+        if [[ $faildir ]]  print -n >>$faildir/$pkgname
         return 1
     }
     pkgname=$REPLY
@@ -1659,7 +1677,7 @@ vpypyright () {  # [--py 2|pypy|current]
     )
     ret=$?
 
-    if (( ret )) && [[ $faildir ]] print -n >>$faildir/$pkgname
+    if (( ret )) && [[ $faildir ]]  print -n >>$faildir/$pkgname
 
     return ret
 }
@@ -1703,7 +1721,7 @@ vpypyright () {  # [--py 2|pypy|current]
 
     [[ $reply ]] || return
 
-    if [[ ! $multi ]] REPLY=$reply[1]
+    if [[ ! $multi ]]  REPLY=$reply[1]
 }
 
 .zpy_pipzunlinkbins () {  # <projects_home> <bins_home> <pkgspec>...
@@ -1722,7 +1740,7 @@ vpypyright () {  # [--py 2|pypy|current]
     local binlinks=() REPLY
     binlinks=(${bins_home}/*(@Ne['.zpy_is_under ${REPLY:P} $vpaths']))
 
-    if [[ $binlinks ]] zf_rm $binlinks
+    if [[ $binlinks ]]  zf_rm $binlinks
 
     rehash
 }
@@ -1777,9 +1795,9 @@ vpypyright () {  # [--py 2|pypy|current]
         } else {
             bins=(${bins:|bins_hidelist})
             bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|(pip|python|pypy)(|<->*)|*.so|__pycache__)})
-            if [[ $pkgname != pip-tools ]] bins=(${bins:#pip-(compile|sync)})
-            if [[ $pkgname != wheel     ]] bins=(${bins:#wheel})
-            if [[ $pkgname != chardet   ]] bins=(${bins:#chardetect})
+            if [[ $pkgname != pip-tools ]]  bins=(${bins:#pip-(compile|sync)})
+            if [[ $pkgname != wheel     ]]  bins=(${bins:#wheel})
+            if [[ $pkgname != chardet   ]]  bins=(${bins:#chardetect})
             bins=(${(f)"$(
                 print -rln $bins \
                 | fzf $fzf_args --header="$fzf_header $1 . . ." \
@@ -1949,7 +1967,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             venvs_path_goodlist=($ZPY_VENVS_HOME)
             shift
         } elif [[ $1 ]] {
-            .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^@:l} || return
+            .zpy_all_replies .zpy_pkgspec2name $@ || return
+            .zpy_all_replies .zpy_venvs_path ${ZPY_PIPZ_PROJECTS}/${^reply} || return
             venvs_path_goodlist=($reply)
         } else {
             .zpy_pipzchoosepkg --multi $ZPY_PIPZ_PROJECTS || return
@@ -1959,23 +1978,31 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         local bins=(${ZPY_PIPZ_BINS}/*(@Ne['.zpy_is_under ${REPLY:P} $venvs_path_goodlist']))
 
-        local cells=(
-            "%BCommand%b"
-            "%BPackage%b"
-            "%BRuntime%b"
-        )
-        if ! [[ -v NO_COLOR ]] cells=(%F{cyan}${^cells}%f)
+        local header=(Command Package Runtime)
+        local cells=()
         cells+=(${(f)"$(
             zargs -P $ZPY_PROCS -rl \
             -- $bins \
             -- .zpy_pipzlistrow $ZPY_PIPZ_PROJECTS
         )"})
 
-        local table=()
-        if [[ $#cells -gt 3 ]] {
-            table=(${(f)"$(print -rPaC 3 -- $cells)"})
-            print -- $table[1]
-            print -l -- ${(i)table[2,-1]}
+        if [[ $cells ]] {
+            local rows=() i
+            for (( i=1; i<=$#cells; i+=$#header ))  rows+=(${(j:,:)cells[i,i+$#header-1]})
+            rows=(${(i)rows})
+
+            if (( $+commands[rich] )) {
+                rows=(${(j:,:)header} $rows)
+
+                rich --csv - <<<${(F)rows}
+            } else {
+                header=(%B${^header}%b)
+                if ! [[ -v NO_COLOR ]]  header=(%F{cyan}${^header}%f)
+
+                cells=($header ${(j:,:s:,:)rows})
+
+                print -rPaC 3 -- $cells
+            }
         }
     ;;
     reinstall)  # [--cmd <cmd>[,<cmd>...]] [--activate] [--all|<pkgname>...]  ## subcmd: pipz reinstall
@@ -1996,7 +2023,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         if [[ $do_all ]] {
             pkgs=(${ZPY_PIPZ_PROJECTS}/*(/N:t))
         } elif [[ $@ ]] {
-            pkgs=($@)
+            .zpy_all_replies .zpy_pkgspec2name $@ || return
+            pkgs=($reply)
         } else {
             .zpy_pipzchoosepkg --multi --header 'Reinstalling . . .' $ZPY_PIPZ_PROJECTS || return
             pkgs=($reply)
@@ -2026,7 +2054,10 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         }
         linkbins_args+=(--header "Injecting [${(j:, :)@[2,-1]}] ->")
 
-        local projdir=${ZPY_PIPZ_PROJECTS}/${1:l}
+        local pkgname projdir
+        .zpy_pkgspec2name $1 || return
+        pkgname=$REPLY
+        projdir=${ZPY_PIPZ_PROJECTS}/${pkgname}
 
         if ! [[ $2 && $1 && -d $projdir ]] { zpy "$0 inject"; return 1 }
 
@@ -2036,7 +2067,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         vbinpath="${vpath}/venv/bin/"
         badlist=(${vbinpath}*(N:t))
 
-        if [[ $badlist ]] linkbins_args+=(--no-cmd ${(j:,:)badlist})
+        if [[ $badlist ]]  linkbins_args+=(--no-cmd ${(j:,:)badlist})
 
         (
             set -e
@@ -2044,7 +2075,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             activate
             pipacs ${@[2,-1]}
         )
-        .zpy_pipzlinkbins $linkbins_args $1
+        .zpy_pipzlinkbins $linkbins_args $pkgname
     ;;
     runpip)  # [--cd] <pkgname> <pip-arg>...  ## subcmd: pipz runpip
     # With --cd, run pip from within the project folder.
@@ -2056,7 +2087,8 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         if ! [[ $2 && $1 ]] { zpy "$0 runpip"; return 1 }
 
-        vrun $vrun_args ${ZPY_PIPZ_PROJECTS}/${1:l} python -m pip ${@[2,-1]}
+        .zpy_pkgspec2name $1 || return
+        vrun $vrun_args ${ZPY_PIPZ_PROJECTS}/${REPLY} python -m pip ${@[2,-1]}
     ;;
     runpkg)  # <pkgspec> <cmd> [<cmd-arg>...]  ## subcmd: pipz runpkg
         if [[ $2 == --help ]] { zpy "$0 $1"; return   }
@@ -2089,17 +2121,18 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         local projdir
         if [[ $1 ]] {
-            projdir=${ZPY_PIPZ_PROJECTS}/${1:l}; shift
+            .zpy_pkgspec2name $1 || return
+            projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}; shift
         } else {
             .zpy_pipzchoosepkg $ZPY_PIPZ_PROJECTS || return
             projdir=${ZPY_PIPZ_PROJECTS}/${REPLY}
 
-            if [[ $2 ]] shift
+            if [[ $2 ]]  shift
         }
 
-        if [[ $1 ]] trap "cd ${(q-)PWD}" EXIT INT QUIT
+        if [[ $1 ]]  trap "cd ${(q-)PWD}" EXIT INT QUIT
         cd $projdir
-        if [[ $1 ]] $@
+        if [[ $1 ]]  $@
     ;;
     *)
         zpy $0
@@ -2117,7 +2150,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     if ! [[ $2 && $1   ]] { zpy $0; return 1 }
 
     local dest=${2:a}
-    if [[ -d $dest ]] dest=$dest/$1
+    if [[ -d $dest ]]  dest=$dest/$1
 
     if [[ -e $dest ]] {
         .zpy_log error 'ABORTING launcher creation' 'destination exists' $dest
@@ -2148,7 +2181,7 @@ _zpy_helpmsg () {  # <zpy-function>
     setopt localoptions extendedglob
     local msg=(${(f)"$(.zpy $1)"})
     msg=(${msg//#(#b)([^#]*)/%B$match[1]%b})
-    if ! [[ -v NO_COLOR ]] msg=(${msg//#(#b)(\#*)/%F{blue}$match[1]%f})
+    if ! [[ -v NO_COLOR ]]  msg=(${msg//#(#b)(\#*)/%F{blue}$match[1]%f})
     _message -r ${(F)msg}
 }
 
@@ -2197,7 +2230,7 @@ _zpy_pypi_pkg () {
     .zpy_pypi_pkgs
     _arguments \
         "*:PyPI Package:($reply)"
-    if (( ${@[(I)--or-local]} )) _files
+    if (( ${@[(I)--or-local]} ))  _files
 }
 
 _pipa () {
@@ -2625,8 +2658,12 @@ _pipz () {
                 "(--help)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
                 '(--help)*::: :->cmd'
             if [[ $state == cmd ]] {
+                local REPLY pkgname
+                .zpy_pkgspec2name ${line[1]} || return
+                pkgname=$REPLY
+
                 trap "cd ${(q-)PWD}" EXIT INT QUIT
-                cd $ZPY_PIPZ_PROJECTS/${(Q)line[1]:l}
+                cd $ZPY_PIPZ_PROJECTS/${(Q)pkgname}
                 _normal -P
             }
         ;;

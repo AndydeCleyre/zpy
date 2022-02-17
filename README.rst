@@ -40,6 +40,45 @@ __ https://github.com/junegunn/fzf
 Examples
 --------
 
+- Install tools from PyPI or git, each with its own isolated venv:
+
+  .. code:: console
+
+    % pipz install tldr jello rich-cli yt-dlp 'visidata @ git+https://github.com/saulpw/visidata@develop'
+
+- Create a venv for the current folder (if necessary), activate it, and **sync** installed pkgs to match ``requirements.txt`` files:
+
+  .. code:: console
+
+    % envin                       # match all (*-)requirements.txt files
+    % envin dev-requirements.txt  # match specific files
+
+- **Add** a pkg to ``requirements.in``, **compile** a locked dep tree as ``requirements.txt``, and **sync** installed packages:
+
+  .. code:: console
+
+    % pipacs beautifulsoup4
+
+- **Compile** all ``(*-)requirements.in`` files, upgrading versions where possible, then **sync** to match:
+
+  .. code:: console
+
+    % pipcs -U
+
+- Inject "loose" requirements (as written in ``requirements.in``) into ``pyproject.toml``:
+
+  .. code:: console
+
+    % pypc
+
+There are about 25 user-facing functions in total.
+For details,
+see the reference__ and the short guide__.
+
+__ https://zpy.readthedocs.io/en/latest/help_all/
+
+__ https://zpy.readthedocs.io/en/latest/start/
+
 Basic usage of ``envin`` and ``pipacs``:
 
 .. image:: https://gist.githubusercontent.com/AndydeCleyre/306d250c59a754b9a3399251b4ca0c65/raw/0ae1d1a9e8f5b72dbf78aba4a5ef138909932851/envin_pipacs.svg?sanitize=true
@@ -50,16 +89,11 @@ Basic usage of ``pipz``:
 .. image:: https://gist.github.com/AndydeCleyre/de117a9aec8360413b8547e1a5ab3484/raw/c58e242b36b6ca721ffae89463554e09b79f7a9c/pipz.svg?sanitize=true
    :alt: Animated pipz demo
 
-There are about 25 user-facing functions in total.
-For details,
-see the reference__ and the short guide__.
-
-__ https://zpy.readthedocs.io/en/latest/help_all/
-
-__ https://zpy.readthedocs.io/en/latest/start/
-
 Guiding Ideas
 -------------
+
+.. image:: https://github.com/AndydeCleyre/zpy/raw/master/doc/src/img/flow.svg
+   :alt: Information flow diagram
 
 - You should not have to manually specify the dependencies anywhere other than
   ``*requirements.in`` files
@@ -67,6 +101,8 @@ Guiding Ideas
   less-standard tools (pipenv, poetry, pip-tools, zpy, etc.);
   ``pip install -r *requirements.txt`` ought to be sufficient
 - It's nice to keep the venv folder *outside* of the project itself
+- Not every manageable project *needs* a ``pyproject.toml`` or to be packaged
+- Lockfiles are good
 - Tab completion is wonderful
 
 - These functions **don't**:
