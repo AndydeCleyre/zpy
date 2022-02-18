@@ -24,8 +24,10 @@ __ https://github.com/jazzband/pip-tools
 
 They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 
-Jump in
--------
+.. contents::
+
+Getting It
+----------
 
 The short version of installation:
 
@@ -37,8 +39,6 @@ __ https://github.com/junegunn/fzf
 Check out zpy.rtfd.io__ for installation, explanation, and usage docs!
 
 __ https://zpy.rtfd.io
-
-.. contents::
 
 Examples
 --------
