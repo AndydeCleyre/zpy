@@ -2,20 +2,20 @@
 zpy: Zsh helpers for Python venvs, with pip-tools
 =================================================
 
-|repo| |docsite| |contact|
-
 |ghpages| |reqs-ci| |container-ci| 
 
 |container-alpine| |container-fedora| |container-ubuntu|
+
+|repo| |docsite| |contact|
 
 ``zpy`` is a set of Zsh functions
 wrapping
 pip-tools__
 and Python's venv module,
-for the **simple** and **interactive** management of
-Python *virtual environments*,
-*dependency specifications*,
-and *isolated Python app installations*.
+for the *simple* and *interactive* management of
+Python **virtual environments**,
+**dependency specifications**,
+and **isolated Python app installations**.
 
 None of them should get in your way.
 All have **thorough tab completion**.
@@ -24,7 +24,8 @@ __ https://github.com/jazzband/pip-tools
 
 They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 
----
+Jump in
+-------
 
 The short version of installation:
 
