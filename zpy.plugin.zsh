@@ -762,18 +762,12 @@ reqshow () {  # [<folder>...]
     }
 }
 
-.zpy_argvenv () {  # 2|pypy|current -> ($venv_name $venv_cmd...)
+.zpy_argvenv () {  # pypy|current -> ($venv_name $venv_cmd...)
     emulate -L zsh
     unset reply
 
     local venv_name venv_cmd=()
     case $1 {
-    2)
-        venv_name=venv2
-        if     (( $+commands[virtualenv2] )) { venv_cmd=(virtualenv2)
-        } elif (( $+commands[virtualenv]  )) { venv_cmd=(virtualenv -p python2)
-        } else                               { venv_cmd=(python2 -m virtualenv) }
-    ;;
     pypy)
         venv_name=venv-pypy
         venv_cmd=(pypy3 -m venv)
@@ -784,9 +778,8 @@ reqshow () {  # [<folder>...]
         venv_name=$REPLY
 
         local major=$(python -c 'from __future__ import print_function; import sys; print(sys.version_info.major)')
-        if     [[ $major == 3            ]] { venv_cmd=(python -m venv)
-        } elif (( $+commands[virtualenv] )) { venv_cmd=(virtualenv -p python)
-        } else                              { venv_cmd=(python -m virtualenv) }
+        [[ $major == 3 ]] || return
+        venv_cmd=(python -m venv)
     ;;
     *)
         return 1
@@ -801,7 +794,7 @@ reqshow () {  # [<folder>...]
 # In other words: [create, ]activate, sync.
 # The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
 # Pass --py to use another interpreter and named venv.
-envin () {  # [--py 2|pypy|current] [<reqs-txt>...]
+envin () {  # [--py pypy|current] [<reqs-txt>...]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
 
@@ -821,7 +814,7 @@ envin () {  # [--py 2|pypy|current] [<reqs-txt>...]
 # Otherwise create, activate, sync.
 # Pass -i to interactively choose the project.
 # Pass --py to use another interpreter and named venv.
-activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
+activate () {  # [--py pypy|current] [-i|<proj-dir>]
     emulate -L zsh -o localtraps
     if [[ $1 == --help ]] { zpy $0; return }
 
@@ -877,7 +870,7 @@ activate () {  # [--py 2|pypy|current] [-i|<proj-dir>]
 }
 
 # Alias for 'activate'.
-alias a8="activate"  # [--py 2|pypy|current] [-i|<proj-dir>]
+alias a8="activate"  # [--py pypy|current] [-i|<proj-dir>]
 
 # Alias for 'deactivate'.
 alias envout="deactivate"
@@ -907,7 +900,7 @@ whichpyproj () {
 # If 'vpy' exists in the PATH, '#!/path/to/vpy' will be used instead.
 # Also ensures the script is executable.
 # --py may be used, same as for envin.
-vpyshebang () {  # [--py 2|pypy|current] <script>...
+vpyshebang () {  # [--py pypy|current] <script>...
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
 
@@ -943,7 +936,7 @@ vpyshebang () {  # [--py 2|pypy|current] <script>...
 # Use --cd to run the command from within the project folder.
 # --py may be used, same as for envin.
 # With --activate, activate the venv (usually unnecessary, and slower).
-vrun () {  # [--py 2|pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-arg>...]
+vrun () {  # [--py pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-arg>...]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
 
@@ -987,7 +980,7 @@ vrun () {  # [--py 2|pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-ar
 
 # Run script with the python from its folder's venv.
 # --py may be used, same as for envin.
-vpy () {  # [--py 2|pypy|current] [--activate] <script> [<script-arg>...]
+vpy () {  # [--py pypy|current] [--activate] <script> [<script-arg>...]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
 
@@ -1006,7 +999,7 @@ vpy () {  # [--py 2|pypy|current] [--activate] <script> [<script-arg>...]
 # Make a launcher script for a command run in a given project's activated venv.
 # With --link-only, only create a symlink to <venv>/bin/<cmd>,
 # which should already have the venv's python in its shebang line.
-vlauncher () {  # [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher-dest>
+vlauncher () {  # [--link-only] [--py pypy|current] <proj-dir> <cmd> <launcher-dest>
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
 
@@ -1084,7 +1077,7 @@ prunevenvs () {  # [-y]
     }
 }
 
-.zpy_pipcheckoldcells () {  # [--py 2|pypy|current] <proj-dir>
+.zpy_pipcheckoldcells () {  # [--py pypy|current] <proj-dir>
     emulate -L zsh
 
     local vrun_args=()
@@ -1146,7 +1139,7 @@ prunevenvs () {  # [-y]
 
 # 'pip list -o' (show outdated) for the current or specified folders.
 # Use --all to instead act on all known projects, or -i to interactively choose.
-pipcheckold () {  # [--py 2|pypy|current] [--all|-i|<proj-dir>...]
+pipcheckold () {  # [--py pypy|current] [--all|-i|<proj-dir>...]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
     [[ $ZPY_PROCS      ]] || return
@@ -1188,7 +1181,7 @@ pipcheckold () {  # [--py 2|pypy|current] [--all|-i|<proj-dir>...]
     }
 }
 
-.zpy_pipup () {  # [--py 2|pypy|current] [--faildir <faildir>] [--only-sync-if-changed] <proj-dir>
+.zpy_pipup () {  # [--py pypy|current] [--faildir <faildir>] [--only-sync-if-changed] <proj-dir>
     emulate -L zsh
 
     local faildir activate_args=() only_sync_if_changed
@@ -1218,7 +1211,7 @@ pipcheckold () {  # [--py 2|pypy|current] [--all|-i|<proj-dir>...]
 
 # 'pipcs -U' (upgrade-compile, sync) in a venv-activated subshell for the current or specified folders.
 # Use --all to instead act on all known projects, or -i to interactively choose.
-pipup () {  # [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
+pipup () {  # [--py pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
     emulate -L zsh
     # TODO:
     # things that *might* gain --interactive (-i):
@@ -1406,7 +1399,7 @@ jsonfile.write_text(dumps(data, indent=4))
 }
 
 # Specify the venv interpreter for the working folder in a new or existing json file.
-.zpy_vpy2json () {  # [--py 2|pypy|current] <jsonfile> <keycrumb>...
+.zpy_vpy2json () {  # [--py pypy|current] <jsonfile> <keycrumb>...
     # Does not currently handle spaces within any keycrumb (or need to)
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
@@ -1449,7 +1442,7 @@ jsonfile.write_text(dumps(data, indent=4))
 }
 
 # Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
-vpysublp () {  # [--py 2|pypy|current]
+vpysublp () {  # [--py pypy|current]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
 
@@ -1461,7 +1454,7 @@ vpysublp () {  # [--py 2|pypy|current]
 }
 
 # Specify the venv interpreter in a new or existing [VS]Code settings file for the working folder.
-vpyvscode () {  # [--py 2|pypy|current]
+vpyvscode () {  # [--py pypy|current]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
 
@@ -1471,7 +1464,7 @@ vpyvscode () {  # [--py 2|pypy|current]
 }
 
 # Specify the venv interpreter in a new or existing Pyright settings file for the working folder.
-vpypyright () {  # [--py 2|pypy|current]
+vpypyright () {  # [--py pypy|current]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
 
@@ -2204,7 +2197,7 @@ _activate () {
     _zpy_helpmsg ${0[2,-1]}
     _arguments \
         '(- 1)--help[Show usage information]' \
-        '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+        '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         '(--help 1)-i[Interactively choose a project]' \
         '(-)1:New or Existing Project:_path_files -/'
 }
@@ -2215,7 +2208,7 @@ _envin () {
     local context state state_descr line opt_args
     _arguments \
         '(- *)--help[Show usage information]' \
-        '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+        '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         '(-)*: :->reqstxts'
     if [[ $state == reqstxts ]] {
         local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
@@ -2307,7 +2300,7 @@ _pipcheckold () {
     _zpy_helpmsg ${0[2,-1]}
     _arguments \
         '(* -)--help[Show usage information]' \
-        '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+        '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         '(--help -i *)--all[Show outdated dependencies for every known project]' \
         '(--help --all *)-i[Choose projects to check interactively]' \
         '(-)*: :_zpy_projects'
@@ -2350,7 +2343,7 @@ _pipup () {
     _zpy_helpmsg ${0[2,-1]}
     _arguments \
         '(* -)--help[Show usage information]' \
-        '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+        '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         "(--help)--only-sync-if-changed[Don't bother syncing if the lockfile didn't change]" \
         '(--help -i *)--all[Upgrade every known project]' \
         '(--help --all *)-i[Choose projects to upgrade interactively]' \
@@ -2391,7 +2384,7 @@ compdef _reqshow reqshow
             _zpy_helpmsg ${0[2,-1]}
             _arguments \
                 '(-)--help[Show usage information]' \
-                '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)'
+                '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)'
         }
         compdef _${zpyfn} $zpyfn
     }
@@ -2442,7 +2435,7 @@ _vlauncher () {
     _arguments \
         '(- * :)--help[Show usage information]' \
         '(--help)--link-only[Only create a symlink to <venv>/bin/<cmd>]' \
-        '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+        '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         "(-)1:Project:_zpy_projects" \
         '(-)2: :->cmd' \
         '(-)3:Destination:_path_files -/'
@@ -2459,7 +2452,7 @@ _vpy () {
     _zpy_helpmsg ${0[2,-1]}
     _arguments \
         '(- : *)--help[Show usage information]' \
-        '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+        '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         "(--help)--activate[Activate the venv (usually unnecessary, and slower)]" \
         '(-)1:Script:_files -g "*.py"' \
         '(-)*:Script Argument: '
@@ -2470,7 +2463,7 @@ _vpyshebang () {
     _zpy_helpmsg ${0[2,-1]}
     _arguments \
         '(- : *)--help[Show usage information]' \
-        '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+        '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         '(-)*:Script:_files -g "*.py"'
 }
 compdef _vpyshebang vpyshebang
@@ -2491,7 +2484,7 @@ _vrun () {
     integer NORMARG
     _arguments -n \
         '(- * :)--help[Show usage information]' \
-        '(--help)--py[Use another interpreter and named venv]:Other Python:(2 pypy current)' \
+        '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         '(--help)--cd[Run the command from within the project folder]' \
         "(--help)--activate[Activate the venv (usually unnecessary for venv-installed scripts, and slower)]" \
         '(-)1:Project:_zpy_projects' \

@@ -80,16 +80,12 @@ In all cases, `highlight` is optional.
     - [highlight](https://repology.org/project/highlight/versions)
       *or* [bat](https://repology.org/project/bat/versions)
       *or* [rich-cli](https://github.com/Textualize/rich-cli)
-      -- for pretty syntax highlighting
-    - [delta](https://github.com/dandavison/delta)
+      -- for pretty syntax highlighting; rich-cli adds fancy tables
+    - [riff](https://github.com/walles/riff)
+      *or* [delta](https://github.com/dandavison/delta)
       *or* [diff-so-fancy](https://github.com/so-fancy/diff-so-fancy)
-      *or* [riff](https://github.com/walles/riff)
       *or* [colordiff](https://repology.org/project/colordiff/versions)
       -- for more pretty syntax highlighting
     - [jq](https://repology.org/project/jq/versions)
       *or* [jello](https://pypi.org/project/jello/)
       -- for theoretically more reliable parsing
-    - Python2 *and* [virtualenv](https://repology.org/project/python:virtualenv/versions)
-      -- for Python2 support (such as it is)
-    - [Git](https://git-scm.com/)
-      -- for easy installation of zpy itself
