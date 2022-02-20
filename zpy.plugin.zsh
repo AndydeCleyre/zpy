@@ -81,7 +81,7 @@ ZPY_PIPZ_BINS=${ZPY_PIPZ_BINS:-${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
         batcat --color always --paging never -p -l $1
     } elif (( $+commands[rich] )) {
         local content=$(<&0)
-        if [[ $content ]]  rich --force-terminal --lexer $1 - <<<$content
+        if [[ $content ]]  rich --force-terminal --no-wrap -W $(( COLUMNS-4 )) --lexer $1 - <<<$content
     } else {
         >&1
     }
