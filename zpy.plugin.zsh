@@ -1617,7 +1617,7 @@ vpypyright () {  # [--py pypy|current]
     if [[ $badspec || ! $REPLY ]] {
         .zpy_log error 'FAILED to parse pkgspec' "$1" \
             'https://www.python.org/dev/peps/pep-0508/#examples' \
-            'https://pip.pypa.io/en/stable/reference/pip_install/#vcs-support'
+            'https://pip.pypa.io/en/stable/topics/vcs-support/'
         return 1
     }
 }
