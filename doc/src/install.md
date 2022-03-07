@@ -60,7 +60,7 @@ or install it with a plugin manager:
     % print zinit light andydecleyre/zpy >>~/.zshrc
     ```
 
-=== "Antibody"
+=== "antibody"
 
     ```console
     % print antibody bundle andydecleyre/zpy >>~/.zshrc
@@ -69,6 +69,12 @@ or install it with a plugin manager:
 === "Antigen"
 
     Put `antigen bundle andydecleyre/zpy` in your ``~/.zshrc``, before `antigen apply`.
+
+=== "antidote"
+
+    ```console
+    % print antidote bundle andydecleyre/zpy >>~/.zshrc
+    ```
 
 === "Prezto"
 
@@ -84,6 +90,20 @@ or install it with a plugin manager:
 
     ```console
     % zgen reset
+    ```
+
+=== "zgenom"
+
+    Put `zgenom load andydecleyre/zpy` in the plugin section of your `~/.zshrc`, then
+
+    ```console
+    % zgenom reset
+    ```
+
+=== "znap"
+
+    ```console
+    % print znap source andydecleyre/zpy >>~/.zshrc
     ```
 
 === "zplug"
