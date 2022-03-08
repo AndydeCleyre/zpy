@@ -1881,6 +1881,9 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         # TODO: track failures from .zpy_pipzlinkbins?
 
+        (( ${path[(I)$ZPY_PIPZ_BINS]} )) \
+        || print -rP "suggestion%B:%b add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B~/.zshrc%b"
+
         if [[ $failures ]] {
             .zpy_log error "FAILED to ($0) install" $failures
             return 1
