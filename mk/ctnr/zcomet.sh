@@ -82,7 +82,7 @@ printf '%s\n' "$user ALL=(ALL) NOPASSWD: ALL" \
 | ctnr_append /etc/sudoers.d/$user
 
 # Install zcomet
-ctnr_run -u git clone -q --depth 1 https://github.com/agkozak/zcomet /home/$user/zcomet
+ctnr_run -u git clone -q --depth 1 https://github.com/agkozak/zcomet /home/$user/.zcomet/bin
 
 # Add settings and plugins to .zshrc:
 ctnr_run -u rm -f /home/$user/.zshrc
@@ -92,7 +92,7 @@ precmd () { rehash }
 zstyle ':completion:*:*:*:*:*' menu select
 
 # Plugins:
-. ~/zcomet/zcomet.zsh
+. ~/.zcomet/bin/zcomet.zsh
 () {
   local plugin
   for plugin (
