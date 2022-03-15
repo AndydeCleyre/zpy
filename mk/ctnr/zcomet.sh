@@ -107,6 +107,7 @@ zstyle ':completion:*:*:*:*:*' menu select
 zcomet compinit
 
 # Shell vars:
+AGKOZAK_BLANK_LINES=1
 AGKOZAK_LEFT_PROMPT_ONLY=1
 AGKOZAK_PROMPT_DIRTRIM=4
 AGKOZAK_PROMPT_DIRTRIM_STRING=…
