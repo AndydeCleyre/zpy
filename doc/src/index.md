@@ -20,6 +20,9 @@ or unaided
 There's a focus on use of good old `requirements.txt` files,
 and extensive tab completion assistance.
 
+Read below for some rationale,
+or just [get started](start.md) with the short guide.
+
 ## Why?
 
 ### I like `requirements.txt`
