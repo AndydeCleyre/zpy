@@ -25,7 +25,29 @@ or just [get started](start.md) with the short guide.
 
 ## Why?
 
-### I like `requirements.txt`
+### You may not like something about the way alternatives behave
+
+You may find poetry or pipenv a good fit, and that's ok.
+I have personally found them
+to conflict with my needs and preferences:
+
+- both introduce new-syntax files
+- neither can do what pipx does
+- poetry is a bit rigid,
+  only working with installable packages as projects
+- pipenv is problematically nosy and weird sometimes,
+  e.g. using unrelated files above the current folder without consent
+- neither fully embrace the rich completions and other features that Zsh offers
+
+I have had only good experience with pipx,
+and replacing its features here was not an
+initial goal.
+I just couldn't resist when
+the other functions provided components
+for a transparent pipx substitute,
+with excellent tab completion.
+
+### `requirements.txt` is good!
 
 The `requirements.txt` format is:
 
@@ -38,7 +60,7 @@ The `requirements.txt` format is:
 - fully capable as a lockfile
 - friendly to VCS tracking
 
-### I like pip-tools
+### pip-tools is good!
 
 It's a great project and a practical tool.
 The model of `requirements.in` `->` `requirements.txt` is strong.
@@ -46,28 +68,14 @@ I appreciate its ability to support a variety of practices, without a fight.
 There's always more work to do be done there,
 so please don't be shy to squash some bugs!
 
-### I like Zsh
+### Zsh is fantastic!
 
 Zsh provides a powerful toolset
 for the interactive shell and scripting,
 and some unique and beautiful syntax,
 and I wanted to explore that.
-And the interactive shell seems a good place from which to coordinate
+And the interactive shell seems a proper place from which to coordinate
 Python virtual environment related activities.
-
-### You may not like something about the way alternatives behave
-
-I have personally found poetry and and pipenv
-to conflict with my needs and preferences,
-but you may find them a good fit, and that's ok.
-
-I have had only good experience with pipx,
-and replacing its features here was not an
-initial goal.
-I just couldn't resist when
-the other functions provided components
-for a transparent pipx substitute,
-with excellent tab completion.
 
 ## Directional Flow of Dependency Specification
 
