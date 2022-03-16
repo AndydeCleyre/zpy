@@ -45,7 +45,7 @@ If it's not enough, you can pass `--activate`.
 
 Either way, the current shell is unaffected.
 
-For something similar and more flexible, see [`vrun` below](`new_proj_run.md#vrun`).
+For something similar and more flexible, see [`vrun` below](`run.md#vrun`).
 
 ## `vpyshebang`
 
