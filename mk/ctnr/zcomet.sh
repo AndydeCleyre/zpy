@@ -100,7 +100,6 @@ zstyle ':completion:*:*:*:*:*' menu select
     zdharma-continuum/fast-syntax-highlighting
     zimfw/environment
     zimfw/input
-    zsh-users/zsh-autosuggestions
     zsh-users/zsh-completions
   ) zcomet load \$plugin
 }
