@@ -82,7 +82,7 @@ printf '%s\n' "$user ALL=(ALL) NOPASSWD: ALL" \
 | ctnr_append /etc/sudoers.d/$user
 
 # Install zcomet
-ctnr_run -u git clone -q --depth 1 https://github.com/agkozak/zcomet /home/$user/zcomet
+ctnr_run -u git clone -q --depth 1 https://github.com/agkozak/zcomet /home/$user/.zcomet/bin
 
 # Add settings and plugins to .zshrc:
 ctnr_run -u rm -f /home/$user/.zshrc
@@ -92,7 +92,7 @@ precmd () { rehash }
 zstyle ':completion:*:*:*:*:*' menu select
 
 # Plugins:
-. ~/zcomet/zcomet.zsh
+. ~/.zcomet/bin/zcomet.zsh
 () {
   local plugin
   for plugin (
@@ -100,18 +100,17 @@ zstyle ':completion:*:*:*:*:*' menu select
     zdharma-continuum/fast-syntax-highlighting
     zimfw/environment
     zimfw/input
-    zsh-users/zsh-autosuggestions
     zsh-users/zsh-completions
   ) zcomet load \$plugin
 }
 zcomet compinit
 
 # Shell vars:
+AGKOZAK_BLANK_LINES=1
 AGKOZAK_LEFT_PROMPT_ONLY=1
 AGKOZAK_PROMPT_DIRTRIM=4
 AGKOZAK_PROMPT_DIRTRIM_STRING=…
 WORDCHARS=\${WORDCHARS//[\/]}
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE=fg=4
 
 # History:
 setopt HIST_IGNORE_ALL_DUPS

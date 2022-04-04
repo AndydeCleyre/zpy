@@ -15,6 +15,7 @@ fi
 . ./venv/bin/activate
 pip install -qU pip-tools
 
+# shellcheck disable=SC2043
 for folder in doc/mkdocs; do
   cd "$folder"
   for reqsin in *requirements.in; do

@@ -41,13 +41,13 @@ nav:
   - Guide:
     - start.md
     - new_proj.md
-    - new_proj_activate.md
-    - new_proj_pipacs.md
-    - new_proj_pipac.md
-    - new_proj_pips_envin.md
-    - new_proj_upgrade.md
-    - new_proj_pyproject.md
-    - new_proj_run.md
+    - new_proj/activate.md
+    - new_proj/pipacs.md
+    - new_proj/pipac.md
+    - new_proj/pips_envin.md
+    - new_proj/upgrade.md
+    - new_proj/pyproject.md
+    - new_proj/run.md
     - existing_projects.md
     - pipz.md
     - python_versions.md

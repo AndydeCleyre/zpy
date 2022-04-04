@@ -119,33 +119,6 @@ print -rl '' '# Aliases:' | .zpy_hlt zsh
 grep '^alias ' \$HOME/.zshrc | .zpy_hlt zsh
 EOF
 
-# Inform user about Py2 support
-case $distro in
-  fedora)
-    <<EOF ctnr_append -u /home/${user}/.zshrc
-print -rl '# For python2 support:' \\
-  'sudo dnf --setopt=install_weak_deps=False install python2 python3-virtualenv' \\
-| .zpy_hlt zsh
-EOF
-  ;;
-  alpine)
-    <<EOF ctnr_append -u /home/${user}/.zshrc
-print -rl '# For python2 support:' \\
-  'sudo apk add python2' \\
-  'sudo python2 -m ensurepip' \\
-  'sudo pip2 install virtualenv' \\
-| .zpy_hlt zsh
-EOF
-  ;;
-  ubuntu)
-    <<EOF ctnr_append -u /home/${user}/.zshrc
-print -rl '# For python2 support:' \\
-  'sudo apt --no-install-recommends install python2 virtualenv' \\
-| .zpy_hlt zsh
-EOF
-  ;;
-esac
-
 # Remind user of a few useful commands
 <<EOF ctnr_append -u /home/${user}/.zshrc
 print -l

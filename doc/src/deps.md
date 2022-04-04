@@ -1,7 +1,7 @@
 # Dependencies
 
 The primary requirements are Zsh, Python, and [`fzf`](https://github.com/junegunn/fzf),
-with optional additions for minor enhancements or Python2 support.
+with optional additions for more colorful output and alternative json parsers.
 
 ## Suggested Dependencies by Platform
 
