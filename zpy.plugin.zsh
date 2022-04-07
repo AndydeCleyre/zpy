@@ -425,6 +425,7 @@ pips () {  # [<reqs-txt>...]
     local badrets
     # --write-relative-to-output
     # --read-relative-to-input
+    PIP_TOOLS_RESOLVER=${PIP_TOOLS_RESOLVER:-backtracking} \
     pip-compile \
       --cache-dir=$cachedir \
       --no-header \
