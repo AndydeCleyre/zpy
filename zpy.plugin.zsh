@@ -747,22 +747,6 @@ reqshow () {  # [<folder>...]
     pips $reqstxts
 }
 
-# Return non-zero if there's no connection
-.zpy_netcheck () {
-    emulate -L zsh
-
-    local url=https://pypi.org/simple/
-    local timeout=3
-
-    if (( $+commands[nm-online] )) {
-        nm-online -t $timeout -qx
-    } elif (( $+commands[wget] )) {
-        wget -T $timeout -q --spider $url &>/dev/null
-    } else {
-        curl -m $timeout -sI $url &>/dev/null
-    }
-}
-
 .zpy_argvenv () {  # pypy|current -> ($venv_name $venv_cmd...)
     emulate -L zsh
     unset reply
