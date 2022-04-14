@@ -25,6 +25,7 @@ theme:
     - navigation.expand
     - toc.integrate
     - header.autohide
+    - content.tabs.link
   palette:
     - scheme: slate
       primary: lime
