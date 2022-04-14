@@ -1,4 +1,4 @@
-# Create a venv with `activate`
+# Create a venv
 
 ```console
 % activate  # there's also an alias: a8

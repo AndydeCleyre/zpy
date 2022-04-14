@@ -1,6 +1,7 @@
 # Manage Python versions
 
-This project doesn't maintain multiple Python installations for you; you can use [pyenv](https://github.com/pyenv/pyenv) or [asdf](https://asdf-vm.com/) to do so.
+This project doesn't maintain multiple Python installations for you;
+you can use [pyenv](https://github.com/pyenv/pyenv) or [asdf](https://asdf-vm.com/) to do so.
 
 === "pyenv"
 
@@ -14,7 +15,7 @@ This project doesn't maintain multiple Python installations for you; you can use
     % asdf install python 3.7.9
     ```
 
-## Use `pipz` to install a tool with a specific Python version
+## Install a tool with a specific Python version
 
 === "pyenv"
 
@@ -30,7 +31,7 @@ This project doesn't maintain multiple Python installations for you; you can use
     % pipz install httpie
     ```
 
-## Create a venv with `activate` or `envin` using a specific Python version
+## Create a venv with a specific Python version
 
 === "pyenv"
 

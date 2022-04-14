@@ -1,4 +1,4 @@
-# Selectively *sync* with `pips` and `envin`
+# Selectively *sync* packages
 
 Now that we've got a combination of plain
 and categorized dependencies,
@@ -32,20 +32,24 @@ your system would be in exactly the same state.
 
 So how do they differ?
 
-### The project folder:
+### The Project Folder
 
 - `envin` *always* operates on a venv associated with the *current folder*
 - `activate` uses the current folder *by default*,
   but *also* accepts a *project path argument*,
   or `-i` to *select the project* folder interactively
 
-### Existing venv behavior:
+### Existing Venv Behavior
 
 - `envin` *always* syncs the venv according to `requirements.txt` files
 - `activate` *only* syncs when creating a *new venv*;
   otherwise, it's activated *as-is*
 
-### Dependency groups (`<category>-requirements.txt`):
+### Dependency Groups
+
+!!! info "In other words"
+
+    `<category>-requirements.txt`
 
 - `activate`, when syncing at all, *always* syncs according to *all* `requirements.txt` files
 - `envin` syncs according to *all* `requirements.txt` files *by default*,

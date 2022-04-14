@@ -1,4 +1,4 @@
-# Upgrade dependencies with `pipcs` and `pipup`
+# Upgrade dependencies
 
 If you want to upgrade the locked versions of specific dependencies,
 you can pass `-u <comma-separated-list>` to `pipcs` or `pipc`:
@@ -31,7 +31,7 @@ pipcs [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [--only-sync-if-changed] [<reqs-in>.
 
 ---
 
-## Upgrade in a subshell with `pipup`
+## Upgrade in a subshell
 
 Unlike `pipcs`, `pipup` activates a project's venv within a subshell,
 without affecting the current user shell. Some examples:

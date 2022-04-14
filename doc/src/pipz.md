@@ -1,4 +1,4 @@
-# Manage installed apps with pipz, a pipx clone
+# Manage installed apps
 
 [pipx](https://pypa.github.io/pipx/#overview-what-is-pipx) is an excellent tool,
 written in Python, providing these features (in their words, from the link):
