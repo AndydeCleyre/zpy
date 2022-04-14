@@ -61,14 +61,14 @@ So how do they differ?
 # Otherwise create, activate, sync.
 # Pass -i to interactively choose the project.
 # Pass --py to use another interpreter and named venv.
-activate [--py 2|pypy|current] [-i|<proj-dir>]
+activate [--py pypy|current] [-i|<proj-dir>]
 
 # Activate the venv (creating if needed) for the current folder, and sync its
 # installed package set according to all found or specified requirements.txt files.
 # In other words: [create, ]activate, sync.
 # The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
 # Pass --py to use another interpreter and named venv.
-envin [--py 2|pypy|current] [<reqs-txt>...]
+envin [--py pypy|current] [<reqs-txt>...]
 ```
 
 ---

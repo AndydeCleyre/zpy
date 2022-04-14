@@ -54,11 +54,11 @@ without affecting your shell's environment.
 ```shell
 # 'pipcs -U' (upgrade-compile, sync) in a venv-activated subshell for the current or specified folders.
 # Use --all to instead act on all known projects, or -i to interactively choose.
-pipup [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
+pipup [--py pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
 
 # 'pip list -o' (show outdated) for the current or specified folders.
 # Use --all to instead act on all known projects, or -i to interactively choose.
-pipcheckold [--py 2|pypy|current] [--all|-i|<proj-dir>...]
+pipcheckold [--py pypy|current] [--all|-i|<proj-dir>...]
 ```
 
 ---

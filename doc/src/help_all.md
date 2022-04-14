@@ -15,7 +15,7 @@ zpy [<zpy-function>...]
     # In other words: [create, ]activate, sync.
     # The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
     # Pass --py to use another interpreter and named venv.
-    envin [--py 2|pypy|current] [<reqs-txt>...]
+    envin [--py pypy|current] [<reqs-txt>...]
     ```
 
 === "`activate`"
@@ -25,12 +25,12 @@ zpy [<zpy-function>...]
     # Otherwise create, activate, sync.
     # Pass -i to interactively choose the project.
     # Pass --py to use another interpreter and named venv.
-    activate [--py 2|pypy|current] [-i|<proj-dir>]
+    activate [--py pypy|current] [-i|<proj-dir>]
     ```
 
     ```shell
     # Alias for 'activate'.
-    a8 [--py 2|pypy|current] [-i|<proj-dir>]
+    a8 [--py pypy|current] [-i|<proj-dir>]
     ```
 
 === "`deactivate`"
@@ -90,7 +90,7 @@ zpy [<zpy-function>...]
     ```shell
     # 'pipcs -U' (upgrade-compile, sync) in a venv-activated subshell for the current or specified folders.
     # Use --all to instead act on all known projects, or -i to interactively choose.
-    pipup [--py 2|pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
+    pipup [--py pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
     ```
 
 === "Sync"
@@ -109,7 +109,7 @@ zpy [<zpy-function>...]
     # If 'vpy' exists in the PATH, '#!/path/to/vpy' will be used instead.
     # Also ensures the script is executable.
     # --py may be used, same as for envin.
-    vpyshebang [--py 2|pypy|current] <script>...
+    vpyshebang [--py pypy|current] <script>...
     ```
 
 === "`vrun`"
@@ -119,7 +119,7 @@ zpy [<zpy-function>...]
     # Use --cd to run the command from within the project folder.
     # --py may be used, same as for envin.
     # With --activate, activate the venv (usually unnecessary, and slower).
-    vrun [--py 2|pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-arg>...]
+    vrun [--py pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-arg>...]
     ```
 
 === "`vpy`"
@@ -127,7 +127,7 @@ zpy [<zpy-function>...]
     ```shell
     # Run script with the python from its folder's venv.
     # --py may be used, same as for envin.
-    vpy [--py 2|pypy|current] [--activate] <script> [<script-arg>...]
+    vpy [--py pypy|current] [--activate] <script> [<script-arg>...]
     ```
 
 === "`vlauncher`"
@@ -136,7 +136,7 @@ zpy [<zpy-function>...]
     # Make a launcher script for a command run in a given project's activated venv.
     # With --link-only, only create a symlink to <venv>/bin/<cmd>,
     # which should already have the venv's python in its shebang line.
-    vlauncher [--link-only] [--py 2|pypy|current] <proj-dir> <cmd> <launcher-dest>
+    vlauncher [--link-only] [--py pypy|current] <proj-dir> <cmd> <launcher-dest>
     ```
 
 ## Informational
@@ -161,7 +161,7 @@ zpy [<zpy-function>...]
     ```shell
     # 'pip list -o' (show outdated) for the current or specified folders.
     # Use --all to instead act on all known projects, or -i to interactively choose.
-    pipcheckold [--py 2|pypy|current] [--all|-i|<proj-dir>...]
+    pipcheckold [--py pypy|current] [--all|-i|<proj-dir>...]
     ```
     
 === "`whichpyproj`"
@@ -260,21 +260,21 @@ pipz [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd
 
     ```shell
     # Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
-    vpysublp [--py 2|pypy|current]
+    vpysublp [--py pypy|current]
     ```
 
 === "VS Code"
 
     ```shell
     # Specify the venv interpreter in a new or existing [VS]Code settings file for the working folder.
-    vpyvscode [--py 2|pypy|current]
+    vpyvscode [--py pypy|current]
     ```
 
 === "Pyright (LSP)"
 
     ```shell
     # Specify the venv interpreter in a new or existing Pyright settings file for the working folder.
-    vpypyright [--py 2|pypy|current]
+    vpypyright [--py pypy|current]
     ```
 
 ## Miscellany
