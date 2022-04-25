@@ -422,16 +422,17 @@ pips () {  # [<reqs-txt>...]
     reqstxt_hash=$REPLY
     cachedir=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash}
 
-    local badrets
+    local pipcompile_args
+    zstyle -a :zpy: pip-compile-args pipcompile_args \
+    || pipcompile_args=(--no-header --annotation-style=line)
+    # After updating minimum pip-tools to support each of these, add them:
+    # --resolver=backtracking     # remove parameter PIP_TOOLS_RESOLVER, below
     # --write-relative-to-output
     # --read-relative-to-input
+
+    local badrets
     PIP_TOOLS_RESOLVER=${PIP_TOOLS_RESOLVER:-backtracking} \
-    pip-compile \
-      --cache-dir=$cachedir \
-      --no-header \
-      --annotation-style=line \
-      -o $reqstxt \
-      $@ $reqsin 2>&1 \
+    pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1 \
     | .zpy_hlt ini
     badrets=(${pipestatus:#0})
 
