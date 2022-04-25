@@ -1,4 +1,4 @@
-# Manage installed apps with pipz, a pipx clone
+# Manage installed apps
 
 [pipx](https://pypa.github.io/pipx/#overview-what-is-pipx) is an excellent tool,
 written in Python, providing these features (in their words, from the link):
@@ -29,7 +29,7 @@ yt-dlp             yt-dlp 2021.12.27  Python 3.9.7
 ```
 
 The paths printed on the first three lines of output may be overridden with the environment variables
-`ZPY_PIPZ_PROJECTS`, 
+`ZPY_PIPZ_PROJECTS`,
 `ZPY_VENVS_HOME`, and
 `$ZPY_PIPZ_BINS`,
 respectively.
@@ -58,7 +58,7 @@ With those in place, you can run `pipz reinstall` to get the apps back.
 % zpy pipz
 ```
 ```shell
-# Package manager for venv-isolated scripts (pipx clone; py3 only).
+# Package manager for venv-isolated scripts (pipx clone).
 pipz [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
 ```
 

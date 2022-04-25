@@ -1,4 +1,4 @@
-# Selectively *sync* with `pips` and `envin`
+# Selectively *sync* packages
 
 Now that we've got a combination of plain
 and categorized dependencies,
@@ -32,20 +32,24 @@ your system would be in exactly the same state.
 
 So how do they differ?
 
-### The project folder:
+### The Project Folder
 
 - `envin` *always* operates on a venv associated with the *current folder*
 - `activate` uses the current folder *by default*,
   but *also* accepts a *project path argument*,
   or `-i` to *select the project* folder interactively
 
-### Existing venv behavior:
+### Existing Venv Behavior
 
 - `envin` *always* syncs the venv according to `requirements.txt` files
 - `activate` *only* syncs when creating a *new venv*;
   otherwise, it's activated *as-is*
 
-### Dependency groups (`<category>-requirements.txt`):
+### Dependency Groups
+
+!!! info "In other words"
+
+    `<category>-requirements.txt`
 
 - `activate`, when syncing at all, *always* syncs according to *all* `requirements.txt` files
 - `envin` syncs according to *all* `requirements.txt` files *by default*,
@@ -61,14 +65,14 @@ So how do they differ?
 # Otherwise create, activate, sync.
 # Pass -i to interactively choose the project.
 # Pass --py to use another interpreter and named venv.
-activate [--py 2|pypy|current] [-i|<proj-dir>]
+activate [--py pypy|current] [-i|<proj-dir>]
 
 # Activate the venv (creating if needed) for the current folder, and sync its
 # installed package set according to all found or specified requirements.txt files.
 # In other words: [create, ]activate, sync.
 # The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
 # Pass --py to use another interpreter and named venv.
-envin [--py 2|pypy|current] [<reqs-txt>...]
+envin [--py pypy|current] [<reqs-txt>...]
 ```
 
 ---

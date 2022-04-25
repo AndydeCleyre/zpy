@@ -1,4 +1,4 @@
-# Create a venv with `activate`
+# Create a venv
 
 ```console
 % activate  # there's also an alias: a8
@@ -33,7 +33,7 @@ what aims to be *thorough* tab completion assistance.
 # Otherwise create, activate, sync.
 # Pass -i to interactively choose the project.
 # Pass --py to use another interpreter and named venv.
-activate [--py 2|pypy|current] [-i|<proj-dir>]
+activate [--py pypy|current] [-i|<proj-dir>]
 ```
 
 ---

@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
-site_name: 'zpy: Managing Python Environments in Zsh'
+site_name: 'zpy: Manage Python Environments in Zsh'
 site_url: https://andydecleyre.github.io/zpy/
 repo_url: https://github.com/andydecleyre/zpy
 docs_dir: ../src
@@ -25,6 +25,7 @@ theme:
     - navigation.expand
     - toc.integrate
     - header.autohide
+    - content.tabs.link
   palette:
     - scheme: slate
       primary: lime

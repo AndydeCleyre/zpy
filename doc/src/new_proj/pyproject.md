@@ -1,4 +1,4 @@
-# Populate `pyproject.toml` with `pypc`
+# Populate `pyproject.toml`
 
 Let's take our project to the next level,
 and prepare it for distribution via PyPI.

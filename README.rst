@@ -1,8 +1,11 @@
-=================================================
-zpy: Zsh helpers for Python venvs, with pip-tools
-=================================================
+===
+zpy
+===
+-------------------------------------------------
+Manage Python Environments in Zsh, with pip-tools
+-------------------------------------------------
 
-|ghpages| |reqs-ci| |container-ci| 
+|ghpages| |reqs-ci| |container-ci|
 
 |container-alpine| |container-fedora| |container-ubuntu|
 

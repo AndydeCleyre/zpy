@@ -1,4 +1,4 @@
-# Install a dependency with `pipacs`
+# Install a dependency
 
 The `acs` in `pipacs` is for "add, compile, sync."
 

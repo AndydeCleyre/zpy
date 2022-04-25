@@ -1,9 +1,9 @@
-# Categorize dependencies with `pipac`
+# Categorize dependencies
 
 The `ac` in `pipac` is for "add, compile."
 
 `pipac` takes the same arguments as `pipacs`,
-but does not affect the current `venv`,
+but does not affect the current venv,
 as it *adds* and *compiles* without *syncing*.
 
 Let's add a popular development tool,
@@ -35,8 +35,9 @@ pipac [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
 
 ---
 
-One input file can "include" another input or output file,
-if one of its lines is `-r PATH/TO/REQSFILE`.
+!!! tip "Tips"
 
-Similarly, the allowable versions of packages can be "constrained" with
-`-c PATH/TO/REQUIREMENTS.TXT`.
+    - One input file can "include" another input or output file,
+      if one of its lines is `-r PATH/TO/REQSFILE`
+    - Similarly, the allowable versions of packages can be "constrained" with
+      `-c PATH/TO/REQUIREMENTS.TXT`

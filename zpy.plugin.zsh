@@ -422,15 +422,17 @@ pips () {  # [<reqs-txt>...]
     reqstxt_hash=$REPLY
     cachedir=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash}
 
-    local badrets
+    local pipcompile_args
+    zstyle -a :zpy: pip-compile-args pipcompile_args \
+    || pipcompile_args=(--no-header --annotation-style=line)
+    # After updating minimum pip-tools to support each of these, add them:
+    # --resolver=backtracking     # remove parameter PIP_TOOLS_RESOLVER, below
     # --write-relative-to-output
     # --read-relative-to-input
-    pip-compile \
-      --cache-dir=$cachedir \
-      --no-header \
-      --annotation-style=line \
-      -o $reqstxt \
-      $@ $reqsin 2>&1 \
+
+    local badrets
+    PIP_TOOLS_RESOLVER=${PIP_TOOLS_RESOLVER:-backtracking} \
+    pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1 \
     | .zpy_hlt ini
     badrets=(${pipestatus:#0})
 
@@ -744,22 +746,6 @@ reqshow () {  # [<folder>...]
     .zpy_minimum_piptools || return
 
     pips $reqstxts
-}
-
-# Return non-zero if there's no connection
-.zpy_netcheck () {
-    emulate -L zsh
-
-    local url=https://pypi.org/simple/
-    local timeout=3
-
-    if (( $+commands[nm-online] )) {
-        nm-online -t $timeout -qx
-    } elif (( $+commands[wget] )) {
-        wget -T $timeout -q --spider $url &>/dev/null
-    } else {
-        curl -m $timeout -sI $url &>/dev/null
-    }
 }
 
 .zpy_argvenv () {  # pypy|current -> ($venv_name $venv_cmd...)
@@ -1823,7 +1809,7 @@ vpypyright () {  # [--py pypy|current]
 
 # TODO: probably kill/privatize whichpyproj.... maybe
 
-# Package manager for venv-isolated scripts (pipx clone; py3 only).
+# Package manager for venv-isolated scripts (pipx clone).
 pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
     emulate -L zsh +o promptsubst -o globdots -o localtraps +o monitor
     [[ $ZPY_PIPZ_PROJECTS && $ZPY_PIPZ_BINS && $ZPY_VENVS_HOME && $ZPY_PROCS ]] || return
