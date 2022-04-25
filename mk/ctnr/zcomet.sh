@@ -41,7 +41,7 @@ case $distro in
     alias ctnr_mkuser="ctnr_run adduser -D -s /bin/zsh"
   ;;
   ubuntu)
-    basetag=${2:-20.04}
+    basetag=${2:-22.04}
     pkgs="$pkgs ca-certificates less git sudo wget"
     fat="$fat /var/cache/* /var/lib/apt/lists/*"
     alias ctnr_pkg="ctnr_run apt -yqq --no-install-recommends"
