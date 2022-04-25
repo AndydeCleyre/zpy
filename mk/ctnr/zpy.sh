@@ -35,8 +35,8 @@ pkgs="$pkgs highlight micro"  # recommended, common
 fat="/home/${user}/.zcomet/repos/*/*/.git /usr/lib*/python3.*/__pycache__"
 case $distro in
   fedora)
-    pkgs="$pkgs diffutils pcre-tools"  # minimal
-    pkgs="$pkgs gcc python3-devel"     # numpy, pandas, etc.
+    pkgs="$pkgs diffutils"          # minimal
+    pkgs="$pkgs gcc python3-devel"  # numpy, pandas, etc.
     fat="$fat /var/cache/* /var/log/*"
     alias ctnr_pkg="ctnr_run dnf -yq --setopt=install_weak_deps=False"
     alias ctnr_pkg_upgrade="ctnr_pkg distro-sync"
