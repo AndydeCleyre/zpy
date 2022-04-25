@@ -51,7 +51,7 @@ case $distro in
     alias ctnr_pkg_add="ctnr_pkg add"
   ;;
   ubuntu)
-    pkgs="$pkgs pcre2-utils python3-venv"  # minimal
+    pkgs="$pkgs python3-venv"  # minimal
     fat="$fat /var/cache/* /var/lib/apt/lists/*"
     alias ctnr_pkg="ctnr_run apt -yqq --no-install-recommends"
     alias ctnr_pkg_upgrade="ctnr_pkg update && ctnr_pkg full-upgrade"
