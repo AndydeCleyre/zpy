@@ -163,7 +163,7 @@ zpy [<zpy-function>...]
     # Use --all to instead act on all known projects, or -i to interactively choose.
     pipcheckold [--py pypy|current] [--all|-i|<proj-dir>...]
     ```
-    
+
 === "`whichpyproj`"
 
     ```shell
@@ -174,7 +174,7 @@ zpy [<zpy-function>...]
 ## `pipz` Package Manager
 
 ```shell
-# Package manager for venv-isolated scripts (pipx clone; py3 only).
+# Package manager for venv-isolated scripts (pipx clone).
 pipz [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
 ```
 

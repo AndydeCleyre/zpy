@@ -1808,7 +1808,7 @@ vpypyright () {  # [--py pypy|current]
 
 # TODO: probably kill/privatize whichpyproj.... maybe
 
-# Package manager for venv-isolated scripts (pipx clone; py3 only).
+# Package manager for venv-isolated scripts (pipx clone).
 pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
     emulate -L zsh +o promptsubst -o globdots -o localtraps +o monitor
     [[ $ZPY_PIPZ_PROJECTS && $ZPY_PIPZ_BINS && $ZPY_VENVS_HOME && $ZPY_PROCS ]] || return
