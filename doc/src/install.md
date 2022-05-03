@@ -8,8 +8,8 @@ You might use `git`, `wget`, or `curl`:
 === "`git`"
 
     ```console
-    % git clone https://github.com/andydecleyre/zpy
-    % print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
+    % git clone https://github.com/andydecleyre/zpy ~/.zpy
+    % print ". ~/.zpy/zpy.plugin.zsh" >>~/.zshrc
     ```
 
 === "`wget`"
