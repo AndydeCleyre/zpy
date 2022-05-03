@@ -1270,6 +1270,8 @@ def reqs_from_reqsin(reqsin):
                 reqsin.parent / re.search(r'^-r\s+([^#]+)', line).group(1).rstrip()
             ).resolve()))
             continue
+        elif line.startswith('-c '):
+            continue
         with suppress(AttributeError):
             reqs.append(
                 re.search(r'^(-\S+\s+)*([^#]+)', line).group(2).rstrip()
