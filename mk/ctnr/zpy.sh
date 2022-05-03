@@ -122,7 +122,8 @@ EOF
 # Remind user of a few useful commands
 <<EOF ctnr_append -u /home/${user}/.zshrc
 print -l
-zpy zpy envin pipacs pipz
+zpy zpy
+print -l '# For example, try: zpy envin pipacs pipz'
 EOF
 
 # Cut some fat
