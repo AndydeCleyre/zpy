@@ -134,10 +134,10 @@ Try it in isolation with docker or podman with one of these commands:
 
 .. code:: console
 
-  $ docker run --net=host -it --rm quay.io/andykluger/zpy-alpine:master
-  $ podman run -it --rm quay.io/andykluger/zpy-alpine:master
+  $ docker run --net=host -it --rm quay.io/andykluger/zpy-ubuntu:master
+  $ podman run -it --rm quay.io/andykluger/zpy-ubuntu:master
 
-Replace "alpine" with "ubuntu" or "fedora" if you prefer.
+Replace "ubuntu" with "alpine" or "fedora" if you prefer.
 
 .. |repo| image:: https://img.shields.io/github/size/andydecleyre/zpy/zpy.plugin.zsh?logo=github&label=Code&color=blueviolet
    :alt: Plugin file size in bytes
