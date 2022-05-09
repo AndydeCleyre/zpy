@@ -424,7 +424,7 @@ pips () {  # [<reqs-txt>...]
 
     local pipcompile_args
     zstyle -a :zpy: pip-compile-args pipcompile_args \
-    || pipcompile_args=(--no-header --annotation-style=line)
+    || pipcompile_args=(--no-header --annotation-style=line --strip-extras)
     # After updating minimum pip-tools to support each of these, add them:
     # --resolver=backtracking     # remove parameter PIP_TOOLS_RESOLVER, below
     # --write-relative-to-output
