@@ -16,3 +16,7 @@ For now, let's just source it in the current session:
 % git clone https://github.com/andydecleyre/zpy ~/.zpy
 % . ~/.zpy/zpy.plugin.zsh
 ```
+
+!!! tip
+
+    You can flip through these docs with `n` and `p`, or `,` and `.`
