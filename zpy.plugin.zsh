@@ -123,15 +123,15 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     if (( $+commands[pcre2grep] )) {
         cmd_doc=(pcre2grep -M -O '$1$4$5$7')
         subcmd_doc=(pcre2grep -M -O '$1$2')
-    } elif (( $+commands[rg] )) {
-        cmd_doc=(rg --no-config --color never -NU -r '$predoc$aname$fname$usage')
-        subcmd_doc=(rg --no-config --color never -NU -r '$usage$postdoc')
     } elif { zmodload -e zsh/pcre } {
         cmd_doc=(.zpy_zpcregrep '$1$4$5$7')
         subcmd_doc=(.zpy_zpcregrep '$1$2')
     } elif (( $+commands[pcregrep] )) {
         cmd_doc=(pcregrep -M -o1 -o4 -o5 -o7)
         subcmd_doc=(pcregrep -M -o1 -o2)
+    } elif (( $+commands[rg] )) {
+        cmd_doc=(rg --no-config --color never -NU -r '$predoc$aname$fname$usage')
+        subcmd_doc=(rg --no-config --color never -NU -r '$usage$postdoc')
     } else {
         local lines=(
             'zpy documentation functions require one of'
