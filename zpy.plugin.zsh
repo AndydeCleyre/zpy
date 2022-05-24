@@ -846,13 +846,20 @@ activate () {  # [--py pypy|current] [-i|<proj-dir>]
 .zpy_minimum_piptools () {
     emulate -L zsh
 
-    pipi --no-upgrade -q 'pip-tools>=6.6.1' 'setuptools>=62.0.0' wheel 'pip<22.1.1'
+    pipi --no-upgrade -q \
+        'pip-tools>=6.6.2' \
+        'setuptools>=62.0.0' \
+        wheel
 }
 
 .zpy_maximum_piptools () {
     emulate -L zsh
 
-    pipi -q pip-tools 'pip<22.1.1' setuptools wheel
+    pipi -q \
+        pip \
+        pip-tools \
+        setuptools \
+        wheel
 }
 
 # Alias for 'activate'.
