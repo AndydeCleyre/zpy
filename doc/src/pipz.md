@@ -31,7 +31,7 @@ yt-dlp             yt-dlp 2021.12.27  Python 3.9.7
 The paths printed on the first three lines of output may be overridden with the environment variables
 `ZPY_PIPZ_PROJECTS`,
 `ZPY_VENVS_HOME`, and
-`$ZPY_PIPZ_BINS`,
+`ZPY_PIPZ_BINS`,
 respectively.
 
 ![Animated demo: pipz install, list](https://gist.github.com/AndydeCleyre/5ad45d78336fc2cc4625b0dc6b450849/raw/777e77607786beb65b2d6e00fb27c507c5e7abfa/pipz_install_list.svg?sanitize=true)
