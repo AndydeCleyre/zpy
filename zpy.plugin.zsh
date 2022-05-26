@@ -1247,9 +1247,12 @@ pipup () {  # [--py pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>.
 # Inject loose requirements.in dependencies into a PEP 621 pyproject.toml.
 # Run either from the folder housing pyproject.toml, or one below.
 # To categorize, name files <category>-requirements.in.
-pypc () {
+pypc () {  # [-y]
     emulate -L zsh
     if [[ $1 == --help ]] { zpy $0; return }
+
+    local noconfirm
+    if [[ $1 == -y ]]  noconfirm=1
 
     pipi --no-upgrade -q tomlkit
     local ret=$?
@@ -1257,7 +1260,17 @@ pypc () {
     if (( ret )) { .zpy_please_activate tomlkit; return ret }
 
     local pyproject=${${:-pyproject.toml}:a}
-    [[ -e $pyproject ]] || pyproject=${pyproject:h:h}/pyproject.toml
+    if [[ ! -e $pyproject ]] && [[ -e ${pyproject:h:h}/pyproject.toml ]] {
+        pyproject=${pyproject:h:h}/pyproject.toml
+    }
+
+    if [[ ! $noconfirm ]] && [[ -e $pyproject ]] {
+        if ! { read -q "?Overwrite ${pyproject}? [yN] " } {
+            print '\n'
+            return
+        }
+        print '\n'
+    }
 
     python3 -c "
 from pathlib import Path
@@ -1289,22 +1302,23 @@ def reqs_from_reqsin(reqsin):
 suffix = 'requirements.in'
 pyproject = Path('''${pyproject}''').absolute()
 pyproject_short = re.sub(rf'^{Path.home()}/', '~/', str(pyproject))
-if pyproject.is_file():
-    reqsins = [*pyproject.parent.glob(f'*/*{suffix}')] + [*pyproject.parent.glob(f'*{suffix}')]
-    toml_data = tomlkit.parse(pyproject.read_text())
-    for reqsin in reqsins:
-        reqsin_short = re.sub(rf'^{Path.home()}/', '~/', str(reqsin))
-        print(f'\033[96m> injecting {reqsin_short} -> {pyproject_short}\033[0m')
-        pyproject_reqs = reqs_from_reqsin(reqsin)
-        print(pyproject_reqs)
-        extras_catg = reqsin.name.rsplit(suffix, 1)[0].rstrip('-.')
-        toml_data.setdefault('project', {})
-        if not extras_catg:
-            toml_data['project']['dependencies'] = pyproject_reqs
-        else:
-            toml_data['project'].setdefault('optional-dependencies', {})
-            toml_data['project']['optional-dependencies'][extras_catg] = pyproject_reqs
-    pyproject.write_text(tomlkit.dumps(toml_data))
+if not pyproject.is_file():
+    pyproject.touch()
+reqsins = [*pyproject.parent.glob(f'*/*{suffix}')] + [*pyproject.parent.glob(f'*{suffix}')]
+toml_data = tomlkit.parse(pyproject.read_text())
+for reqsin in reqsins:
+    reqsin_short = re.sub(rf'^{Path.home()}/', '~/', str(reqsin))
+    print(f'\033[96m> injecting {reqsin_short} -> {pyproject_short}\033[0m')
+    pyproject_reqs = reqs_from_reqsin(reqsin)
+    print(pyproject_reqs)
+    extras_catg = reqsin.name.rsplit(suffix, 1)[0].rstrip('-.')
+    toml_data.setdefault('project', {})
+    if not extras_catg:
+        toml_data['project']['dependencies'] = pyproject_reqs
+    else:
+        toml_data['project'].setdefault('optional-dependencies', {})
+        toml_data['project']['optional-dependencies'][extras_catg] = pyproject_reqs
+pyproject.write_text(tomlkit.dumps(toml_data))
     "
     ret=$?
 
@@ -2349,14 +2363,6 @@ _pipup () {
 }
 compdef _pipup pipup
 
-_prunevenvs () {
-    _zpy_helpmsg ${0[2,-1]}
-    _arguments \
-        '(-)--help[Show usage information]' \
-        "(--help)-y[Don't ask for confirmation]"
-}
-compdef _prunevenvs prunevenvs
-
 _reqshow () {
     _zpy_helpmsg ${0[2,-1]}
     _arguments \
@@ -2369,10 +2375,20 @@ compdef _reqshow reqshow
     emulate -L zsh
     local zpyfn
 
-    for zpyfn ( pypc whichpyproj ) {
+    for zpyfn ( whichpyproj ) {
         _${zpyfn} () {
             _zpy_helpmsg ${0[2,-1]}
             _arguments '--help[Show usage information]'
+        }
+        compdef _${zpyfn} $zpyfn
+    }
+
+    for zpyfn ( prunevenvs pypc ) {
+        _${zpyfn} () {
+            _zpy_helpmsg ${0[2,-1]}
+            _arguments \
+                '(-)--help[Show usage information]' \
+                "(--help)-y[Don't ask for confirmation]"
         }
         compdef _${zpyfn} $zpyfn
     }
