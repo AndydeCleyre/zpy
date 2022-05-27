@@ -70,7 +70,7 @@ zpy [<zpy-function>...]
     # Inject loose requirements.in dependencies into a PEP 621 pyproject.toml.
     # Run either from the folder housing pyproject.toml, or one below.
     # To categorize, name files <category>-requirements.in.
-    pypc
+    pypc [-y]
     ```
 
 === "Compile[, Sync]"
