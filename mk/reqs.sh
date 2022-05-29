@@ -13,7 +13,7 @@ if [ ! -d venv ]; then
 fi
 # shellcheck disable=SC1091
 . ./venv/bin/activate
-pip install -qU pip-tools
+pip install -qU pip-and-pip-tools
 
 # shellcheck disable=SC2043
 for folder in doc/mkdocs; do
