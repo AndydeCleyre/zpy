@@ -23,6 +23,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     .zpy_help
     local lines=(${(f)REPLY})
     local cmds=(${${(M)lines:#[^# ]*}/ *})
+    cmds=(${cmds:#zpy})
 
     local subcmds=() ui_cmd
     for ui_cmd ( $cmds ) {
@@ -216,7 +217,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     local help_subcmd=()
     local -A rEpLy
-    $cmd subcommands
+    .zpy_ui_${cmd} subcommands
     help_subcmd+=("# ${rEpLy[$subcmd]}" "$cmd $subcmd $lines[1]" $lines[2,-1])
 
     zstyle ':zpy:*' $topic ${(F)help_subcmd##[[:space:]]#}
@@ -2227,6 +2228,7 @@ jsonfile.write_text(dumps(data, indent=4))
     local -A rEpLy
     .zpy_ui_zpy subcommands
     cmds=(${(k)rEpLy:#(help|mkbin)})
+    cmds+=(zpy)
 
     local exposed_funcs
     if ! { zstyle -a :zpy: exposed-funcs exposed_funcs }  exposed_funcs=($cmds)
@@ -2272,6 +2274,7 @@ _.zpy_ui_mkbin () {
     local -A rEpLy
     .zpy_ui_zpy subcommands
     cmds=(${(k)rEpLy})
+    cmds+=(zpy)
 
     local pipz_cmd
     .zpy_ui_pipz subcommands
@@ -2616,7 +2619,7 @@ _.zpy_ui_help () {
 _.zpy_ui_zpy () {
     local cmds=() cmd desc
     local -A rEpLy
-    ${0[10,-1]} subcommands
+    ${0[2,-1]} subcommands
     for cmd desc ( ${(kv)rEpLy} )  cmds+=("${cmd}:${desc}")
     local context state state_descr line opt_args
     _arguments \
@@ -2634,7 +2637,7 @@ _.zpy_ui_pipz () {
     setopt localtraps
     local cmds=() cmd desc
     local -A rEpLy
-    ${0[10,-1]} subcommands
+    ${0[2,-1]} subcommands
     for cmd desc ( ${(kv)rEpLy} )  cmds+=("${cmd}:${desc}")
     integer NORMARG
     local context state state_descr line opt_args
