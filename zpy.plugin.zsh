@@ -2228,11 +2228,36 @@ jsonfile.write_text(dumps(data, indent=4))
 .zpy_expose_funcs () {
     emulate -L zsh
 
-    local cmds=()
-    local -A rEpLy
-    .zpy_ui_zpy subcommands
-    cmds=(${(k)rEpLy:#(help|mkbin)})
-    cmds+=(zpy)
+    local cmds=(
+        envout
+        vpyshebang
+        pipac
+        pipz
+        reqshow
+        pipi
+        vlauncher
+        prunevenvs
+        vrun
+        vpy
+        whichpyproj
+        da8
+        venvs_path
+        vpysublp
+        vpyvscode
+        a8
+        pipacs
+        pipup
+        envin
+        pipa
+        pypc
+        pips
+        vpypyright
+        pipc
+        pipcheckold
+        activate
+        pipcs
+        zpy
+    )
 
     local exposed_funcs
     if ! { zstyle -a :zpy: exposed-funcs exposed_funcs }  exposed_funcs=($cmds)
