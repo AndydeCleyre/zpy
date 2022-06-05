@@ -25,11 +25,15 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     local cmds=(${${(M)lines:#[^# ]*}/ *})
     cmds=(${cmds:#zpy})
 
-    local subcmds=() ui_cmd
-    for ui_cmd ( $cmds ) {
-        .zpy_help $ui_cmd
-        lines=(${(f)REPLY})
-        subcmds+=($ui_cmd ${lines[1]### })
+    local subcmds=()
+    if ! { zstyle -a :zpy: subcommands subcmds } {
+        local ui_cmd
+        for ui_cmd ( $cmds ) {
+            .zpy_help $ui_cmd
+            lines=(${(f)REPLY})
+            subcmds+=($ui_cmd ${lines[1]### })
+        }
+        zstyle ':zpy:*' subcommands $subcmds
     }
 
     case $1 {
