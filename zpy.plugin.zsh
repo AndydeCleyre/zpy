@@ -1893,7 +1893,7 @@ jsonfile.write_text(dumps(data, indent=4))
 
 # Package manager for venv-isolated scripts (pipx clone).
 .zpy_ui_pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
-    emulate -L zsh +o promptsubst -o globdots +o monitor
+    emulate -L zsh +o promptsubst -o globdots
     [[ $ZPY_PIPZ_PROJECTS && $ZPY_PIPZ_BINS && $ZPY_VENVS_HOME && $ZPY_PROCS ]] || return
 
     local reply REPLY
