@@ -2836,3 +2836,5 @@ if (( $+functions[compdef] )) {
     compdef _.zpy_ui_mkbin .zpy_ui_mkbin
     compdef _.zpy_ui_help .zpy_ui_help
 }
+
+if (( $+functions[zsh-defer] ))  zsh-defer .zpy_ui_zpy subcommands
