@@ -857,7 +857,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 # Pass -i to interactively choose the project.
 # Pass --py to use another interpreter and named venv.
 .zpy_ui_activate () {  # [--py pypy|current] [-i|<proj-dir>]
-    emulate -L zsh -o localtraps
+    emulate -L zsh
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local envin_args=() venv_name=venv interactive
@@ -1893,7 +1893,7 @@ jsonfile.write_text(dumps(data, indent=4))
 
 # Package manager for venv-isolated scripts (pipx clone).
 .zpy_ui_pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
-    emulate -L zsh +o promptsubst -o globdots -o localtraps +o monitor
+    emulate -L zsh +o promptsubst -o globdots +o monitor
     [[ $ZPY_PIPZ_PROJECTS && $ZPY_PIPZ_BINS && $ZPY_VENVS_HOME && $ZPY_PROCS ]] || return
 
     local reply REPLY
