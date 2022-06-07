@@ -146,7 +146,7 @@ zpy help [<zpy-function>...]
 
     ```shell
     # Make a standalone script for any zpy function.
-    mkbin <func> <dest>
+    zpy mkbin <func> <dest>
     ```
 
 ## Informational
