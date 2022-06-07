@@ -59,7 +59,7 @@ pipacs [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
     When a zpy function internally calls `pip-compile`,
     it provides these flags by default:
     ```shell
-    --no-header --annotation-style=line --strip-extras
+    --no-header --annotation-style=line --strip-extras --allow-unsafe
     ```
     You can *add* `pip-compile` flags in a particular instance using the double dash syntax, like:
     ```console
