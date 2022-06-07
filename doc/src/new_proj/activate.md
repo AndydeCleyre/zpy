@@ -34,7 +34,10 @@ what aims to be *thorough* tab completion assistance.
 ---
 
 ```console
+% # These are all equivalent:
 % activate --help
+% zpy activate --help
+% zpy help activate
 ```
 ```shell
 # Activate the venv for the current folder or specified project, if it exists.
