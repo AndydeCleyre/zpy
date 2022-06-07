@@ -17,7 +17,7 @@ pass `-U`:
 ---
 
 ```console
-% zpy pipc pipcs
+% zpy help pipc pipcs
 ```
 ```shell
 # Compile requirements.txt files from all found or specified requirements.in files (compile).
@@ -49,7 +49,7 @@ without affecting your shell's environment.
 ---
 
 ```console
-% zpy pipup pipcheckold
+% zpy help pipup pipcheckold
 ```
 ```shell
 # 'pipcs -U' (upgrade-compile, sync) in a venv-activated subshell for the current or specified folders.
