@@ -55,6 +55,18 @@ So how do they differ?
 - `envin` syncs according to *all* `requirements.txt` files *by default*,
   but *also* accepts any number of *lockfile arguments*, just like `pips`
 
+# Deactivation
+
+These are standard Python virtual environments,
+and so can be deactivated with:
+
+```console
+[venv] % deactivate
+```
+
+For symmetry with `a8` and `envin`, `zpy` adds two aliases for the same command:
+`da8` and `envout`.
+
 ---
 
 ```console
@@ -79,15 +91,3 @@ envin [--py pypy|current] [<reqs-txt>...]
 ```
 
 ---
-
-# Deactivation
-
-These are standard Python virtual environments,
-and so can be deactivated with:
-
-```console
-[venv] % deactivate
-```
-
-For symmetry with `a8` and `envin`, `zpy` adds two aliases for the same command:
-`da8` and `envout`.
