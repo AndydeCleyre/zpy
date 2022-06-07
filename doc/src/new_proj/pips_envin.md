@@ -58,17 +58,20 @@ So how do they differ?
 ---
 
 ```console
-% zpy activate envin
+% zpy help pips activate envin
 ```
 ```shell
+# Install packages according to all found or specified requirements.txt files (sync).
+pips [<reqs-txt>...]
+
 # Activate the venv for the current folder or specified project, if it exists.
 # Otherwise create, activate, sync.
 # Pass -i to interactively choose the project.
 # Pass --py to use another interpreter and named venv.
 activate [--py pypy|current] [-i|<proj-dir>]
 
-# Activate the venv (creating if needed) for the current folder, and sync its
-# installed package set according to all found or specified requirements.txt files.
+# Activate the venv (creating if needed) for the current folder, and sync
+# its installed package set according to all found or specified requirements.txt files.
 # In other words: [create, ]activate, sync.
 # The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
 # Pass --py to use another interpreter and named venv.
