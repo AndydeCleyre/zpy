@@ -235,6 +235,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     local REPLY ret=0
     .zpy_help $@ || ret=$?
+    REPLY=${REPLY/$'\n'help /$'\n'zpy help }
+    REPLY=${REPLY/$'\n'mkbin /$'\n'zpy mkbin }
     .zpy_hlt zsh <<<$REPLY || ret=$?
     return ret
 }
