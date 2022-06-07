@@ -34,6 +34,12 @@ Try typing `zpy`, then a space, then tab.
 
 [^1]: Well, except for `zpy mkbin` and `zpy help`.
 
+From here, you may want to:
+
+- continue to the [next page](new_proj.md), for an idea of how these tools can help manage a project
+- jump to the [full reference](help_all.md)
+- jump to [`pipz`](pipz.md), a [pipx](https://pypa.github.io/pipx/) alternative
+
 !!! tip
 
     You can flip through these docs with `n` and `p`, or `.` and `,`.
