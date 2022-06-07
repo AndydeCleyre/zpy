@@ -480,6 +480,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         --no-header
         --annotation-style=line
         --strip-extras
+        --allow-unsafe
     )
     # After updating minimum pip-tools to support each of these, add them:
     # --resolver=backtracking     # remove parameter PIP_TOOLS_RESOLVER, below
