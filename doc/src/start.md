@@ -19,4 +19,4 @@ For now, let's just source it in the current session:
 
 !!! tip
 
-    You can flip through these docs with `n` and `p`, or `,` and `.`
+    You can flip through these docs with `n` and `p`, or `.` and `,`.
