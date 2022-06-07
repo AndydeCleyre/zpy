@@ -832,8 +832,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     reply=($venv_name $venv_cmd)
 }
 
-# Activate the venv (creating if needed) for the current folder, and sync its
-# installed package set according to all found or specified requirements.txt files.
+# Activate the venv (creating if needed) for the current folder, and sync
+# its installed package set according to all found or specified requirements.txt files.
 # In other words: [create, ]activate, sync.
 # The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
 # Pass --py to use another interpreter and named venv.
