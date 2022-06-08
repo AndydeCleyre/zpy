@@ -50,8 +50,8 @@ or install it with a plugin manager:
 === "yadm"
 
     ```console
-    % yadm submodule add git@github.com:andydecleyre/zpy
-    % print ". $PWD/zpy/zpy.plugin.zsh" >>~/.zshrc
+    % yadm submodule add git@github.com:andydecleyre/zpy ~/.zpy
+    % print ". ~/.zpy/zpy.plugin.zsh" >>~/.zshrc
     ```
 
 === "Zinit"

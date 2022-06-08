@@ -15,6 +15,46 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 ## Installing an app via pipz puts requirements.{in,txt} in $ZPY_PIPZ_PROJECTS/<appname>
 ## and executables in $ZPY_PIPZ_BINS
 
+# Optional launcher for all zpy functions as subcommands
+.zpy_ui_zpy () {  # <function> [<function-arg>...]
+    emulate -L zsh
+
+    local REPLY
+    .zpy_help
+    local lines=(${(f)REPLY})
+    local cmds=(${${(M)lines:#[^# ]*}/ *})
+    cmds=(${cmds:#zpy})
+
+    local subcmds=()
+    if ! { zstyle -a :zpy: subcommands subcmds } {
+        local ui_cmd
+        for ui_cmd ( $cmds ) {
+            .zpy_help $ui_cmd
+            lines=(${(f)REPLY})
+            subcmds+=($ui_cmd ${lines[1]### })
+        }
+        zstyle ':zpy:*' subcommands $subcmds
+    }
+
+    case $1 {
+    subcommands)
+        rEpLy=($subcmds)
+        return
+    ;;
+    --help)
+        .zpy_ui_help ${0[9,-1]}
+        return
+    ;;
+    *)
+        if (( ${(k)subcmds[(I)$1]} )) {
+            .zpy_ui_${1} ${@[2,-1]}
+            return
+        }
+    ;;
+    }
+    return 1
+}
+
 ## Syntax highlighter, reading stdin.
 .zpy_hlt () {  # <syntax>
     emulate -L zsh
@@ -110,27 +150,41 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     print -r -- ${(F)all_results}
 }
 
-## zpy, but never highlight
-.zpy () {  # [<zpy-function>...]
+.zpy_help () {  # [<zpy-function>...]
     emulate -L zsh -o extendedglob
-    [[ -r $ZPY_SRC ]] || return
-    rehash
+    unset REPLY
 
-    local cmds_pattern='^(?P<predoc>\n?(# .*\n)*)(alias (?P<aname>[^=]+)="[^"]+"|(?P<fname>[^._ \n][^ \n]+) \(\) \{)(  #(?P<usage> .+))?'
+    # Multiple commands or subcommands:
+    if (( $# > 1 )) {
+        local reply
+        .zpy_all_replies .zpy_help $@
+        REPLY=${(pj:\n\n:)reply}
+        return
+    }
+
+    # Either all commands or a single command or subcommand:
+
+    local topic=help-${1:-all}
+    if { zstyle -s :zpy: $topic REPLY }  return
+
+    [[ -r $ZPY_SRC ]] || return
+
+    local cmds_pattern='^(?P<predoc>\n?(# .*\n)*)(\.zpy_ui_(?P<fname>[^._ \n][^ \n]+) \(\) \{)(  #(?P<usage> .+))?'
     local subcmd_pattern='.*  # (?P<usage>.*)  ## subcmd: <CMD> <SUBCMD>(?P<postdoc>\n( *# [^\n]+\n)*)'
 
     local cmd_doc=() subcmd_doc=()
+    rehash
     if (( $+commands[pcre2grep] )) {
-        cmd_doc=(pcre2grep -M -O '$1$4$5$7')
+        cmd_doc=(pcre2grep -M -O '$1$4$6')
         subcmd_doc=(pcre2grep -M -O '$1$2')
     } elif { zmodload -e zsh/pcre } {
-        cmd_doc=(.zpy_zpcregrep '$1$4$5$7')
+        cmd_doc=(.zpy_zpcregrep '$1$4$6')
         subcmd_doc=(.zpy_zpcregrep '$1$2')
     } elif (( $+commands[pcregrep] )) {
-        cmd_doc=(pcregrep -M -o1 -o4 -o5 -o7)
+        cmd_doc=(pcregrep -M -o1 -o4 -o6)
         subcmd_doc=(pcregrep -M -o1 -o2)
     } elif (( $+commands[rg] )) {
-        cmd_doc=(rg --no-config --color never -NU -r '$predoc$aname$fname$usage')
+        cmd_doc=(rg --no-config --color never -NU -r '$predoc$fname$usage')
         subcmd_doc=(rg --no-config --color never -NU -r '$usage$postdoc')
     } else {
         local lines=(
@@ -144,46 +198,47 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         return 1
     }
 
-    if ! (( $# )) {  # all commands
-        print -r -- ${"$(
+    # All commands or single command (but not a subcommand):
+    if [[ ! $1 ]] || (( ! ${1[(I) ]} )) {
+        if [[ $1 ]]  cmds_pattern=${(S)cmds_pattern//name>*\)/name>$1)}
+        zstyle ':zpy:*' $topic ${"$(
             $cmd_doc $cmds_pattern $ZPY_SRC
         )"##[[:space:]]#}
 
-    } else {  # specified commands & subcommands
-        local cmd subcmd lines=()
-        local -A rEpLy
-        for 1 {
-
-            if (( ! ${1[(I) ]} )) {  # "<cmd>"
-                print -r -- ${"$(
-                    $cmd_doc ${(S)cmds_pattern//name>*\)/name>$1)} $ZPY_SRC
-                )"##[[:space:]]#}
-
-            } else {  # "<cmd> <subcmd>"
-                cmd=${${(z)1}[1]}
-                subcmd=${${(z)1}[2]}
-                $cmd subcommands
-                print -r "# ${rEpLy[$subcmd]}"
-                lines=(${(f)"$(
-                    $subcmd_doc ${${subcmd_pattern:gs/<CMD>/$cmd}:gs/<SUBCMD>/$subcmd} $ZPY_SRC
-                )"})
-                lines[1]="$cmd $subcmd $lines[1]"
-                print -rl -- ${lines##[[:space:]]#}
-            }
-
-            if [[ $1 != ${@[-1]} ]]  print
-        }
+        zstyle -s :zpy: $topic REPLY
+        return
     }
+
+    # Subcommand ("<cmd> <subcmd>"):
+
+    local cmd subcmd
+    cmd=${${(z)1}[1]}
+    subcmd=${${(z)1}[2]}
+
+    local lines=(${(f)"$(
+        $subcmd_doc ${${subcmd_pattern:gs/<CMD>/$cmd}:gs/<SUBCMD>/$subcmd} $ZPY_SRC
+    )"})
+
+    local help_subcmd=()
+    local -A rEpLy
+    .zpy_ui_${cmd} subcommands
+    help_subcmd+=("# ${rEpLy[$subcmd]}" "$cmd $subcmd $lines[1]" $lines[2,-1])
+
+    zstyle ':zpy:*' $topic ${(F)help_subcmd##[[:space:]]#}
+    zstyle -s :zpy: $topic REPLY
 }
 
 # Print description and arguments for all or specified functions.
-zpy () {  # [<zpy-function>...]
+.zpy_ui_help () {  # [<zpy-function>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
-    .zpy $@ | .zpy_hlt zsh
-    local badrets=(${pipestatus:#0})
-    [[ ! $badrets ]]
+    local REPLY ret=0
+    .zpy_help $@ || ret=$?
+    REPLY=${REPLY/$'\n'help /$'\n'zpy help }
+    REPLY=${REPLY/$'\n'mkbin /$'\n'zpy mkbin }
+    .zpy_hlt zsh <<<$REPLY || ret=$?
+    return ret
 }
 
 .zpy_path_hash () {  # <path>
@@ -240,14 +295,14 @@ zpy () {  # [<zpy-function>...]
 
 # Get path of folder containing all venvs for the current folder or specified proj-dir.
 # Pass -i to interactively choose the project.
-venvs_path () {  # [-i|<proj-dir>]
+.zpy_ui_venvs_path () {  # [-i|<proj-dir>]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local REPLY
     if [[ $1 == -i ]] {
         .zpy_chooseproj || return
-        venvs_path $REPLY
+        .zpy_ui_venvs_path $REPLY
     } else {
         .zpy_venvs_path $@ || return
         print -rn -- $REPLY
@@ -263,22 +318,22 @@ venvs_path () {  # [-i|<proj-dir>]
 }
 
 # Install and upgrade packages.
-pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
+.zpy_ui_pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     [[ $VIRTUAL_ENV ]] || .zpy_please_activate venv
 
     local upgrade=-U
     if [[ $1 == --no-upgrade ]] { unset upgrade; shift }
 
-    if [[ ! $1 ]] { zpy $0; return 1 }
+    if [[ ! $1 ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
 
     python -m pip --disable-pip-version-check install $upgrade $@
     local ret=$?
     rehash
 
     if (( ret )) {
-        local log_args=(error "FAILED $0 call" "$0 $@" $VIRTUAL_ENV)
+        local log_args=(error "FAILED ${0[9,-1]} call" "${0[9,-1]} $@" $VIRTUAL_ENV)
         if [[ $VIRTUAL_ENV ]] && [[ -L ${VIRTUAL_ENV:h}/project ]] {
             log_args+=${${:-${VIRTUAL_ENV:h}/project}:P:t}
         }
@@ -337,9 +392,9 @@ pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
 }
 
 # Install packages according to all found or specified requirements.txt files (sync).
-pips () {  # [<reqs-txt>...]
+.zpy_ui_pips () {  # [<reqs-txt>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     rehash
     if (( ! $+commands[pip-sync] )) { .zpy_please_activate pip-sync; return 1 }
 
@@ -352,15 +407,15 @@ pips () {  # [<reqs-txt>...]
         pip-sync -q --pip-args --disable-pip-version-check $reqstxts
         ret=$?
 
-        local reqstxt                       #
-        for reqstxt ( $reqstxts ) {         # can remove if pip-tools #896 is resolved
-            pipi --no-upgrade -qr $reqstxt  # (by merging pip-tools #907)
-            if (( ? ))  ret=1               #
-        }                                   #
+        local reqstxt                               #
+        for reqstxt ( $reqstxts ) {                 # can remove if pip-tools #896 is resolved
+            .zpy_ui_pipi --no-upgrade -qr $reqstxt  # (by merging pip-tools #907)
+            if (( ? ))  ret=1                       #
+        }                                           #
         rehash
 
         if (( ret )) {
-            .zpy_log error "FAILED $0 call" "$0 $@"
+            .zpy_log error "FAILED ${0[9,-1]} call" "${0[9,-1]} $@"
             return ret
         }
     }
@@ -423,8 +478,12 @@ pips () {  # [<reqs-txt>...]
     cachedir=${VIRTUAL_ENV:-$(mktemp -d)}/zpy-cache/${reqstxt_hash}
 
     local pipcompile_args
-    zstyle -a :zpy: pip-compile-args pipcompile_args \
-    || pipcompile_args=(--no-header --annotation-style=line --strip-extras)
+    if ! { zstyle -a :zpy: pip-compile-args pipcompile_args }  pipcompile_args=(
+        --no-header
+        --annotation-style=line
+        --strip-extras
+        --allow-unsafe
+    )
     # After updating minimum pip-tools to support each of these, add them:
     # --resolver=backtracking     # remove parameter PIP_TOOLS_RESOLVER, below
     # --write-relative-to-output
@@ -474,10 +533,10 @@ pips () {  # [<reqs-txt>...]
 
 # Compile requirements.txt files from all found or specified requirements.in files (compile).
 # Use -h to include hashes, -u dep1,dep2... to upgrade specific dependencies, and -U to upgrade all.
-pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compile-arg>...]
+.zpy_ui_pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compile-arg>...]
     emulate -L zsh
     unset REPLY
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     [[ $ZPY_PROCS ]] || return
 
     local gen_hashes upgrade upgrade_csv
@@ -513,7 +572,7 @@ pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compi
 
     if [[ $failures ]] {
         .zpy_log error 'Problems compiling' $failures
-        zpy $0
+        .zpy_ui_help ${0[9,-1]}
         return 1
     }
 }
@@ -548,9 +607,9 @@ pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compi
 
 # Compile, then sync.
 # Use -h to include hashes, -u dep1,dep2... to upgrade specific dependencies, and -U to upgrade all.
-pipcs () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [--only-sync-if-changed] [<reqs-in>...] [-- <pip-compile-arg>...]
+.zpy_ui_pipcs () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [--only-sync-if-changed] [<reqs-in>...] [-- <pip-compile-arg>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local only_sync_if_changed pipc_args=()
     while [[ $1 == (-[hUu]|--only-sync-if-changed) ]] {
@@ -570,12 +629,12 @@ pipcs () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [--only-sync-if-changed] [<r
     if [[ ! $only_sync_if_changed ]]  do_sync=1
 
     local ret REPLY snapshot
-    pipc $pipc_args
+    .zpy_ui_pipc $pipc_args
     ret=$?
     snapshot=$REPLY
 
     if (( ret )) {
-        .zpy_log error "FAILED $0 call" "$0 $only_sync_if_changed $pipc_args"
+        .zpy_log error "FAILED ${0[9,-1]} call" "${0[9,-1]} $only_sync_if_changed $pipc_args"
         return ret
     }
 
@@ -592,18 +651,18 @@ pipcs () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [--only-sync-if-changed] [<r
         }
     }
 
-    if [[ $do_sync ]]  pips $newtxts
+    if [[ $do_sync ]]  .zpy_ui_pips $newtxts
 }
 
 # Add loose requirements to [<category>-]requirements.in (add).
-pipa () {  # [-c <category>] <pkgspec>...
+.zpy_ui_pipa () {  # [-c <category>] <pkgspec>...
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local reqsin=requirements.in
     if [[ $1 == -c ]] { reqsin=${2}-requirements.in; shift 2 }
 
-    if [[ ! $1 ]] { zpy $0; return 1 }
+    if [[ ! $1 ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
 
     .zpy_log action appending $reqsin
 
@@ -614,9 +673,9 @@ pipa () {  # [-c <category>] <pkgspec>...
 
 # Add to requirements.in, then compile it to requirements.txt (add, compile).
 # Use -c to affect categorized requirements, and -h to include hashes.
-pipac () {  # [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
+.zpy_ui_pipac () {  # [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local catg gen_hashes
     while [[ $1 == -[ch] ]] {
@@ -630,7 +689,7 @@ pipac () {  # [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
        shift -p "$(( $#pipcompile_args+1 ))"
     }
 
-    if [[ ! $1 ]] { zpy $0; return 1 }
+    if [[ ! $1 ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
 
     local pipa_args=($@) reqsin=requirements.in
     if [[ $catg ]] {
@@ -640,21 +699,21 @@ pipac () {  # [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
 
     local pipc_args=($reqsin -- $gen_hashes $pipcompile_args)
 
-    pipa $pipa_args
-    pipc $pipc_args
+    .zpy_ui_pipa $pipa_args
+    .zpy_ui_pipc $pipc_args
 }
 
 # Add to requirements.in, compile it to requirements.txt, then sync to that (add, compile, sync).
 # Use -c to affect categorized requirements, and -h to include hashes.
-pipacs () {  # [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
+.zpy_ui_pipacs () {  # [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
-    pipac $@
+    .zpy_ui_pipac $@
     local ret=$?
 
     if (( ret )) {
-        .zpy_log error "FAILED $0 call" "$0 $@"
+        .zpy_log error "FAILED ${0[9,-1]} call" "${0[9,-1]} $@"
         return ret
     }
 
@@ -662,13 +721,13 @@ pipacs () {  # [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
     if [[ $1 == -h ]]  shift
     if [[ $1 == -c ]]  reqstxt=${2}-requirements.txt
 
-    pips $reqstxt
+    .zpy_ui_pips $reqstxt
 }
 
 # View contents of all *requirements*.{in,txt} files in the current or specified folders.
-reqshow () {  # [<folder>...]
+.zpy_ui_reqshow () {  # [<folder>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     [[ $1 ]] || 1=$PWD
 
     local reqsfiles=() rf
@@ -745,7 +804,7 @@ reqshow () {  # [<folder>...]
 
     .zpy_minimum_piptools || return
 
-    pips $reqstxts
+    .zpy_ui_pips $reqstxts
 }
 
 .zpy_argvenv () {  # pypy|current -> ($venv_name $venv_cmd...)
@@ -775,19 +834,19 @@ reqshow () {  # [<folder>...]
     reply=($venv_name $venv_cmd)
 }
 
-# Activate the venv (creating if needed) for the current folder, and sync its
-# installed package set according to all found or specified requirements.txt files.
+# Activate the venv (creating if needed) for the current folder, and sync
+# its installed package set according to all found or specified requirements.txt files.
 # In other words: [create, ]activate, sync.
 # The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
 # Pass --py to use another interpreter and named venv.
-envin () {  # [--py pypy|current] [<reqs-txt>...]
+.zpy_ui_envin () {  # [--py pypy|current] [<reqs-txt>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local venv_name=venv venv_cmd=(python3 -m venv)
     if [[ $1 == --py ]] {
         local reply
-        if ! { .zpy_argvenv $2 } { zpy $0; return 1 }
+        if ! { .zpy_argvenv $2 } { .zpy_ui_help ${0[9,-1]}; return 1 }
         venv_name=$reply[1]
         venv_cmd=($reply[2,-1])
         shift 2
@@ -800,16 +859,16 @@ envin () {  # [--py pypy|current] [<reqs-txt>...]
 # Otherwise create, activate, sync.
 # Pass -i to interactively choose the project.
 # Pass --py to use another interpreter and named venv.
-activate () {  # [--py pypy|current] [-i|<proj-dir>]
-    emulate -L zsh -o localtraps
-    if [[ $1 == --help ]] { zpy $0; return }
+.zpy_ui_activate () {  # [--py pypy|current] [-i|<proj-dir>]
+    emulate -L zsh
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local envin_args=() venv_name=venv interactive
     while [[ $1 == -(i|-py) ]] {
         if [[ $1 == -i ]] { interactive=1; shift }
         if [[ $1 == --py ]] {
             local reply
-            if ! { .zpy_argvenv $2 } { zpy $0; return 1 }
+            if ! { .zpy_argvenv $2 } { .zpy_ui_help ${0[9,-1]}; return 1 }
             venv_name=$reply[1]
             envin_args=($1 $2)
             shift 2
@@ -819,7 +878,7 @@ activate () {  # [--py pypy|current] [-i|<proj-dir>]
     local REPLY
     if [[ $interactive ]] {
         .zpy_chooseproj || return
-        activate $envin_args "$REPLY"
+        .zpy_ui_activate $envin_args "$REPLY"
         return
     }
 
@@ -835,7 +894,7 @@ activate () {  # [--py pypy|current] [-i|<proj-dir>]
         trap "cd ${(q-)PWD}" EXIT INT QUIT
         zf_mkdir -p $projdir
         cd $projdir
-        envin $envin_args
+        .zpy_ui_envin $envin_args
     } elif { . $activator } {
         .zpy_minimum_piptools || return
     } else {
@@ -846,7 +905,7 @@ activate () {  # [--py pypy|current] [-i|<proj-dir>]
 .zpy_minimum_piptools () {
     emulate -L zsh
 
-    pipi --no-upgrade -q \
+    .zpy_ui_pipi --no-upgrade -q \
         'pip-tools>=6.6.2' \
         'setuptools>=62.0.0' \
         wheel
@@ -855,7 +914,7 @@ activate () {  # [--py pypy|current] [-i|<proj-dir>]
 .zpy_maximum_piptools () {
     emulate -L zsh
 
-    pipi -q \
+    .zpy_ui_pipi -q \
         pip \
         pip-tools \
         setuptools \
@@ -863,13 +922,19 @@ activate () {  # [--py pypy|current] [-i|<proj-dir>]
 }
 
 # Alias for 'activate'.
-alias a8="activate"  # [--py pypy|current] [-i|<proj-dir>]
+.zpy_ui_a8 () {  # [--py pypy|current] [-i|<proj-dir>]
+    .zpy_ui_activate $@
+}
 
 # Alias for 'deactivate'.
-alias envout="deactivate"
+.zpy_ui_envout () {
+    deactivate $@
+}
 
 # Another alias for 'deactivate'.
-alias da8="deactivate"
+.zpy_ui_da8 () {
+    deactivate $@
+}
 
 .zpy_whichvpy () {  # <venv-name> <script>
     emulate -L zsh
@@ -881,9 +946,9 @@ alias da8="deactivate"
 }
 
 # Display path of project for the activated venv.
-whichpyproj () {
+.zpy_ui_whichpyproj () {
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     [[ $VIRTUAL_ENV ]] || return
 
     print -r -- ${VIRTUAL_ENV:h}/project(@N:P)
@@ -893,18 +958,18 @@ whichpyproj () {
 # If 'vpy' exists in the PATH, '#!/path/to/vpy' will be used instead.
 # Also ensures the script is executable.
 # --py may be used, same as for envin.
-vpyshebang () {  # [--py pypy|current] <script>...
+.zpy_ui_vpyshebang () {  # [--py pypy|current] <script>...
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local venv_name=venv
     if [[ $1 == --py ]] {
         local reply
-        if ! { .zpy_argvenv $2 } { zpy $0; return 1 }
+        if ! { .zpy_argvenv $2 } { .zpy_ui_help ${0[9,-1]}; return 1 }
         venv_name=$reply[1]; shift 2
     }
 
-    if [[ ! $1 ]] { zpy $0; return 1 }
+    if [[ ! $1 ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
 
     local vpyscript
     if [[ $venv_name == venv ]]  vpyscript=$commands[vpy]
@@ -929,20 +994,20 @@ vpyshebang () {  # [--py pypy|current] <script>...
 # Use --cd to run the command from within the project folder.
 # --py may be used, same as for envin.
 # With --activate, activate the venv (usually unnecessary, and slower).
-vrun () {  # [--py pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-arg>...]
+.zpy_ui_vrun () {  # [--py pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-arg>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local do_enter do_activate activate_args=() projdir
     while [[ $1 == --(py|cd|activate) ]] {
         if [[ $1 == --cd       ]] { do_enter=1;    shift }
         if [[ $1 == --activate ]] { do_activate=1; shift }
         if [[ $1 == --py       ]] {
-            if ! { .zpy_argvenv $2 } { zpy $0; return 1 }
+            if ! { .zpy_argvenv $2 } { .zpy_ui_help ${0[9,-1]}; return 1 }
             activate_args=($1 $2); shift 2
         }
     }
-    if ! [[ $2 && $1 ]] { zpy $0; return 1 }
+    if ! [[ $2 && $1 ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
     projdir=${1:a}; shift
 
     zf_mkdir -p $projdir
@@ -952,7 +1017,7 @@ vrun () {  # [--py pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-arg>
         if [[ $do_enter ]]  cd $projdir
 
         if [[ $do_activate ]] {
-            activate $activate_args $projdir
+            .zpy_ui_activate $activate_args $projdir
         } else {
             vname=venv
             if [[ $activate_args ]] {
@@ -964,7 +1029,7 @@ vrun () {  # [--py pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-arg>
             vpath=$REPLY
 
             if [[ -d $vpath/$vname/bin ]] { path=($vpath/$vname/bin $path)
-            } else                        { activate $activate_args $projdir }
+            } else                        { .zpy_ui_activate $activate_args $projdir }
         }
 
         $@
@@ -973,9 +1038,9 @@ vrun () {  # [--py pypy|current] [--cd] [--activate] <proj-dir> <cmd> [<cmd-arg>
 
 # Run script with the python from its folder's venv.
 # --py may be used, same as for envin.
-vpy () {  # [--py pypy|current] [--activate] <script> [<script-arg>...]
+.zpy_ui_vpy () {  # [--py pypy|current] [--activate] <script> [<script-arg>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local vrun_args=()
     while [[ $1 == --(py|activate) ]] {
@@ -983,18 +1048,18 @@ vpy () {  # [--py pypy|current] [--activate] <script> [<script-arg>...]
         if [[ $1 == --activate ]] { vrun_args+=($1);    shift   }
     }
 
-    if [[ ! $1 ]] { zpy $0; return 1 }
+    if [[ ! $1 ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
 
-    vrun $vrun_args ${1:a:h} python ${1:a} ${@[2,-1]}
+    .zpy_ui_vrun $vrun_args ${1:a:h} python ${1:a} ${@[2,-1]}
 }
 
 
 # Make a launcher script for a command run in a given project's activated venv.
 # With --link-only, only create a symlink to <venv>/bin/<cmd>,
 # which should already have the venv's python in its shebang line.
-vlauncher () {  # [--link-only] [--py pypy|current] <proj-dir> <cmd> <launcher-dest>
+.zpy_ui_vlauncher () {  # [--link-only] [--py pypy|current] <proj-dir> <cmd> <launcher-dest>
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local linkonly venv_name=venv reply
     while [[ $1 == --(link-only|py) ]] {
@@ -1002,12 +1067,12 @@ vlauncher () {  # [--link-only] [--py pypy|current] <proj-dir> <cmd> <launcher-d
             linkonly=1; shift
         }
         if [[ $1 == --py ]] {
-            if ! { .zpy_argvenv $2 } { zpy $0; return 1 }
+            if ! { .zpy_argvenv $2 } { .zpy_ui_help ${0[9,-1]}; return 1 }
             venv_name=$reply[1]; shift 2
         }
     }
 
-    if ! [[ $3 && $2 && $1 ]] { zpy $0; return 1 }
+    if ! [[ $3 && $2 && $1 ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
 
     local projdir=${1:P} cmd=$2 dest=${3:a}
     if [[ -d $dest ]]  dest=$dest/$cmd
@@ -1043,9 +1108,9 @@ vlauncher () {  # [--link-only] [--py pypy|current] <proj-dir> <cmd> <launcher-d
 }
 
 # Delete venvs for project folders which no longer exist.
-prunevenvs () {  # [-y]
+.zpy_ui_prunevenvs () {  # [-y]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     [[ $ZPY_VENVS_HOME ]] || return
 
     local noconfirm
@@ -1083,12 +1148,12 @@ prunevenvs () {  # [-y]
     local cells=()
     if (( $+commands[jq] )) {
         cells=($(
-            vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json \
+            .zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json \
             | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
         ))
     } elif (( $+commands[jello] )) {
         cells=($(
-            vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json \
+            .zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json \
             | jello -r '" ".join(" ".join((pkg["name"], pkg["version"], pkg["latest_version"])) for pkg in _ if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"))'
         ))
     } elif (( $+commands[wheezy.template] )) {
@@ -1107,10 +1172,10 @@ prunevenvs () {  # [-y]
         )
         cells=($(
             wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $(vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json)}")
+            =(<<<"{\"_\": $(.zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json)}")
         ))
     } else {
-        local lines=(${(f)"$(vrun $vrun_args python -m pip --disable-pip-version-check list -o)"})
+        local lines=(${(f)"$(.zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o)"})
         lines=($lines[3,-1])
         lines=(${lines:#(setuptools|six|pip|pip-tools) *})
 
@@ -1132,9 +1197,9 @@ prunevenvs () {  # [-y]
 
 # 'pip list -o' (show outdated) for the current or specified folders.
 # Use --all to instead act on all known projects, or -i to interactively choose.
-pipcheckold () {  # [--py pypy|current] [--all|-i|<proj-dir>...]
+.zpy_ui_pipcheckold () {  # [--py pypy|current] [--all|-i|<proj-dir>...]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     [[ $ZPY_PROCS      ]] || return
     [[ $ZPY_VENVS_HOME ]] || return
 
@@ -1191,9 +1256,9 @@ pipcheckold () {  # [--py pypy|current] [--all|-i|<proj-dir>...]
         set -e
 
         cd $1
-        activate $activate_args 2>/dev/null
+        .zpy_ui_activate $activate_args 2>/dev/null
 
-        pipcs -U $only_sync_if_changed
+        .zpy_ui_pipcs -U $only_sync_if_changed
     )
     ret=$?
 
@@ -1204,7 +1269,7 @@ pipcheckold () {  # [--py pypy|current] [--all|-i|<proj-dir>...]
 
 # 'pipcs -U' (upgrade-compile, sync) in a venv-activated subshell for the current or specified folders.
 # Use --all to instead act on all known projects, or -i to interactively choose.
-pipup () {  # [--py pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
+.zpy_ui_pipup () {  # [--py pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>...]
     emulate -L zsh
     # TODO:
     # things that *might* gain --interactive (-i):
@@ -1212,7 +1277,7 @@ pipup () {  # [--py pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>.
     # vlauncher
     # pipz cd|inject|runpip (names which are really projs)
 
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     [[ $ZPY_PROCS      ]] || return
     [[ $ZPY_VENVS_HOME ]] || return
 
@@ -1239,7 +1304,7 @@ pipup () {  # [--py pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>.
     zf_rm -rf $faildir
 
     if [[ $failures ]] {
-        .zpy_log error "FAILED $0 call; Problems upgrading" $failures
+        .zpy_log error "FAILED ${0[9,-1]} call; Problems upgrading" $failures
         return 1
     }
 }
@@ -1247,14 +1312,14 @@ pipup () {  # [--py pypy|current] [--only-sync-if-changed] [--all|-i|<proj-dir>.
 # Inject loose requirements.in dependencies into a PEP 621 pyproject.toml.
 # Run either from the folder housing pyproject.toml, or one below.
 # To categorize, name files <category>-requirements.in.
-pypc () {  # [-y]
+.zpy_ui_pypc () {  # [-y]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local noconfirm
     if [[ $1 == -y ]]  noconfirm=1
 
-    pipi --no-upgrade -q tomlkit
+    .zpy_ui_pipi --no-upgrade -q tomlkit
     local ret=$?
 
     if (( ret )) { .zpy_please_activate tomlkit; return ret }
@@ -1411,12 +1476,11 @@ jsonfile.write_text(dumps(data, indent=4))
 .zpy_vpy2json () {  # [--py pypy|current] <jsonfile> <keycrumb>...
     # Does not currently handle spaces within any keycrumb (or need to)
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
 
     local venv_name=venv
     if [[ $1 == --py ]] {
         local reply
-        if ! { .zpy_argvenv $2 } { zpy $0; return 1 }
+        if ! { .zpy_argvenv $2 } { return 1 }
         venv_name=$reply[1]
         shift 2
     }
@@ -1451,9 +1515,9 @@ jsonfile.write_text(dumps(data, indent=4))
 }
 
 # Specify the venv interpreter in a new or existing Sublime Text project file for the working folder.
-vpysublp () {  # [--py pypy|current]
+.zpy_ui_vpysublp () {  # [--py pypy|current]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local REPLY jsonfile
     .zpy_get_sublp
@@ -1463,9 +1527,9 @@ vpysublp () {  # [--py pypy|current]
 }
 
 # Specify the venv interpreter in a new or existing [VS]Code settings file for the working folder.
-vpyvscode () {  # [--py pypy|current]
+.zpy_ui_vpyvscode () {  # [--py pypy|current]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local jsonfile=$PWD/.vscode/settings.json
 
@@ -1473,16 +1537,16 @@ vpyvscode () {  # [--py pypy|current]
 }
 
 # Specify the venv interpreter in a new or existing Pyright settings file for the working folder.
-vpypyright () {  # [--py pypy|current]
+.zpy_ui_vpypyright () {  # [--py pypy|current]
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local jsonfile=$PWD/pyrightconfig.json
 
     local venv_name=venv
     if [[ $1 == --py ]] {
         local reply
-        if ! { .zpy_argvenv $2 } { zpy $0; return 1 }
+        if ! { .zpy_argvenv $2 } { .zpy_ui_help ${0[9,-1]}; return 1 }
         venv_name=$reply[1]
     }
 
@@ -1560,13 +1624,13 @@ vpypyright () {  # [--py pypy|current]
     # Slower than the pure ZSH fallback below?
         local pattern=${${pdir:t}//-/[._-]}
         piplistline=($(
-            vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
+            .zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
             | jq -r '.[] | select(.name|test("^'${pattern}'$"; "i")) | .name,.version'
         ))
     } elif (( $+commands[jello] )) {
         # Slower than the pure ZSH fallback below?
         piplistline=($(
-            vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
+            .zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
             | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'"]'
         ))
     } elif (( $+commands[wheezy.template] )) {
@@ -1585,11 +1649,11 @@ vpypyright () {  # [--py pypy|current]
         )
         piplistline=($(
             wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $(vrun $pdir python -m pip --disable-pip-version-check list --pre --format json)}")
+            =(<<<"{\"_\": $(.zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre --format json)}")
         ))
     } else {
         local lines=(${(f)"$(
-            vrun $pdir python -m pip --disable-pip-version-check list --pre
+            .zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre
         )"})
         lines=($lines[3,-1])
 
@@ -1601,7 +1665,7 @@ vpypyright () {  # [--py pypy|current]
     # TODO: don't do that. handle empty results.
 
     local pyverlines=(${(f)"$(
-        vrun $pdir python -V
+        .zpy_ui_vrun $pdir python -V
     )"})
 
     print -rl -- "${bin:t}" "${piplistline[1,2]}" "${pyverlines[-1]}"
@@ -1674,8 +1738,8 @@ vpypyright () {  # [--py pypy|current]
 
         cd ${projects_home}/${pkgname}
         zf_rm -f requirements.{in,txt}
-        activate
-        pipacs $pkg
+        .zpy_ui_activate
+        .zpy_ui_pipacs $pkg
     )
     ret=$?
 
@@ -1809,10 +1873,10 @@ vpypyright () {  # [--py pypy|current]
 
         for bin ( $bins ) {
             if [[ $linkonly ]] {
-                vlauncher --link-only $projdir $bin $bins_home
+                .zpy_ui_vlauncher --link-only $projdir $bin $bins_home
             } else {
                 zf_mkdir -p ${vpath}/venv/pipz_launchers
-                vlauncher $projdir $bin ${vpath}/venv/pipz_launchers
+                .zpy_ui_vlauncher $projdir $bin ${vpath}/venv/pipz_launchers
 
                 src=${vpath}/venv/pipz_launchers/${bin}
                 dest=${bins_home}/${bin}
@@ -1830,11 +1894,9 @@ vpypyright () {  # [--py pypy|current]
 
 # TODO: readme: links to doc pages, as alphabetical grid:
 
-# TODO: probably kill/privatize whichpyproj.... maybe
-
 # Package manager for venv-isolated scripts (pipx clone).
-pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
-    emulate -L zsh +o promptsubst -o globdots -o localtraps +o monitor
+.zpy_ui_pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
+    emulate -L zsh +o promptsubst -o globdots
     [[ $ZPY_PIPZ_PROJECTS && $ZPY_PIPZ_BINS && $ZPY_VENVS_HOME && $ZPY_PROCS ]] || return
 
     local reply REPLY
@@ -1855,18 +1917,18 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         return
     ;;
     --help)
-        zpy $0
+        .zpy_ui_help ${0[9,-1]}
         local i
         for ((i=1; i<$#subcmds; i+=2)) {
             print
-            zpy "$0 $subcmds[i]"
+            .zpy_ui_help "${0[9,-1]} $subcmds[i]"
         }
         return
     ;;
     install)  # [--cmd <cmd>[,<cmd>...]] [--activate] <pkgspec>...  ## subcmd: pipz install
     # Without --cmd, interactively choose.
     # Without --activate, 'vlauncher --link-only' is used.
-        if [[ $2 == --help ]] { zpy "$0 $1"; return }
+        if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return }
         shift
 
         local linkbins_args=($ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS --auto1)
@@ -1875,7 +1937,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             if [[ $1 == --activate ]] { linkbins_args+=($1);    shift   }
         }
 
-        if [[ ! $1 ]] { zpy "$0 install"; return 1 }
+        if [[ ! $1 ]] { .zpy_ui_help "${0[9,-1]} install"; return 1 }
 
         local faildir=$(mktemp -d) failures=()
         zargs -P $ZPY_PROCS -rl \
@@ -1894,13 +1956,13 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         || print -rP "suggestion%B:%b add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B~/.zshrc%b"
 
         if [[ $failures ]] {
-            .zpy_log error "FAILED to ($0) install" $failures
+            .zpy_log error "FAILED to (${0[9,-1]}) install" $failures
             return 1
         }
     ;;
     uninstall)  # [--all|<pkgname>...]  ## subcmd: pipz uninstall
     # Without args, interactively choose.
-        if [[ $2 == --help ]] { zpy "$0 $1"; return }
+        if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return }
         shift
         if [[ $1 == --all ]] { pipz uninstall ${ZPY_PIPZ_PROJECTS}/*(/:t); return }
 
@@ -1921,7 +1983,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
             if [[ -d $projdir ]] {
                 zf_rm -r $projdir
             } else {
-                .zpy_log error "FAILED to find project for ($0) uninstall" $projdir
+                .zpy_log error "FAILED to find project for (${0[9,-1]}) uninstall" $projdir
                 ret=1
             }
         }
@@ -1930,7 +1992,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     ;;
     upgrade)  # [--all|<pkgname>...]  ## subcmd: pipz upgrade
     # Without args, interactively choose.
-        if [[ $2 == --help ]] { zpy "$0 $1"; return }
+        if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return }
         shift
         if [[ $1 == --all ]] { pipz upgrade ${ZPY_PIPZ_PROJECTS}/*(/:t); return }
 
@@ -1942,17 +2004,17 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         }
         pkgnames=($reply)
 
-        pipup --only-sync-if-changed ${ZPY_PIPZ_PROJECTS}/${^pkgnames}
+        .zpy_ui_pipup --only-sync-if-changed ${ZPY_PIPZ_PROJECTS}/${^pkgnames}
         local ret=$?
 
         if (( ret )) {
-            .zpy_log error "FAILED $0 call" "$0 upgrade $@"
+            .zpy_log error "FAILED ${0[9,-1]} call" "${0[9,-1]} upgrade $@"
             return ret
         }
     ;;
     list)  # [--all|<pkgname>...]  ## subcmd: pipz list
     # Without args, interactively choose which installed apps to list.
-        if [[ $2 == --help ]] { zpy "$0 $1"; return }
+        if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return }
         shift
 
         print -rPl \
@@ -2014,7 +2076,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     # Without --cmd, interactively choose.
     # Without --activate, 'vlauncher --link-only' is used.
     # Without --all or <pkgname>, interactively choose.
-        if [[ $2 == --help ]] { zpy "$0 $1"; return }
+        if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return }
         shift
 
         local do_all linkbins_args=($ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS --auto1)
@@ -2041,7 +2103,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
         zargs -P $ZPY_PROCS -ri___ \
         -- $pkgs \
-        -- vrun --activate --cd ${ZPY_PIPZ_PROJECTS}/___ pipcs
+        -- .zpy_ui_vrun --activate --cd ${ZPY_PIPZ_PROJECTS}/___ .zpy_ui_pipcs
         # `pipz upgrade $pkgs` would also work instead of zargs/vrun,
         # but does a few unnecessary things and takes a little longer.
         .zpy_pipzlinkbins $linkbins_args $pkgs
@@ -2049,7 +2111,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
     inject)  # [--cmd <cmd>[,<cmd>...]] [--activate] <installed-pkgname> <extra-pkgspec>...  ## subcmd: pipz inject
     # Without --cmd, interactively choose.
     # Without --activate, 'vlauncher --link-only' is used.
-        if [[ $2 == --help ]] { zpy "$0 $1"; return }
+        if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return }
         shift
 
         local linkbins_args=($ZPY_PIPZ_PROJECTS $ZPY_PIPZ_BINS)
@@ -2064,7 +2126,7 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         pkgname=$REPLY
         projdir=${ZPY_PIPZ_PROJECTS}/${pkgname}
 
-        if ! [[ $2 && $1 && -d $projdir ]] { zpy "$0 inject"; return 1 }
+        if ! [[ $2 && $1 && -d $projdir ]] { .zpy_ui_help "${0[9,-1]} inject"; return 1 }
 
         local vpath vbinpath badlist=()
         .zpy_venvs_path $projdir || return
@@ -2077,27 +2139,27 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         (
             set -e
             cd $projdir
-            activate
-            pipacs ${@[2,-1]}
+            .zpy_ui_activate
+            .zpy_ui_pipacs ${@[2,-1]}
         )
         .zpy_pipzlinkbins $linkbins_args $pkgname
     ;;
     runpip)  # [--cd] <pkgname> <pip-arg>...  ## subcmd: pipz runpip
     # With --cd, run pip from within the project folder.
-        if [[ $2 == --help ]] { zpy "$0 $1"; return }
+        if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return }
         shift
 
         local vrun_args=()
         if [[ $1 == --cd ]] { vrun_args+=($1); shift }
 
-        if ! [[ $2 && $1 ]] { zpy "$0 runpip"; return 1 }
+        if ! [[ $2 && $1 ]] { .zpy_ui_help "${0[9,-1]} runpip"; return 1 }
 
         .zpy_pkgspec2name $1 || return
-        vrun $vrun_args ${ZPY_PIPZ_PROJECTS}/${REPLY} python -m pip ${@[2,-1]}
+        .zpy_ui_vrun $vrun_args ${ZPY_PIPZ_PROJECTS}/${REPLY} python -m pip ${@[2,-1]}
     ;;
     runpkg)  # <pkgspec> <cmd> [<cmd-arg>...]  ## subcmd: pipz runpkg
-        if [[ $2 == --help ]] { zpy "$0 $1"; return   }
-        if ! [[ $3 && $2   ]] { zpy "$0 $1"; return 1 }
+        if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return   }
+        if ! [[ $3 && $2   ]] { .zpy_ui_help "${0[9,-1]} $1"; return 1 }
         shift
 
         local pkg=$1; shift
@@ -2114,14 +2176,14 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         zf_ln -sfn $projdir ${vpath}/project
         (
             . $venv/bin/activate
-            pipi $pkg -q
+            .zpy_ui_pipi $pkg -q
             $@
         )
     ;;
     cd)  # [<installed-pkgname> [<cmd> [<cmd-arg>...]]]  ## subcmd: pipz cd
     # Without args (or if pkgname is ''), interactively choose.
     # With cmd, run it in the folder, then return to CWD.
-        if [[ $2 == --help ]] { zpy "$0 $1"; return }
+        if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return }
         shift
 
         local projdir
@@ -2140,19 +2202,19 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         if [[ $1 ]]  $@
     ;;
     *)
-        zpy $0
+        .zpy_ui_help ${0[9,-1]}
         return 1
     ;;
     }
-    # TODO: split subcommands out to 'private' functions. don't forget to update 'zpy "$0 $1"', etc.
+    # TODO: split subcommands out to 'private' functions. don't forget to update 'zpy help "$0 $1"', etc.
 }
 
 # Make a standalone script for any zpy function.
-.zpy_mkbin () {  # <func> <dest>
+.zpy_ui_mkbin () {  # <func> <dest>
     # TODO: flag for standalone copy, or small source-ing script?
     emulate -L zsh
-    if [[ $1 == --help ]] { zpy $0; return   }
-    if ! [[ $2 && $1   ]] { zpy $0; return 1 }
+    if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return   }
+    if ! [[ $2 && $1   ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
 
     local dest=${2:a}
     if [[ -d $dest ]]  dest=$dest/$1
@@ -2162,10 +2224,55 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
         return 1
     }
 
-    print -rl -- '#!/bin/zsh' "$(<$ZPY_SRC)" "$1 \$@" >$dest
+    print -rl -- '#!/bin/zsh' "$(<$ZPY_SRC)" ".zpy_ui_${1} \$@" >$dest
     zf_chmod 0755 $dest
 }
 
+.zpy_expose_funcs () {
+    emulate -L zsh
+
+    local cmds=(
+        envout
+        vpyshebang
+        pipac
+        pipz
+        reqshow
+        pipi
+        vlauncher
+        prunevenvs
+        vrun
+        vpy
+        whichpyproj
+        da8
+        venvs_path
+        vpysublp
+        vpyvscode
+        a8
+        pipacs
+        pipup
+        envin
+        pipa
+        pypc
+        pips
+        vpypyright
+        pipc
+        pipcheckold
+        activate
+        pipcs
+        zpy
+    )
+
+    local exposed_funcs
+    if ! { zstyle -a :zpy: exposed-funcs exposed_funcs }  exposed_funcs=($cmds)
+
+    local zpyfn
+    for zpyfn ( $exposed_funcs ) {
+        if (( $+functions[.zpy_ui_${zpyfn}] )) {
+            eval "$zpyfn () { .zpy_ui_${zpyfn} \$@ }"
+            if (( $+functions[compdef] ))  compdef _.zpy_ui_${zpyfn} $zpyfn
+        }
+    }
+}
 ## TODO: is there a standard/common way to include zsh completions in pypi packages?
 ## Maybe detect presence of any during installation/bin-linking, and integrate with bin-linking and bin-unlinking
 ## Found examples:
@@ -2180,43 +2287,49 @@ pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] 
 
 ## Completions
 ## -----------
-if (( $+functions[compdef] )) {
 
 _zpy_helpmsg () {  # <zpy-function>
     setopt localoptions extendedglob
-    local msg=(${(f)"$(.zpy $1)"})
+    local msg=() REPLY
+    .zpy_help $1
+    msg=(${(f)REPLY})
     msg=(${msg//#(#b)([^#]*)/%B$match[1]%b})
     if ! [[ -v NO_COLOR ]]  msg=(${msg//#(#b)(\#*)/%F{blue}$match[1]%f})
     _message -r ${(F)msg}
 }
 
-_.zpy_mkbin () {
-    _zpy_helpmsg ${0[2,-1]}
-    local lines=(${(f)"$(.zpy)"})
-    local cmds=(${${(M)lines:#[^# ]*}/ *})
-    local pipz_cmd
+_.zpy_ui_mkbin () {
+    _zpy_helpmsg ${0[10,-1]}
+    # TODO: desc style help, like _.zpy_ui_help?
+
+    local cmds=()
     local -A rEpLy
-    pipz subcommands
-    for pipz_cmd ( ${(k)rEpLy} ) cmds+=(${(q-):-"pipz $pipz_cmd"})
+    .zpy_ui_zpy subcommands
+    cmds=(${(k)rEpLy})
+    cmds+=(zpy)
+
+    local pipz_cmd
+    .zpy_ui_pipz subcommands
+    for pipz_cmd ( ${(k)rEpLy} )  cmds+=(${(q-):-"pipz $pipz_cmd"})
+
     _arguments \
         '(:)--help[Show usage information]' \
         "(--help)1:Function:($cmds)" \
         '(--help)2:Destination:_files'
 }
-compdef _.zpy_mkbin .zpy_mkbin
 
-_activate () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_activate () {
+    _zpy_helpmsg ${0[10,-1]}
     _arguments \
         '(- 1)--help[Show usage information]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         '(--help 1)-i[Interactively choose a project]' \
         '(-)1:New or Existing Project:_path_files -/'
 }
-compdef _activate activate
+_.zpy_ui_a8 () { _.zpy_ui_activate $@ }
 
-_envin () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_envin () {
+    _zpy_helpmsg ${0[10,-1]}
     local context state state_descr line opt_args
     _arguments \
         '(- *)--help[Show usage information]' \
@@ -2228,7 +2341,6 @@ _envin () {
             '(-)*:requirements.txt:_files -F blocklist -g "*.txt"'
     }
 }
-compdef _envin envin
 
 _zpy_pypi_pkg () {
     local reply
@@ -2238,8 +2350,8 @@ _zpy_pypi_pkg () {
     if (( ${@[(I)--or-local]} ))  _files
 }
 
-_pipa () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_pipa () {
+    _zpy_helpmsg ${0[10,-1]}
     local -U catgs=(dev doc test *-requirements.{in,txt}(N))
     catgs=(${catgs%%-*})
     _arguments \
@@ -2247,10 +2359,9 @@ _pipa () {
         "(--help)-c[Use <category>-requirements.in]:Category:($catgs)" \
         '(-)*:Package Spec:_zpy_pypi_pkg --or-local'
 }
-compdef _pipa pipa
 
-_pipc () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_pipc () {
+    _zpy_helpmsg ${0[10,-1]}
     local i=$words[(i)--]
     if (( CURRENT > $i )) {
         shift i words
@@ -2276,10 +2387,9 @@ _pipc () {
             '(*)--[pip-compile Arguments]:pip-compile Argument: '
     }
 }
-compdef _pipc pipc
 
-_pipcs () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_pipcs () {
+    _zpy_helpmsg ${0[10,-1]}
     local i=$words[(i)--]
     if (( CURRENT > $i )) {
         shift i words
@@ -2306,10 +2416,9 @@ _pipcs () {
             '(*)--[pip-compile Arguments]:pip-compile Argument: '
     }
 }
-compdef _pipcs pipcs
 
-_pipcheckold () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_pipcheckold () {
+    _zpy_helpmsg ${0[10,-1]}
     _arguments \
         '(* -)--help[Show usage information]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
@@ -2317,10 +2426,9 @@ _pipcheckold () {
         '(--help --all *)-i[Choose projects to check interactively]' \
         '(-)*: :_zpy_projects'
 }
-compdef _pipcheckold pipcheckold
 
-_pipi () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_pipi () {
+    _zpy_helpmsg ${0[10,-1]}
     local context state state_descr line opt_args
     _arguments \
         '(- *)--help[Show usage information]' \
@@ -2335,10 +2443,9 @@ _pipi () {
         # TODO: Consider filtering out some pip completions
     }
 }
-compdef _pipi pipi
 
-_pips () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_pips () {
+    _zpy_helpmsg ${0[10,-1]}
     local context state state_descr line opt_args
     _arguments \
         '(- *)--help[Show usage information]' \
@@ -2349,10 +2456,9 @@ _pips () {
             '(--help)*:requirements.txt:_files -F blocklist -g "*.txt"'
     }
 }
-compdef _pips pips
 
-_pipup () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_pipup () {
+    _zpy_helpmsg ${0[10,-1]}
     _arguments \
         '(* -)--help[Show usage information]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
@@ -2361,51 +2467,46 @@ _pipup () {
         '(--help --all *)-i[Choose projects to upgrade interactively]' \
         '(-)*: :_zpy_projects'
 }
-compdef _pipup pipup
 
-_reqshow () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_reqshow () {
+    _zpy_helpmsg ${0[10,-1]}
     _arguments \
         '(*)--help[Show usage information]' \
         '(--help)*: :_zpy_projects'
 }
-compdef _reqshow reqshow
 
 () {
     emulate -L zsh
     local zpyfn
 
-    for zpyfn ( whichpyproj ) {
+    for zpyfn ( .zpy_ui_whichpyproj ) {
         _${zpyfn} () {
-            _zpy_helpmsg ${0[2,-1]}
+            _zpy_helpmsg ${0[10,-1]}
             _arguments '--help[Show usage information]'
         }
-        compdef _${zpyfn} $zpyfn
     }
 
-    for zpyfn ( prunevenvs pypc ) {
+    for zpyfn ( .zpy_ui_prunevenvs .zpy_ui_pypc ) {
         _${zpyfn} () {
-            _zpy_helpmsg ${0[2,-1]}
+            _zpy_helpmsg ${0[10,-1]}
             _arguments \
                 '(-)--help[Show usage information]' \
                 "(--help)-y[Don't ask for confirmation]"
         }
-        compdef _${zpyfn} $zpyfn
     }
 
-    for zpyfn ( vpysublp vpyvscode vpypyright ) {
+    for zpyfn ( .zpy_ui_vpysublp .zpy_ui_vpyvscode .zpy_ui_vpypyright ) {
         _${zpyfn} () {
-            _zpy_helpmsg ${0[2,-1]}
+            _zpy_helpmsg ${0[10,-1]}
             _arguments \
                 '(-)--help[Show usage information]' \
                 '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)'
         }
-        compdef _${zpyfn} $zpyfn
     }
 
-    for zpyfn ( pipac pipacs ) {
+    for zpyfn ( .zpy_ui_pipac .zpy_ui_pipacs ) {
         _${zpyfn} () {
-            _zpy_helpmsg ${0[2,-1]}
+            _zpy_helpmsg ${0[10,-1]}
             local i=$words[(i)--]
             if (( CURRENT > $i )) {
                 shift i words
@@ -2429,22 +2530,20 @@ compdef _reqshow reqshow
                     '(*)--[pip-compile Arguments]:pip-compile Argument: '
             }
         }
-        compdef _${zpyfn} $zpyfn
     }
 }
 
-_venvs_path () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_venvs_path () {
+    _zpy_helpmsg ${0[10,-1]}
     _arguments \
         '(- :)--help[Show usage information]' \
         '(--help 1)-i[Interactively choose a project]' \
         '(-)1::Project:_zpy_projects'
 }
-compdef _venvs_path venvs_path
 
-_vlauncher () {
+_.zpy_ui_vlauncher () {
     # TODO: Project completions are too lenient (again?)!
-    _zpy_helpmsg ${0[2,-1]}
+    _zpy_helpmsg ${0[10,-1]}
     local context state state_descr line opt_args
     _arguments \
         '(- * :)--help[Show usage information]' \
@@ -2460,10 +2559,9 @@ _vlauncher () {
             "*:Command:_path_files -g '$REPLY/venv/bin/*(x:t)'"
     }
 }
-compdef _vlauncher vlauncher
 
-_vpy () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_vpy () {
+    _zpy_helpmsg ${0[10,-1]}
     _arguments \
         '(- : *)--help[Show usage information]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
@@ -2471,16 +2569,14 @@ _vpy () {
         '(-)1:Script:_files -g "*.py"' \
         '(-)*:Script Argument: '
 }
-compdef _vpy vpy
 
-_vpyshebang () {
-    _zpy_helpmsg ${0[2,-1]}
+_.zpy_ui_vpyshebang () {
+    _zpy_helpmsg ${0[10,-1]}
     _arguments \
         '(- : *)--help[Show usage information]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         '(-)*:Script:_files -g "*.py"'
 }
-compdef _vpyshebang vpyshebang
 
 _zpy_projects () {
     local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
@@ -2490,10 +2586,12 @@ _zpy_projects () {
     _files -x 'Project:' -F blocklist -/ -g '${ZPY_VENVS_HOME}/*/project(@N-/:P)'
 }
 
-_vrun () {
+# TODO: profile this, compare to develop branch, fix sourcing speed
+
+_.zpy_ui_vrun () {
     # TODO: Project completions are too lenient (again?)!
     setopt localtraps
-    _zpy_helpmsg ${0[2,-1]}
+    _zpy_helpmsg ${0[10,-1]}
     local context state state_descr line opt_args
     integer NORMARG
     _arguments -n \
@@ -2504,7 +2602,7 @@ _vrun () {
         '(-)1:Project:_zpy_projects' \
         '(-)*::: :->cmd'
     local vname=venv
-    if (( words[(i)--py] < NORMARG )) {
+    if (( words[(I)--py] )) && (( words[(i)--py] < NORMARG )) {
         local reply
         .zpy_argvenv ${words[${words[(i)--py]} + 1]} || return
         vname=$reply[1]
@@ -2513,7 +2611,7 @@ _vrun () {
         local projdir=${${(Q)line[1]/#\~/~}:P} REPLY
         .zpy_venvs_path $projdir
         local venv=$REPLY/$vname
-        if (( words[(i)--cd] < NORMARG )) {
+        if (( words[(I)--cd] )) && (( words[(i)--cd] < NORMARG )) {
             trap "cd ${(q-)PWD}" EXIT INT QUIT
             cd $projdir
         }
@@ -2536,28 +2634,44 @@ _vrun () {
         _normal -P
     }
 }
-compdef _vrun vrun
 
-_zpy () {
-    _zpy_helpmsg ${0[2,-1]}
-    local lines=(${(f)"$(.zpy)"})
-    local cmds=(${${(M)lines:#[^# ]*}/ *})
-    local pipz_cmd
+_.zpy_ui_help () {
+    _zpy_helpmsg ${0[10,-1]}
+    local cmds=() cmd desc
     local -A rEpLy
-    pipz subcommands
-    for pipz_cmd ( ${(k)rEpLy} ) cmds+=(${(q-):-"pipz $pipz_cmd"})
+    .zpy_ui_zpy subcommands
+    for cmd desc ( ${(kv)rEpLy} )  cmds+=("${cmd}:${desc}")
+    cmds+=('zpy:Optional launcher for all zpy functions as subcommands')
+    .zpy_ui_pipz subcommands
+    for cmd desc ( ${(kv)rEpLy} )  cmds+=("pipz ${cmd}:${desc}")
     _arguments \
         '(*)--help[Show usage information]' \
-        "(--help)*:Function:($cmds)"
+        '(--help)*:Function:(($cmds))'
 }
-compdef _zpy zpy
 
-_pipz () {
+_.zpy_ui_zpy () {
+    local cmds=() cmd desc
+    local -A rEpLy
+    ${0[2,-1]} subcommands
+    for cmd desc ( ${(kv)rEpLy} )  cmds+=("${cmd}:${desc}")
+    local context state state_descr line opt_args
+    _arguments \
+        '(1 *)--help[Show usage information]' \
+        '(--help)1:Function:(($cmds))' \
+        '(--help)*:: :->sub_arg'
+    if [[ $state != sub_arg ]] {
+        _zpy_helpmsg ${0[10,-1]}
+    } else {
+        _.zpy_ui_${line[1]}
+    }
+}
+
+_.zpy_ui_pipz () {
     setopt localtraps
     local cmds=() cmd desc
     local -A rEpLy
     ${0[2,-1]} subcommands
-    for cmd desc ( ${(kv)rEpLy} ) cmds+=("${cmd}:${desc}")
+    for cmd desc ( ${(kv)rEpLy} )  cmds+=("${cmd}:${desc}")
     integer NORMARG
     local context state state_descr line opt_args
     _arguments \
@@ -2565,9 +2679,9 @@ _pipz () {
         '(--help)1:Operation:(($cmds))' \
         '(--help)*:: :->sub_arg'
     if [[ $state != sub_arg ]] {
-        _zpy_helpmsg ${0[2,-1]}
+        _zpy_helpmsg ${0[10,-1]}
     } else {
-        _zpy_helpmsg "$0[2,-1] $line[1]"
+        _zpy_helpmsg "$0[10,-1] $line[1]"
         case $line[1] {
         install)
             _arguments \
@@ -2677,7 +2791,6 @@ _pipz () {
         }
     }
 }
-compdef _pipz pipz
 
 ## TODO: more [-- pip-{compile,sync}-arg...]? (pips pipup 'pipz inject' 'pipz install')
 ## TODO: revisit instances of 'pipi -q pip-tools' if/when pip-tools gets out-of-venv support:
@@ -2722,4 +2835,10 @@ tfile.write_text('\n'.join(r['project'] for r in data['rows']))
     reply=(${(f)"$(<$txt)"})
 }
 
+.zpy_expose_funcs
+if (( $+functions[compdef] )) {
+    compdef _.zpy_ui_mkbin .zpy_ui_mkbin
+    compdef _.zpy_ui_help .zpy_ui_help
 }
+
+if (( $+functions[zsh-defer] ))  zsh-defer .zpy_ui_zpy subcommands

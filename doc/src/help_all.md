@@ -1,8 +1,11 @@
 # Full Reference
 
 ```shell
+# Optional launcher for all zpy functions as subcommands
+zpy <function> [<function-arg>...]
+
 # Print description and arguments for all or specified functions.
-zpy [<zpy-function>...]
+zpy help [<zpy-function>...]
 ```
 
 ## Environment Activation
@@ -10,8 +13,8 @@ zpy [<zpy-function>...]
 === "`envin`"
 
     ```shell
-    # Activate the venv (creating if needed) for the current folder, and sync its
-    # installed package set according to all found or specified requirements.txt files.
+    # Activate the venv (creating if needed) for the current folder, and sync
+    # its installed package set according to all found or specified requirements.txt files.
     # In other words: [create, ]activate, sync.
     # The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
     # Pass --py to use another interpreter and named venv.
@@ -137,6 +140,13 @@ zpy [<zpy-function>...]
     # With --link-only, only create a symlink to <venv>/bin/<cmd>,
     # which should already have the venv's python in its shebang line.
     vlauncher [--link-only] [--py pypy|current] <proj-dir> <cmd> <launcher-dest>
+    ```
+
+=== "`zpy mkbin`"
+
+    ```shell
+    # Make a standalone script for any zpy function.
+    zpy mkbin <func> <dest>
     ```
 
 ## Informational
