@@ -85,6 +85,9 @@ __ https://zpy.readthedocs.io/en/latest/help_all/
 
 __ https://zpy.readthedocs.io/en/latest/start/
 
+They are also available as subcommands to the "supercommand" ``zpy``;
+``envin`` is equivalent to ``zpy envin``, etc.
+
 Basic usage of ``envin`` and ``pipacs``:
 
 .. image:: https://gist.githubusercontent.com/AndydeCleyre/306d250c59a754b9a3399251b4ca0c65/raw/0ae1d1a9e8f5b72dbf78aba4a5ef138909932851/envin_pipacs.svg?sanitize=true
