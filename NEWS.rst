@@ -2,6 +2,16 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- When zsh-defer is present,
+  pre-cache PyPI package list when plugin loads,
+  if not yet cached at all
+
 0.3.0
 =====
 
