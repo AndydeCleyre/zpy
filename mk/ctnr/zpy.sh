@@ -104,7 +104,7 @@ printf 'zpy_version: %s\n' "$zpy_version"
 
 # Install standalone vpy script, for simpler shebangs
 ctnr_run -u mkdir -p /home/${user}/.local/bin
-ctnr_run -u zsh -ic '.zpy_mkbin vpy ~/.local/bin/vpy'
+ctnr_run -u zsh -ic 'zpy mkbin vpy ~/.local/bin/vpy'
 
 # Set aliases
 <<EOF ctnr_append -u /home/${user}/.zshrc
@@ -122,8 +122,8 @@ EOF
 # Remind user of a few useful commands
 <<EOF ctnr_append -u /home/${user}/.zshrc
 print -l
-zpy zpy
-print -l '# For example, try: zpy envin pipacs pipz'
+zpy help zpy help
+print -l '# For example, try: zpy help envin pipacs pipz'
 EOF
 
 # Cut some fat
