@@ -82,6 +82,12 @@ export HIGHLIGHT_OPTIONS='-O truecolor -s ekvoli -t 4 --force --stdout'
 export LESS='ij.3JRWX'
 EOF
 
+# Install zsh-defer
+ctnr_run -u sed -Ei \
+  "s:^(zcomet compinit( .*)?):zcomet load romkatv/zsh-defer\n\1:" \
+  /home/${user}/.zshrc
+ctnr_run -u zsh -ic exit
+
 # Install zpy
 if [ "$zpy_branch" = --local ]; then
   zpy_branch="$(
