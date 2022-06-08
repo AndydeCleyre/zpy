@@ -94,7 +94,7 @@ if [ "$zpy_branch" = --local ]; then
   | ctnr_append -u /home/${user}/.zshrc
 else
   ctnr_run -u sed -Ei \
-    "s:^(zcomet compinit( .*)?)$:zcomet load andydecleyre/zpy@${zpy_branch}\n\1:" \
+    "s:^(zcomet compinit( .*)?):zcomet load andydecleyre/zpy@${zpy_branch}\n\1:" \
     /home/${user}/.zshrc
   ctnr_run -u zsh -ic exit
   zpy_version="$(ctnr_run -u git -C /home/${user}/.zcomet/repos/andydecleyre/zpy describe --dirty)"
