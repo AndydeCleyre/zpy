@@ -129,7 +129,7 @@ EOF
 <<EOF ctnr_append -u /home/${user}/.zshrc
 print -l
 zpy help zpy help
-print -l '# For example, try: zpy help envin pipacs pipz'
+print -l '# For example, try: zpy help envin pipacs pipz' ''
 EOF
 
 # Cut some fat
