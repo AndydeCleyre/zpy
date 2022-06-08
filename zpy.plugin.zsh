@@ -2641,6 +2641,7 @@ _.zpy_ui_help () {
     local -A rEpLy
     .zpy_ui_zpy subcommands
     for cmd desc ( ${(kv)rEpLy} )  cmds+=("${cmd}:${desc}")
+    cmds+=('zpy:Optional launcher for all zpy functions as subcommands')
     .zpy_ui_pipz subcommands
     for cmd desc ( ${(kv)rEpLy} )  cmds+=("pipz ${cmd}:${desc}")
     _arguments \
