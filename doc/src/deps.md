@@ -89,3 +89,5 @@ In all cases, `highlight` is optional.
     - [jq](https://repology.org/project/jq/versions)
       *or* [jello](https://pypi.org/project/jello/)
       -- for theoretically more reliable parsing
+    - [zsh-defer](https://github.com/romkatv/zsh-defer)
+      -- for caching help content to eliminate a small delay in the first help message

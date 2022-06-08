@@ -36,7 +36,20 @@ we can populate it with entries from our `requirements.in` files:
 
 ![Animated demo: pypc](https://gist.github.com/AndydeCleyre/c8cad3380bd475706815969b07733a55/raw/5a4b327bf699819c96c8126de4ef60546c5cccea/pypc_demo.svg?sanitize=true)
 
-
 The dependencies have been injected according to
 [PEP 621](https://www.python.org/dev/peps/pep-0621/),
 and categorized according to their `<category>-requirements.in` filenames.
+
+---
+
+```console
+% pypc --help
+```
+```shell
+# Inject loose requirements.in dependencies into a PEP 621 pyproject.toml.
+# Run either from the folder housing pyproject.toml, or one below.
+# To categorize, name files <category>-requirements.in.
+pypc [-y]
+```
+
+---

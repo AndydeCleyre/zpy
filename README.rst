@@ -29,6 +29,9 @@ They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 
 .. contents::
 
+.. image:: https://user-images.githubusercontent.com/1787385/172661113-7a2c6670-e716-491e-8db4-c005fef8455b.png
+   :alt: zpy supercommand completions
+
 Getting It
 ----------
 
@@ -84,6 +87,9 @@ see the reference__ and the short guide__.
 __ https://zpy.readthedocs.io/en/latest/help_all/
 
 __ https://zpy.readthedocs.io/en/latest/start/
+
+They are also available as subcommands to the "supercommand" ``zpy``;
+``envin`` is equivalent to ``zpy envin``, etc.
 
 Basic usage of ``envin`` and ``pipacs``:
 

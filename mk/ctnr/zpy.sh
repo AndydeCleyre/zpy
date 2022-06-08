@@ -82,6 +82,12 @@ export HIGHLIGHT_OPTIONS='-O truecolor -s ekvoli -t 4 --force --stdout'
 export LESS='ij.3JRWX'
 EOF
 
+# Install zsh-defer
+ctnr_run -u sed -Ei \
+  "s:^(zcomet compinit( .*)?):zcomet load romkatv/zsh-defer\n\1:" \
+  /home/${user}/.zshrc
+ctnr_run -u zsh -ic exit
+
 # Install zpy
 if [ "$zpy_branch" = --local ]; then
   zpy_branch="$(
@@ -94,7 +100,7 @@ if [ "$zpy_branch" = --local ]; then
   | ctnr_append -u /home/${user}/.zshrc
 else
   ctnr_run -u sed -Ei \
-    "s:^(zcomet compinit( .*)?)$:zcomet load andydecleyre/zpy@${zpy_branch}\n\1:" \
+    "s:^(zcomet compinit( .*)?):zcomet load andydecleyre/zpy@${zpy_branch}\n\1:" \
     /home/${user}/.zshrc
   ctnr_run -u zsh -ic exit
   zpy_version="$(ctnr_run -u git -C /home/${user}/.zcomet/repos/andydecleyre/zpy describe --dirty)"
@@ -104,7 +110,7 @@ printf 'zpy_version: %s\n' "$zpy_version"
 
 # Install standalone vpy script, for simpler shebangs
 ctnr_run -u mkdir -p /home/${user}/.local/bin
-ctnr_run -u zsh -ic '.zpy_mkbin vpy ~/.local/bin/vpy'
+ctnr_run -u zsh -ic 'zpy mkbin vpy ~/.local/bin/vpy'
 
 # Set aliases
 <<EOF ctnr_append -u /home/${user}/.zshrc
@@ -122,8 +128,8 @@ EOF
 # Remind user of a few useful commands
 <<EOF ctnr_append -u /home/${user}/.zshrc
 print -l
-zpy zpy
-print -l '# For example, try: zpy envin pipacs pipz'
+zpy help zpy help
+print -l '# For example, try: zpy help envin pipacs pipz' ''
 EOF
 
 # Cut some fat

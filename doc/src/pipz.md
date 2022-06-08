@@ -55,7 +55,7 @@ With those in place, you can run `pipz reinstall` to get the apps back.
 ---
 
 ```console
-% zpy pipz
+% zpy help pipz
 ```
 ```shell
 # Package manager for venv-isolated scripts (pipx clone).

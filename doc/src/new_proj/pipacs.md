@@ -33,18 +33,18 @@ Some closely related `zpy` functions are
 
 All of their `--help` outputs,
 as for any set of `zpy` functions, can be viewed at once,
-by providing them as arguments to the `zpy` function:
+by providing them as arguments to the `zpy help` subcommand:
 
 ```console
-% zpy pipa pipc pips pipac pipcs
+% zpy help pipa pipc pips pipac pipcs
 ```
 
-Without any arguments, running `zpy` displays help for *all* `zpy` functions.
+Without any arguments, running `zpy help` displays help for *all* `zpy` functions.
 
 ---
 
 ```console
-% zpy pipacs
+% zpy help pipacs
 ```
 ```shell
 # Add to requirements.in, compile it to requirements.txt, then sync to that (add, compile, sync).
@@ -59,7 +59,7 @@ pipacs [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
     When a zpy function internally calls `pip-compile`,
     it provides these flags by default:
     ```shell
-    --no-header --annotation-style=line --strip-extras
+    --no-header --annotation-style=line --strip-extras --allow-unsafe
     ```
     You can *add* `pip-compile` flags in a particular instance using the double dash syntax, like:
     ```console

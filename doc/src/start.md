@@ -17,6 +17,29 @@ For now, let's just source it in the current session:
 % . ~/.zpy/zpy.plugin.zsh
 ```
 
+The user-facing functions are all available as subcommands to `zpy`.
+Try typing `zpy`, then a space, then tab.
+
+!!! info
+
+    By default, each function is *also* available directly, as a "top-level" command[^1].
+    This can be prevented by explicitly specifying a list of functions to expose,
+    *before* sourcing the plugin.
+    This example will expose only the `pipz` and `zpy` functions
+    (the rest remaining available as subcommands):
+
+    ```console
+    % zstyle ':zpy:*' exposed-funcs pipz zpy
+    ```
+
+[^1]: Well, except for `zpy mkbin` and `zpy help`.
+
+From here, you may want to:
+
+- continue to the [next page](new_proj.md), for an idea of how these tools can help manage a project
+- jump to the [full reference](help_all.md)
+- jump to [`pipz`](pipz.md), a [pipx](https://pypa.github.io/pipx/) alternative
+
 !!! tip
 
-    You can flip through these docs with `n` and `p`, or `,` and `.`
+    You can flip through these docs with `n` and `p`, or `.` and `,`.

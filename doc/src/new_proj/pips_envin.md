@@ -55,28 +55,6 @@ So how do they differ?
 - `envin` syncs according to *all* `requirements.txt` files *by default*,
   but *also* accepts any number of *lockfile arguments*, just like `pips`
 
----
-
-```console
-% zpy activate envin
-```
-```shell
-# Activate the venv for the current folder or specified project, if it exists.
-# Otherwise create, activate, sync.
-# Pass -i to interactively choose the project.
-# Pass --py to use another interpreter and named venv.
-activate [--py pypy|current] [-i|<proj-dir>]
-
-# Activate the venv (creating if needed) for the current folder, and sync its
-# installed package set according to all found or specified requirements.txt files.
-# In other words: [create, ]activate, sync.
-# The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
-# Pass --py to use another interpreter and named venv.
-envin [--py pypy|current] [<reqs-txt>...]
-```
-
----
-
 # Deactivation
 
 These are standard Python virtual environments,
@@ -88,3 +66,28 @@ and so can be deactivated with:
 
 For symmetry with `a8` and `envin`, `zpy` adds two aliases for the same command:
 `da8` and `envout`.
+
+---
+
+```console
+% zpy help pips activate envin
+```
+```shell
+# Install packages according to all found or specified requirements.txt files (sync).
+pips [<reqs-txt>...]
+
+# Activate the venv for the current folder or specified project, if it exists.
+# Otherwise create, activate, sync.
+# Pass -i to interactively choose the project.
+# Pass --py to use another interpreter and named venv.
+activate [--py pypy|current] [-i|<proj-dir>]
+
+# Activate the venv (creating if needed) for the current folder, and sync
+# its installed package set according to all found or specified requirements.txt files.
+# In other words: [create, ]activate, sync.
+# The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
+# Pass --py to use another interpreter and named venv.
+envin [--py pypy|current] [<reqs-txt>...]
+```
+
+---

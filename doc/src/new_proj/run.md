@@ -68,7 +68,7 @@ If you find that unsightly, inflexible, or would just like `vpy` available outsi
 create a "standalone" `vpy` script:
 
 ```console
-% .zpy_mkbin vpy ~/.local/bin
+% zpy mkbin vpy ~/.local/bin
 ```
 
 Next time you use `vpyshebang`, it will use the path to that script, instead.

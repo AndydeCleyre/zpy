@@ -6,6 +6,14 @@
 
 Congrats, you've created a virtual environment and activated it for your current shell!
 
+!!! tip
+
+	Like all `zpy` commands, it can alternatively be invoked as a subcommand:
+
+	```shell
+	% zpy activate
+	```
+
 The project folder remains empty, with the venv tucked away
 at a location determined by a hash of the absolute path of the project.
 The home for all of these (`~/.local/share/venvs`) may be overridden
@@ -26,7 +34,10 @@ what aims to be *thorough* tab completion assistance.
 ---
 
 ```console
+% # These are all equivalent:
 % activate --help
+% zpy activate --help
+% zpy help activate
 ```
 ```shell
 # Activate the venv for the current folder or specified project, if it exists.
