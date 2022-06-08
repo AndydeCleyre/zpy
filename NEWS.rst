@@ -9,11 +9,13 @@ Added
 -----
 
 - This changelog
-- Optional dependency [zsh-defer](https://github.com/romkatv/zsh-defer),
+- Optional dependency zsh-defer__,
   for pre-caching help messages
 - Option to control which functions are "exposed" as top-level in the shell
 - ``zpy`` "supercommand" can run all zpy functions as subcommands,
   with great tab completion
+
+__ https://github.com/romkatv/zsh-defer
 
 Changed
 -------
