@@ -1,9 +1,8 @@
-# dot -Tsvg flow.dot >src/svg/flow.svg 
 digraph {
     bgcolor = "#242936";
     edge [color = "#d5ff80"];
     node [fontcolor = "#ff974e"; fontname = "Iosevka Term Custom, ui-monospace, monospace"];
-    
+
     node [color = "#90b1ff"; shape = box];
     "requirements.in";
     "dev-requirements.in";
