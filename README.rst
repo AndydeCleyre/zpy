@@ -31,6 +31,7 @@ They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 
 .. image:: https://user-images.githubusercontent.com/1787385/172661113-7a2c6670-e716-491e-8db4-c005fef8455b.png
    :alt: zpy supercommand completions
+   :width: 100%
 
 Getting It
 ----------
@@ -100,17 +101,20 @@ Basic usage of ``envin`` and ``pipacs``:
 
 .. image:: https://gist.githubusercontent.com/AndydeCleyre/306d250c59a754b9a3399251b4ca0c65/raw/0ae1d1a9e8f5b72dbf78aba4a5ef138909932851/envin_pipacs.svg?sanitize=true
    :alt: Animated envin and pipacs demo
+   :width: 100%
 
 Basic usage of ``pipz``:
 
 .. image:: https://gist.github.com/AndydeCleyre/de117a9aec8360413b8547e1a5ab3484/raw/c58e242b36b6ca721ffae89463554e09b79f7a9c/pipz.svg?sanitize=true
    :alt: Animated pipz demo
+   :width: 100%
 
 Guiding Ideas
 -------------
 
 .. image:: https://github.com/AndydeCleyre/zpy/raw/master/doc/src/img/flow.svg
    :alt: Information flow diagram
+   :width: 100%
 
 - You should not have to manually specify the dependencies anywhere other than
   ``*requirements.in`` files
