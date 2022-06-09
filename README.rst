@@ -55,12 +55,17 @@ Examples
 
     % pipz install tldr jello rich-cli yt-dlp 'visidata @ git+https://github.com/saulpw/visidata@develop'
 
-- Create a venv for the current folder (if necessary), activate it, and **sync** installed pkgs to match ``requirements.txt`` files:
+- Create a venv for the current folder (if necessary), activate it, and **sync** installed pkgs to match *all* ``requirements.txt`` lockfiles:
 
   .. code:: console
 
-    % envin                       # match all (*-)requirements.txt files
-    % envin dev-requirements.txt  # match specific files
+    % envin
+
+  . . . or sync packages to *particular* lockfiles:
+
+  .. code:: console
+
+    % envin dev-requirements.txt
 
 - **Add** a pkg to ``requirements.in``, **compile** a locked dep tree as ``requirements.txt``, and **sync** installed packages:
 
