@@ -1,0 +1,130 @@
+@(from utils import zpy_help)\
+# Full Reference
+
+```shell
+@zpy_help('zpy', 'help')
+```
+
+## Environment Activation
+
+=== "`envin`"
+
+    ```shell
+    @zpy_help('envin', indentation=4)
+    ```
+
+=== "`activate`"
+
+    @for func in ('activate', 'a8'):
+    ```shell
+    @zpy_help(func, indentation=4)
+    ```
+
+    @end\
+
+=== "`deactivate`"
+
+    @for func in ('envout', 'da8'):
+    ```shell
+    @zpy_help(func, indentation=4)
+    ```
+
+    @end\
+
+## Add, Compile, Sync
+
+=== "Add[, Compile[, Sync]]"
+
+    @for func in ('pipa', 'pipac', 'pipacs', 'pypc'):
+    ```shell
+    @zpy_help(func, indentation=4)
+    ```
+
+    @end\
+
+=== "Compile[, Sync]"
+
+    @for func in ('pipc', 'pipcs', 'pipup'):
+    ```shell
+    @zpy_help(func, indentation=4)
+    ```
+
+    @end\
+
+=== "Sync"
+
+    ```shell
+    @zpy_help('pips', indentation=4)
+    ```
+
+## Launch Helpers
+
+@for func in ('vpyshebang', 'vrun', 'vpy', 'vlauncher'):
+=== "`@func`"
+
+    ```shell
+    @zpy_help(func, indentation=4)
+    ```
+
+@end\
+
+=== "`zpy mkbin`"
+
+    ```shell
+    @zpy_help('mkbin', indentation=4)
+    ```
+
+## Informational
+
+@for func in ('venvs_path', 'reqshow', 'pipcheckold', 'whichpyproj'):
+=== "`@func`"
+
+    ```shell
+    @zpy_help(func, indentation=4)
+    ```
+
+@end\
+
+## `pipz` Package Manager
+
+```shell
+@zpy_help('pipz')
+```
+
+@for func in ('install', 'uninstall', 'upgrade', 'list', 'inject', 'reinstall', 'cd', 'runpip', 'runpkg'):
+=== "`@func`"
+
+    ```shell
+    @zpy_help(f"pipz {func}", indentation=4)
+    ```
+
+@end\
+
+## Editor Configuration
+
+=== "Sublime Text"
+
+    ```shell
+    @zpy_help('vpysublp', indentation=4)
+    ```
+
+=== "VS Code"
+
+    ```shell
+    @zpy_help('vpyvscode', indentation=4)
+    ```
+
+=== "Pyright (LSP)"
+
+    ```shell
+    @zpy_help('vpypyright', indentation=4)
+    ```
+
+## Miscellany
+
+@for func in ('pipi', 'prunevenvs'):
+```shell
+@zpy_help(func)
+```
+
+@end\

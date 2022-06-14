@@ -16,7 +16,7 @@ fi
 pip install -qU pip pip-and-pip-tools
 
 # shellcheck disable=SC2043
-for folder in doc/mkdocs; do
+for folder in "${gitroot}/doc/mkdocs" "${gitroot}/doc/templates"; do
   cd "$folder"
   for reqsin in *requirements.in; do
     pip-compile -U --no-header --annotation-style=line --strip-extras "$reqsin"
