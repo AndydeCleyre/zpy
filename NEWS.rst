@@ -5,12 +5,18 @@ News
 Unreleased
 ==========
 
-Changed
--------
+Added
+-----
 
 - When zsh-defer is present,
   pre-cache PyPI package list when plugin loads,
   if not yet cached at all
+
+Changed
+-------
+
+- Minor documentation edits and ordering for readability
+- The "Full Reference" document is now generated from a template for easier updating
 
 0.3.0
 =====
