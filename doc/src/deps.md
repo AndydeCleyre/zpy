@@ -5,8 +5,6 @@ with optional additions for more colorful output and alternative json parsers.
 
 ## Suggested Dependencies by Platform
 
-In all cases, `highlight` is optional.
-
 === "Alpine"
 
     ```console
@@ -43,6 +41,10 @@ In all cases, `highlight` is optional.
     $ sudo zypper in curl diffutils fzf highlight python3 zsh
     ```
 
+!!! note
+
+    Either `highlight` or `bat` are included in each of these commands, but are strictly optional.
+
 ## All Dependencies
 
 === "The big ones"
@@ -50,6 +52,23 @@ In all cases, `highlight` is optional.
     - [Zsh](https://repology.org/project/zsh/versions)
     - [Python](https://repology.org/project/python/versions)
     - [`fzf`](https://github.com/junegunn/fzf)
+
+=== "The optional ones"
+
+    - [highlight](https://repology.org/project/highlight/versions)
+      *or* [bat](https://repology.org/project/bat/versions)
+      *or* [rich-cli](https://github.com/Textualize/rich-cli)
+      -- for pretty syntax highlighting; rich-cli adds fancy tables
+    - [riff](https://github.com/walles/riff)
+      *or* [delta](https://github.com/dandavison/delta)
+      *or* [diff-so-fancy](https://github.com/so-fancy/diff-so-fancy)
+      *or* [colordiff](https://repology.org/project/colordiff/versions)
+      -- for more pretty syntax highlighting
+    - [jq](https://repology.org/project/jq/versions)
+      *or* [jello](https://pypi.org/project/jello/)
+      -- for theoretically more reliable parsing
+    - [zsh-defer](https://github.com/romkatv/zsh-defer)
+      -- for caching help content to eliminate a small delay in the first help message
 
 === "The ones you already have anyway, probably"
 
@@ -74,20 +93,3 @@ In all cases, `highlight` is optional.
       pcre2grep/pcre2-tools,
       [ripgrep](https://repology.org/project/ripgrep/versions),
       or Zsh with pcre enabled
-
-=== "The optional ones"
-
-    - [highlight](https://repology.org/project/highlight/versions)
-      *or* [bat](https://repology.org/project/bat/versions)
-      *or* [rich-cli](https://github.com/Textualize/rich-cli)
-      -- for pretty syntax highlighting; rich-cli adds fancy tables
-    - [riff](https://github.com/walles/riff)
-      *or* [delta](https://github.com/dandavison/delta)
-      *or* [diff-so-fancy](https://github.com/so-fancy/diff-so-fancy)
-      *or* [colordiff](https://repology.org/project/colordiff/versions)
-      -- for more pretty syntax highlighting
-    - [jq](https://repology.org/project/jq/versions)
-      *or* [jello](https://pypi.org/project/jello/)
-      -- for theoretically more reliable parsing
-    - [zsh-defer](https://github.com/romkatv/zsh-defer)
-      -- for caching help content to eliminate a small delay in the first help message
