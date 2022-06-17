@@ -22,7 +22,7 @@ In all cases, `highlight` is optional.
 === "Debian/Ubuntu"
 
     ```console
-    $ sudo apt --no-install-recommends install fzf highlight python3{,-venv} wget zsh
+    $ sudo apt --no-install-recommends install bat fzf python3{,-venv} wget zsh
     ```
 
 === "Fedora"
