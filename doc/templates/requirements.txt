@@ -1,0 +1,2 @@
+plumbum==1.7.2            # via -r requirements.in
+wheezy-template==3.1.0    # via -r requirements.in

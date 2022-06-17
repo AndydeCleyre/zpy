@@ -113,3 +113,10 @@ or install it with a plugin manager:
     ```console
     % zplug install; zplug load
     ```
+
+=== "zpm"
+
+    ```console
+    % print zpm load andydecleyre/zpy >>~/.zshrc
+    % zpm clean
+    ```

@@ -8,11 +8,11 @@ Congrats, you've created a virtual environment and activated it for your current
 
 !!! tip
 
-	Like all `zpy` commands, it can alternatively be invoked as a subcommand:
+    Like all `zpy` commands, it can alternatively be invoked as a subcommand:
 
-	```shell
-	% zpy activate
-	```
+    ```shell
+    % zpy activate
+    ```
 
 The project folder remains empty, with the venv tucked away
 at a location determined by a hash of the absolute path of the project.
