@@ -2,6 +2,17 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- Doc site de-integrates local TOC, in favor of right hand side local TOC
+- The minimum version of pip-tools is bumped to 6.8.1
+- The shell parameter ``PIP_TOOLS_RESOLVER`` is replaced by
+  a new default option passed to ``pip-compile``: ``--resolver=backtracking``
+
 0.3.1
 =====
 
