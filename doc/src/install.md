@@ -73,7 +73,7 @@ or install it with a plugin manager:
 === "antidote"
 
     ```console
-    % print antidote bundle andydecleyre/zpy >>~/.zshrc
+    % print andydecleyre/zpy >>~/.zsh_plugins.txt
     ```
 
 === "Prezto"
