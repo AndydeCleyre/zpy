@@ -66,15 +66,15 @@ or install it with a plugin manager:
     % print antibody bundle andydecleyre/zpy >>~/.zshrc
     ```
 
-=== "Antigen"
-
-    Put `antigen bundle andydecleyre/zpy` in your ``~/.zshrc``, before `antigen apply`.
-
 === "antidote"
 
     ```console
     % print andydecleyre/zpy >>~/.zsh_plugins.txt
     ```
+
+=== "Antigen"
+
+    Put `antigen bundle andydecleyre/zpy` in your ``~/.zshrc``, before `antigen apply`.
 
 === "Prezto"
 
@@ -83,6 +83,12 @@ or install it with a plugin manager:
     ```
 
     Then add `zpy` to your pmodule list in `~/.zpreztorc`.
+
+=== "Sheldon"
+
+    ```console
+    $ sheldon add zpy --github andydecleyre/zpy
+    ```
 
 === "zgen"
 
