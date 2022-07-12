@@ -1350,9 +1350,12 @@ def reqs_from_reqsin(reqsin):
     reqs = []
     for line in reqsin.read_text().splitlines():
         if line.startswith('-r '):
-            reqs.extend(reqs_from_reqsin((
+            include_me = (
                 reqsin.parent / re.search(r'^-r\s+([^#]+)', line).group(1).rstrip()
-            ).resolve()))
+            ).resolve()
+            if include_me.with_suffix('.in').exists():
+                include_me = include_me.with_suffix('.in')
+            reqs.extend(reqs_from_reqsin(include_me))
             continue
         elif line.startswith('-c '):
             continue
