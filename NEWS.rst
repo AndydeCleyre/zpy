@@ -12,6 +12,8 @@ Changed
 - The minimum version of pip-tools is bumped to 6.8.1
 - The shell parameter ``PIP_TOOLS_RESOLVER`` is replaced by
   a new default option passed to ``pip-compile``: ``--resolver=backtracking``
+- ``pypc``: When parsing '``-r ...txt``' lines, use the corresponding ``.in`` file
+  contents if available, instead. This more consistently injects *loose* requirements.
 
 0.3.1
 =====
