@@ -5,15 +5,21 @@ News
 Unreleased
 ==========
 
+Added
+-----
+
+- Requirements category completions now additionally suggest ``ops``
+- A little more info about category completion in the docs
+
 Changed
 -------
 
-- Doc site de-integrates local TOC, in favor of right hand side local TOC
 - The minimum version of pip-tools is bumped to 6.8.1
 - The shell parameter ``PIP_TOOLS_RESOLVER`` is replaced by
   a new default option passed to ``pip-compile``: ``--resolver=backtracking``
 - ``pypc``: When parsing '``-r ...txt``' lines, use the corresponding ``.in`` file
   contents if available, instead. This more consistently injects *loose* requirements.
+- Doc site de-integrates local TOC, in favor of right hand side local TOC
 
 0.3.1
 =====
