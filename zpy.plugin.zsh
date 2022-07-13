@@ -2354,7 +2354,7 @@ _zpy_pypi_pkg () {
 
 _.zpy_ui_pipa () {
     _zpy_helpmsg ${0[10,-1]}
-    local -U catgs=(dev doc test *-requirements.{in,txt}(N))
+    local -U catgs=(dev doc ops test *-requirements.{in,txt}(N))
     catgs=(${catgs%%-*})
     _arguments \
         '(- *)--help[Show usage information]' \
@@ -2517,7 +2517,7 @@ _.zpy_ui_reqshow () {
                 _normal -P
                 return
             }
-            local -U catgs=(dev doc test *-requirements.{in,txt}(N))
+            local -U catgs=(dev doc ops test *-requirements.{in,txt}(N))
             catgs=(${catgs%%-*})
             local context state state_descr line opt_args
             _arguments \

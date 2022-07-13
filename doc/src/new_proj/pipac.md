@@ -19,8 +19,11 @@ This time, we used `-c` to specify a *category*.
 The effect is that the files written are
 `dev-requirements.in` and `dev-requirements.txt`.
 
-Tab completion will suggest the categories `dev`, `doc`, and `test`,
+Tab completion will suggest categories like `dev`, `doc`, and `test`,
 but any arbitrary name can be used.
+
+If you have existing `CATEGORY-requirements.{txt,in}` files,
+those categories will be offered in tab completion, too.
 
 ---
 
