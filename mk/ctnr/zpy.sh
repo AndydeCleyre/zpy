@@ -116,6 +116,7 @@ ctnr_run -u zsh -ic 'zpy mkbin vpy ~/.local/bin/vpy'
 <<EOF ctnr_append -u /home/${user}/.zshrc
 alias e="\$EDITOR"
 alias h="highlight"
+mkcd () { mkdir \$1 && cd \$1 }
 
 EOF
 
@@ -123,6 +124,8 @@ EOF
 <<EOF ctnr_append -u /home/${user}/.zshrc
 print -rl '' '# Aliases:' | .zpy_hlt zsh
 grep '^alias ' \$HOME/.zshrc | .zpy_hlt zsh
+which mkcd | .zpy_hlt zsh
+
 EOF
 
 # Remind user of a few useful commands
