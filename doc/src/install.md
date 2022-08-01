@@ -30,11 +30,11 @@ or install it with a plugin manager:
 
 === "Oh My Zsh"
 
+    Add `zpy` to your `plugins` array in `~/.zshrc`, and
+
     ```console
     % git clone https://github.com/andydecleyre/zpy $ZSH_CUSTOM/plugins/zpy
     ```
-
-    Then add `zpy` to your `plugins` array in `~/.zshrc`.
 
 === "zcomet"
 
@@ -78,11 +78,11 @@ or install it with a plugin manager:
 
 === "Prezto"
 
+    Add `zpy` to your pmodule list in `~/.zpreztorc`, and
+
     ```console
     % git clone https://github.com/andydecleyre/zpy $ZPREZTODIR/modules/zpy
     ```
-
-    Then add `zpy` to your pmodule list in `~/.zpreztorc`.
 
 === "Sheldon"
 
