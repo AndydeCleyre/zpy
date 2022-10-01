@@ -1363,7 +1363,7 @@ def reqs_from_reqsin(reqsin):
             reqs.append(
                 re.search(r'^(-\S+\s+)*([^#]+)', line).group(2).rstrip()
             )
-    return sorted(set(reqs))
+    return sorted(set(r for r in reqs if r.strip()))
 
 
 suffix = 'requirements.in'
