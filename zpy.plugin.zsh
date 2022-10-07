@@ -905,7 +905,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     emulate -L zsh
 
     .zpy_ui_pipi --no-upgrade -q \
-        'pip-tools>=6.8.1' \
+        'pip-tools>=6.9.0' \
         'setuptools>=62.0.0' \
         wheel
 }
