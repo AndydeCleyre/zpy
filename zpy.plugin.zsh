@@ -1866,6 +1866,7 @@ jsonfile.write_text(dumps(data, indent=4))
             if [[ $pkgname != pip-tools ]]  bins=(${bins:#pip-(compile|sync)})
             if [[ $pkgname != wheel     ]]  bins=(${bins:#wheel})
             if [[ $pkgname != chardet   ]]  bins=(${bins:#chardetect})
+            if [[ $pkgname != build     ]]  bins=(${bins:#pyproject-build})
             bins=(${(f)"$(
                 print -rln $bins \
                 | fzf $fzf_args --header="$fzf_header $1 . . ." \
