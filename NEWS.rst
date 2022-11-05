@@ -3,7 +3,7 @@ News
 ====
 
 Unreleased
-==========
+=====
 
 Added
 -----
@@ -14,12 +14,18 @@ Added
 Changed
 -------
 
-- The minimum version of pip-tools is bumped to 6.8.1
+- The minimum version of pip-tools is bumped to 6.9.0
 - The shell parameter ``PIP_TOOLS_RESOLVER`` is replaced by
   a new default option passed to ``pip-compile``: ``--resolver=backtracking``
 - ``pypc``: When parsing '``-r ...txt``' lines, use the corresponding ``.in`` file
   contents if available, instead. This more consistently injects *loose* requirements.
 - Doc site de-integrates local TOC, in favor of right hand side local TOC
+- ``pipz``: unless installing the ``build`` package explicitly, don't install ``pyproject-build`` script
+
+Fixed
+-----
+
+- Bug in ``pypc`` where an empty string could get added to reqs list
 
 0.3.1
 =====
