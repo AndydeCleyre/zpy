@@ -19,11 +19,11 @@ at a location determined by a hash of the absolute path of the project.
 The home for all of these (`~/.local/share/venvs`) may be overridden
 by setting the environment variable `ZPY_VENVS_HOME` or `XDG_DATA_HOME`.
 
-If you want to access it as `./venv` (e.g. for another tool to easily find),
+If you want to access it as `./.venv` (e.g. for another tool to easily find),
 run:
 
 ```console
-[venv] % ln -s $VIRTUAL_ENV
+[venv] % ln -s $VIRTUAL_ENV .venv
 ```
 
 There's a bit more to `activate` if you need it;

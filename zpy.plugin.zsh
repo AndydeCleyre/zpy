@@ -483,14 +483,13 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         --annotation-style=line
         --strip-extras
         --allow-unsafe
+        --resolver=backtracking
     )
     # After updating minimum pip-tools to support each of these, add them:
-    # --resolver=backtracking     # remove parameter PIP_TOOLS_RESOLVER, below
     # --write-relative-to-output
     # --read-relative-to-input
 
     local badrets
-    PIP_TOOLS_RESOLVER=${PIP_TOOLS_RESOLVER:-backtracking} \
     pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1 \
     | .zpy_hlt ini
     badrets=(${pipestatus:#0})
@@ -906,7 +905,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     emulate -L zsh
 
     .zpy_ui_pipi --no-upgrade -q \
-        'pip-tools>=6.6.2' \
+        'pip-tools>=6.9.0' \
         'setuptools>=62.0.0' \
         wheel
 }
@@ -1351,9 +1350,12 @@ def reqs_from_reqsin(reqsin):
     reqs = []
     for line in reqsin.read_text().splitlines():
         if line.startswith('-r '):
-            reqs.extend(reqs_from_reqsin((
+            include_me = (
                 reqsin.parent / re.search(r'^-r\s+([^#]+)', line).group(1).rstrip()
-            ).resolve()))
+            ).resolve()
+            if include_me.with_suffix('.in').exists():
+                include_me = include_me.with_suffix('.in')
+            reqs.extend(reqs_from_reqsin(include_me))
             continue
         elif line.startswith('-c '):
             continue
@@ -1361,7 +1363,7 @@ def reqs_from_reqsin(reqsin):
             reqs.append(
                 re.search(r'^(-\S+\s+)*([^#]+)', line).group(2).rstrip()
             )
-    return sorted(set(reqs))
+    return sorted(set(r for r in reqs if r.strip()))
 
 
 suffix = 'requirements.in'
@@ -1864,6 +1866,7 @@ jsonfile.write_text(dumps(data, indent=4))
             if [[ $pkgname != pip-tools ]]  bins=(${bins:#pip-(compile|sync)})
             if [[ $pkgname != wheel     ]]  bins=(${bins:#wheel})
             if [[ $pkgname != chardet   ]]  bins=(${bins:#chardetect})
+            if [[ $pkgname != build     ]]  bins=(${bins:#pyproject-build})
             bins=(${(f)"$(
                 print -rln $bins \
                 | fzf $fzf_args --header="$fzf_header $1 . . ." \
@@ -2352,7 +2355,7 @@ _zpy_pypi_pkg () {
 
 _.zpy_ui_pipa () {
     _zpy_helpmsg ${0[10,-1]}
-    local -U catgs=(dev doc test *-requirements.{in,txt}(N))
+    local -U catgs=(dev doc ops test *-requirements.{in,txt}(N))
     catgs=(${catgs%%-*})
     _arguments \
         '(- *)--help[Show usage information]' \
@@ -2515,7 +2518,7 @@ _.zpy_ui_reqshow () {
                 _normal -P
                 return
             }
-            local -U catgs=(dev doc test *-requirements.{in,txt}(N))
+            local -U catgs=(dev doc ops test *-requirements.{in,txt}(N))
             catgs=(${catgs%%-*})
             local context state state_descr line opt_args
             _arguments \

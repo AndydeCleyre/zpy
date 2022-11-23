@@ -30,11 +30,11 @@ or install it with a plugin manager:
 
 === "Oh My Zsh"
 
+    Add `zpy` to your `plugins` array in `~/.zshrc`, and
+
     ```console
     % git clone https://github.com/andydecleyre/zpy $ZSH_CUSTOM/plugins/zpy
     ```
-
-    Then add `zpy` to your `plugins` array in `~/.zshrc`.
 
 === "zcomet"
 
@@ -66,23 +66,29 @@ or install it with a plugin manager:
     % print antibody bundle andydecleyre/zpy >>~/.zshrc
     ```
 
+=== "antidote"
+
+    ```console
+    % print andydecleyre/zpy >>~/.zsh_plugins.txt
+    ```
+
 === "Antigen"
 
     Put `antigen bundle andydecleyre/zpy` in your ``~/.zshrc``, before `antigen apply`.
 
-=== "antidote"
-
-    ```console
-    % print antidote bundle andydecleyre/zpy >>~/.zshrc
-    ```
-
 === "Prezto"
+
+    Add `zpy` to your pmodule list in `~/.zpreztorc`, and
 
     ```console
     % git clone https://github.com/andydecleyre/zpy $ZPREZTODIR/modules/zpy
     ```
 
-    Then add `zpy` to your pmodule list in `~/.zpreztorc`.
+=== "Sheldon"
+
+    ```console
+    $ sheldon add zpy --github andydecleyre/zpy
+    ```
 
 === "zgen"
 
