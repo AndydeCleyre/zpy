@@ -22,4 +22,4 @@ requests==2.28.1          # via mkdocs-material
 six==1.16.0               # via python-dateutil
 urllib3==1.26.13          # via requests
 watchdog==2.1.9           # via mkdocs
-zipp==3.10.0              # via importlib-metadata
+zipp==3.11.0              # via importlib-metadata
