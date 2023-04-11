@@ -12,7 +12,7 @@ mkdocs==1.4.2             # via -r requirements.in, mkdocs-material
 mkdocs-material==9.1.6    # via -r requirements.in
 mkdocs-material-extensions==1.1.1  # via mkdocs-material
 packaging==23.0           # via mkdocs
-pygments==2.14.0          # via mkdocs-material
+pygments==2.15.0          # via mkdocs-material
 pymdown-extensions==9.11  # via mkdocs-material
 python-dateutil==2.8.2    # via ghp-import
 pyyaml==6.0               # via mkdocs, pymdown-extensions, pyyaml-env-tag
