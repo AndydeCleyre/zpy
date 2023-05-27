@@ -2,6 +2,15 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- When using rich as syntax highlighter,
+  never truncate lines, but wrap them
+
 0.3.2
 =====
 

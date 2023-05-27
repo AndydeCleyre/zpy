@@ -121,7 +121,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         batcat --color always --paging never -p -l $1
     } elif (( $+commands[rich] )) {
         local content=$(<&0)
-        if [[ $content ]]  rich --force-terminal --no-wrap -W $(( COLUMNS-4 )) --lexer $1 - <<<$content
+        if [[ $content ]]  rich --force-terminal --guides --max-width $(( COLUMNS-4 )) --lexer $1 - <<<$content
     } else {
         >&1
     }
