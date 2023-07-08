@@ -1,5 +1,5 @@
 certifi==2023.5.7         # via requests
-charset-normalizer==3.1.0  # via requests
+charset-normalizer==3.2.0  # via requests
 click==8.1.4              # via mkdocs
 colorama==0.4.6           # via mkdocs-material
 ghp-import==2.1.0         # via mkdocs
