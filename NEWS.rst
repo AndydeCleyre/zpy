@@ -10,6 +10,7 @@ Changed
 
 - When using rich as syntax highlighter,
   never truncate lines, but wrap them
+- The minimum version of pip-tools is bumped to 7.0.0
 
 0.3.2
 =====
