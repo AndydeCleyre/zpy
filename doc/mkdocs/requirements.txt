@@ -8,7 +8,7 @@ jinja2==3.1.2             # via mkdocs, mkdocs-material
 markdown==3.4.4           # via mkdocs, mkdocs-material, pymdown-extensions
 markupsafe==2.1.3         # via jinja2, mkdocs
 mergedeep==1.3.4          # via mkdocs
-mkdocs==1.5.1             # via -r requirements.in, mkdocs-material
+mkdocs==1.5.2             # via -r requirements.in, mkdocs-material
 mkdocs-material==9.1.21   # via -r requirements.in
 mkdocs-material-extensions==1.1.1  # via mkdocs-material
 packaging==23.1           # via mkdocs
