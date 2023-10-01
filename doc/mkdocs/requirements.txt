@@ -1,6 +1,6 @@
 babel==2.12.1             # via mkdocs-material
 certifi==2023.7.22        # via requests
-charset-normalizer==3.2.0  # via requests
+charset-normalizer==3.3.0  # via requests
 click==8.1.7              # via mkdocs
 colorama==0.4.6           # via mkdocs-material
 ghp-import==2.1.0         # via mkdocs
