@@ -1,4 +1,4 @@
-babel==2.13.0             # via mkdocs-material
+babel==2.13.1             # via mkdocs-material
 certifi==2023.7.22        # via requests
 charset-normalizer==3.3.1  # via requests
 click==8.1.7              # via mkdocs
