@@ -12,6 +12,11 @@ Changed
   never truncate lines, but wrap them
 - The minimum version of pip-tools is bumped to 7.1.0
 
+Fixed
+-----
+
+- Don't complain if the installed version of highlight is too old to know TOML
+
 0.3.2
 =====
 
