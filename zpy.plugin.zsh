@@ -111,7 +111,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         if [[ $content ]] {
             local themes=(aiseered blacknblue bluegreen ekvoli navy)
             HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-"-s $themes[RANDOM % $#themes + 1]"} \
-            highlight -O truecolor --stdout -S $1 <<<$content
+            highlight -O truecolor --stdout --force -S $1 <<<$content
         }
     } elif (( $+commands[bat] )) {  # recommended themes: ansi, zenburn
         BAT_THEME=${BAT_THEME:-ansi} \
