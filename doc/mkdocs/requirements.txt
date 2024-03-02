@@ -18,7 +18,7 @@ pathspec==0.12.1          # via mkdocs
 platformdirs==4.2.0       # via mkdocs
 pygments==2.17.2          # via mkdocs-material
 pymdown-extensions==10.7  # via mkdocs-material
-python-dateutil==2.9.0    # via ghp-import
+python-dateutil==2.9.0.post0  # via ghp-import
 pyyaml==6.0.1             # via mkdocs, pymdown-extensions, pyyaml-env-tag
 pyyaml-env-tag==0.1       # via mkdocs
 regex==2023.12.25         # via mkdocs-material
