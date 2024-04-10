@@ -75,7 +75,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
                 # delta will use BAT_THEME
                 BAT_THEME=${BAT_THEME:-ansi} \
-                $diffhi $args
+                $diffhi $args 2>/dev/null
                 return
             }
         }
@@ -738,7 +738,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
         for rf ( $reqsfiles ) {
             if [[ $rf != ${reqsfiles[1]} ]]  print
-            print -r -- '==>' $rf '<=='
+            print -r -- '--' $rf '--'
             .zpy_hlt ini <$rf
         }
         if [[ $1 != ${@[-1]} ]]  print
