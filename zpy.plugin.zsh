@@ -1591,17 +1591,14 @@ jsonfile.write_text(dumps(data, indent=4))
     local origtxts=(${1:a}/**/*(DN.))
     local newtxts=(${origtxts#${1:a}})
 
-    local origtxt newtxt lines=() label
+    local origtxt newtxt diffout label
     for origtxt newtxt ( ${origtxts:^newtxts} ) {
         if [[ ! $(<$origtxt) ]]  continue
 
         label=${newtxt:a:h:h:t}/${newtxt:a:h:t}${${newtxt:a:h:t}:+/}${newtxt:t}
-        lines=(${(f)"$(
-            diff -wu -L $label $origtxt -L $label $newtxt
-        )"})
+        diffout=$(diff -wu -L $label $origtxt -L $label $newtxt)
         if (( ? )) {
-            lines=(${(M)lines:#[-+@][^ ]*})
-            .zpy_hlt diff <<<${(F)lines}
+            .zpy_hlt diff <<<$diffout
         }
     }
 }

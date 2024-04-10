@@ -13,6 +13,8 @@ Changed
 - The minimum version of pip-tools is bumped to 7.1.0
 - Since Linux Mint shadows the ``highlight`` command,
   demote it in the search order in ``.zpy_hlt``, for now.
+- Stop abbreviating diffs during pipz upgrade,
+  as it was breaking some highlighters (riff at least)
 
 Fixed
 -----
