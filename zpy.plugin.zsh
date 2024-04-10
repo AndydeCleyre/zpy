@@ -81,7 +81,16 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         }
     }
 
-    if (( $+commands[highlight] )) {
+    if (( $+commands[bat] )) {  # recommended themes: ansi, zenburn
+        BAT_THEME=${BAT_THEME:-ansi} \
+        bat --color always --paging never -p -l $1
+    } elif (( $+commands[batcat] )) {
+        BAT_THEME=${BAT_THEME:-ansi} \
+        batcat --color always --paging never -p -l $1
+    } elif (( $+commands[rich] )) {
+        local content=$(<&0)
+        if [[ $content ]]  rich --force-terminal --guides --max-width $(( COLUMNS-4 )) --lexer $1 - <<<$content
+    } elif (( $+commands[highlight] )) {
         # recommended themes: aiseered, blacknblue, bluegreen, ekvoli, navy
 
         # highlight has two issues with newlines:
@@ -113,15 +122,6 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
             HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-"-s $themes[RANDOM % $#themes + 1]"} \
             highlight -O truecolor --stdout --force -S $1 <<<$content
         }
-    } elif (( $+commands[bat] )) {  # recommended themes: ansi, zenburn
-        BAT_THEME=${BAT_THEME:-ansi} \
-        bat --color always --paging never -p -l $1
-    } elif (( $+commands[batcat] )) {
-        BAT_THEME=${BAT_THEME:-ansi} \
-        batcat --color always --paging never -p -l $1
-    } elif (( $+commands[rich] )) {
-        local content=$(<&0)
-        if [[ $content ]]  rich --force-terminal --guides --max-width $(( COLUMNS-4 )) --lexer $1 - <<<$content
     } else {
         >&1
     }
