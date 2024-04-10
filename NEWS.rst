@@ -8,6 +8,7 @@ Unreleased
 Changed
 -------
 
+- Use uv, if present, to create venvs
 - When using rich as syntax highlighter,
   never truncate lines, but wrap them
 - The minimum version of pip-tools is bumped to 7.1.0

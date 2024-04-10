@@ -815,6 +815,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     pypy)
         venv_name=venv-pypy
         venv_cmd=(pypy3 -m venv)
+        if (( $+commands[uv] ))  venv_cmd=(uv venv -q --seed -p pypy3)
     ;;
     current)
         local REPLY
@@ -824,6 +825,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         local major=$(python -c 'from __future__ import print_function; import sys; print(sys.version_info.major)')
         [[ $major == 3 ]] || return
         venv_cmd=(python -m venv)
+        if (( $+commands[uv] ))  venv_cmd=(uv venv -q --seed -p python)
     ;;
     *)
         return 1
@@ -843,6 +845,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local venv_name=venv venv_cmd=(python3 -m venv)
+    if (( $+commands[uv] ))  venv_cmd=(uv venv -q --seed -p python3)
     if [[ $1 == --py ]] {
         local reply
         if ! { .zpy_argvenv $2 } { .zpy_ui_help ${0[9,-1]}; return 1 }
@@ -2175,7 +2178,13 @@ jsonfile.write_text(dumps(data, indent=4))
         vpath=$REPLY
         venv=${vpath}/venv
 
-        [[ -d $venv ]] || python3 -m venv $venv
+        if ! [[ -d $venv ]] {
+            if (( $+commands[uv] )) {
+                uv venv -q --seed -p python3 $venv
+            } else {
+                python3 -m venv $venv
+            }
+        }
         zf_ln -sfn $projdir ${vpath}/project
         (
             . $venv/bin/activate
