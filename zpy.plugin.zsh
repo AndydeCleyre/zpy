@@ -317,18 +317,32 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
       "${${PWD:P}/%${PWD:P:t}/%B${PWD:P:t}%b}"
 }
 
+.zpy_require_venv () {
+    emulate -L zsh
+
+    if ! [[ $VIRTUAL_ENV ]] {
+        .zpy_please_activate venv
+        return 1
+    }
+}
+
 # Install and upgrade packages.
 .zpy_ui_pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
     emulate -L zsh
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
-    [[ $VIRTUAL_ENV ]] || .zpy_please_activate venv
+    .zpy_require_venv
 
     local upgrade=-U
     if [[ $1 == --no-upgrade ]] { unset upgrade; shift }
 
     if [[ ! $1 ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
 
-    python -m pip --disable-pip-version-check install $upgrade $@
+    rehash
+    if (( $+commands[uv] )) {
+        uv pip install -p python $upgrade $@
+    } else {
+        python -m pip --disable-pip-version-check install $upgrade $@
+    }
     local ret=$?
     rehash
 
@@ -396,15 +410,23 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     emulate -L zsh
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     rehash
-    if (( ! $+commands[pip-sync] )) { .zpy_please_activate pip-sync; return 1 }
+    .zpy_require_venv
+    if (( ! $+commands[uv] )) && (( ! $+commands[pip-sync] )) {
+        .zpy_please_activate "uv or pip-sync"
+        return 1
+    }
 
     local reqstxts=(${@:-*requirements.txt(N)}) ret
     if [[ $reqstxts ]] {
         local p_a_args=(syncing env $reqstxts)
         if [[ $VIRTUAL_ENV && -L ${VIRTUAL_ENV:h}/project ]]  p_a_args=(--proj ${VIRTUAL_ENV:h}/project(:P) $p_a_args)
         .zpy_log action $p_a_args
-        # --read-relative-to-input
-        pip-sync -q --pip-args --disable-pip-version-check $reqstxts
+        if (( ! $+commands[uv] )) {
+            # --read-relative-to-input
+            pip-sync -q --pip-args --disable-pip-version-check $reqstxts
+        } else {
+            uv pip sync -p python $reqstxts
+        }
         ret=$?
 
         local reqstxt                               #
@@ -431,8 +453,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         if [[ $1 == --snapshotdir ]] { snapshotdir=${2:a}; shift 2 }
     }
 
-    if (( ! $+commands[pip-compile] )) {
-        .zpy_please_activate pip-compile
+    if { ! .zpy_require_venv } || (( ! $+commands[uv] && ! $+commands[pip-compile] )) {
+        .zpy_please_activate "uv or pip-compile"
         if [[ $faildir ]]  print -n >>$faildir/${PWD:t}
         return 1
     }
@@ -490,8 +512,12 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     # --read-relative-to-input
 
     local badrets
-    pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1 \
-    | .zpy_hlt ini
+    if (( $+commands[uv] )) {
+        uv pip compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1
+    } else {
+        pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1 \
+        | .zpy_hlt ini
+    }
     badrets=(${pipestatus:#0})
 
     if [[ $badrets && $faildir ]]  print -n >>$faildir/${PWD:t}
@@ -785,7 +811,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     # create venv if necessary:
     local ret
-    if [[ ! -r $venv/bin/activate ]] || ! { $venv/bin/pip &>/dev/null } {
+    if [[ ! -r $venv/bin/activate ]] {
         .zpy_log action creating $short_venv
         zf_rm -rf $venv
         $venv_cmd $venv
@@ -809,13 +835,14 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 .zpy_argvenv () {  # pypy|current -> ($venv_name $venv_cmd...)
     emulate -L zsh
     unset reply
+    rehash
 
     local venv_name venv_cmd=()
     case $1 {
     pypy)
         venv_name=venv-pypy
         venv_cmd=(pypy3 -m venv)
-        if (( $+commands[uv] ))  venv_cmd=(uv venv -q --seed -p pypy3)
+        if (( $+commands[uv] ))  venv_cmd=(uv venv -q -p pypy3)
     ;;
     current)
         local REPLY
@@ -825,7 +852,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         local major=$(python -c 'from __future__ import print_function; import sys; print(sys.version_info.major)')
         [[ $major == 3 ]] || return
         venv_cmd=(python -m venv)
-        if (( $+commands[uv] ))  venv_cmd=(uv venv -q --seed -p python)
+        if (( $+commands[uv] ))  venv_cmd=(uv venv -q -p python)
     ;;
     *)
         return 1
@@ -843,9 +870,10 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 .zpy_ui_envin () {  # [--py pypy|current] [<reqs-txt>...]
     emulate -L zsh
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
+    rehash
 
     local venv_name=venv venv_cmd=(python3 -m venv)
-    if (( $+commands[uv] ))  venv_cmd=(uv venv -q --seed -p python3)
+    if (( $+commands[uv] ))  venv_cmd=(uv venv -q -p python3)
     if [[ $1 == --py ]] {
         local reply
         if ! { .zpy_argvenv $2 } { .zpy_ui_help ${0[9,-1]}; return 1 }
@@ -892,7 +920,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     local activator=$venv/bin/activate
 
-    if [[ ! -r $activator ]] || ! { $venv/bin/pip &>/dev/null } {
+    if [[ ! -r $activator ]] {
         trap "cd ${(q-)PWD}" EXIT INT QUIT
         zf_mkdir -p $projdir
         cd $projdir
@@ -906,21 +934,27 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
 .zpy_minimum_piptools () {
     emulate -L zsh
+    rehash
 
-    .zpy_ui_pipi --no-upgrade -q \
-        'pip-tools>=7.1.0' \
-        'setuptools>=62.0.0' \
-        wheel
+    if ! (( $+commands[uv] )) {
+        .zpy_ui_pipi --no-upgrade -q \
+            'pip-tools>=7.1.0' \
+            'setuptools>=62.0.0' \
+            wheel
+    }
 }
 
 .zpy_maximum_piptools () {
     emulate -L zsh
+    rehash
 
-    .zpy_ui_pipi -q \
-        pip \
-        pip-tools \
-        setuptools \
-        wheel
+    if ! (( $+commands[uv] )) {
+        .zpy_ui_pipi -q \
+            pip \
+            pip-tools \
+            setuptools \
+            wheel
+    }
 }
 
 # Alias for 'activate'.
@@ -1145,6 +1179,10 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     [[ -d $1 ]] || return
     vrun_args+=($1)
 
+    if (( $+commands[uv] ))  .zpy_ui_vrun --activate $vrun_args uv pip install -p python pip
+    # TODO: adjust to work without pip, when uv is present
+    # https://github.com/astral-sh/uv/issues/2150
+
     rehash
 
     local cells=()
@@ -1320,6 +1358,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     local noconfirm
     if [[ $1 == -y ]]  noconfirm=1
+
+    # TODO: maybe do a sort of `pipz runpkg` thing here?
 
     .zpy_ui_pipi --no-upgrade -q tomlkit
     local ret=$?
@@ -1617,22 +1657,30 @@ jsonfile.write_text(dumps(data, indent=4))
     plink=${bin:P:h:h:h}/project
     pdir=${plink:P}
 
-    if [[ ! -L $plink ]] || { ! .zpy_is_under $pdir $projects_home } return
+    if [[ ! -L $plink ]] || { ! .zpy_is_under $pdir $projects_home }  return
 
     rehash
 
+    local piplist
+    if (( $+commands[uv] )) {
+        piplist=(.zpy_ui_vrun --activate $pdir uv pip list)
+        # TODO: --pre?
+    } else {
+        piplist=(.zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre)
+    }
+
     local piplistline=()
     if (( $+commands[jq] )) {
-    # Slower than the pure ZSH fallback below?
+        # Slower than the pure ZSH fallback below?
         local pattern=${${pdir:t}//-/[._-]}
         piplistline=($(
-            .zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
+            $piplist --format json \
             | jq -r '.[] | select(.name|test("^'${pattern}'$"; "i")) | .name,.version'
         ))
     } elif (( $+commands[jello] )) {
         # Slower than the pure ZSH fallback below?
         piplistline=($(
-            .zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre --format json \
+            $piplist --format json \
             | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'"]'
         ))
     } elif (( $+commands[wheezy.template] )) {
@@ -1651,12 +1699,10 @@ jsonfile.write_text(dumps(data, indent=4))
         )
         piplistline=($(
             wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $(.zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre --format json)}")
+            =(<<<"{\"_\": $($piplist --format json)}")
         ))
     } else {
-        local lines=(${(f)"$(
-            .zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre
-        )"})
+        local lines=(${(f)"$($piplist)"})
         lines=($lines[3,-1])
 
         local pattern=${${pdir:t}//-/[._-]}
@@ -1862,7 +1908,7 @@ jsonfile.write_text(dumps(data, indent=4))
             bins=(${bins:*bins_showlist})
         } else {
             bins=(${bins:|bins_hidelist})
-            bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1)|easy_install(|-<->*)|(pip|python|pypy)(|<->*)|*.so|__pycache__)})
+            bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1|.bat|.nu|_this.py)|(deactivate|pydoc).bat|easy_install(|-<->*)|(pip|python|pypy)(|<->*)|*.so|__pycache__)})
             if [[ $pkgname != pip-tools ]]  bins=(${bins:#pip-(compile|sync)})
             if [[ $pkgname != wheel     ]]  bins=(${bins:#wheel})
             if [[ $pkgname != chardet   ]]  bins=(${bins:#chardetect})
@@ -2158,7 +2204,12 @@ jsonfile.write_text(dumps(data, indent=4))
         if ! [[ $2 && $1 ]] { .zpy_ui_help "${0[9,-1]} runpip"; return 1 }
 
         .zpy_pkgspec2name $1 || return
-        .zpy_ui_vrun $vrun_args ${ZPY_PIPZ_PROJECTS}/${REPLY} python -m pip ${@[2,-1]}
+        local pkgname=$REPLY
+        if (( $+commands[uv] )) {
+            .zpy_ui_vrun --activate $vrun_args ${ZPY_PIPZ_PROJECTS}/${pkgname} uv pip ${@[2,-1]}
+        } else {
+            .zpy_ui_vrun $vrun_args ${ZPY_PIPZ_PROJECTS}/${pkgname} python -m pip ${@[2,-1]}
+        }
     ;;
     runpkg)  # <pkgspec> <cmd> [<cmd-arg>...]  ## subcmd: pipz runpkg
         if [[ $2 == --help ]] { .zpy_ui_help "${0[9,-1]} $1"; return   }
@@ -2176,8 +2227,9 @@ jsonfile.write_text(dumps(data, indent=4))
         venv=${vpath}/venv
 
         if ! [[ -d $venv ]] {
+            rehash
             if (( $+commands[uv] )) {
-                uv venv -q --seed -p python3 $venv
+                uv venv -q -p python3 $venv
             } else {
                 python3 -m venv $venv
             }
