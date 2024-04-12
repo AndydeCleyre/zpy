@@ -1,7 +1,13 @@
 # Manage Python versions
 
 This project doesn't maintain multiple Python installations for you;
-you can use [pyenv](https://github.com/pyenv/pyenv) or [asdf](https://asdf-vm.com/) to do so.
+you can use [mise](https://github.com/jdx/mise), [pyenv](https://github.com/pyenv/pyenv), or [asdf](https://asdf-vm.com/) to do so.
+
+=== "mise"
+
+    ```console
+    % mise install python@3.7.9
+    ```
 
 === "pyenv"
 
@@ -16,6 +22,13 @@ you can use [pyenv](https://github.com/pyenv/pyenv) or [asdf](https://asdf-vm.co
     ```
 
 ## Install a tool with a specific Python version
+
+=== "mise"
+
+    ```console
+    % mise shell python@3.7.9
+    % pipz install httpie
+    ```
 
 === "pyenv"
 
@@ -32,6 +45,13 @@ you can use [pyenv](https://github.com/pyenv/pyenv) or [asdf](https://asdf-vm.co
     ```
 
 ## Create a venv with a specific Python version
+
+=== "mise"
+
+    ```console
+    % mise shell python@3.7.9
+    % envin  # or: activate
+    ```
 
 === "pyenv"
 
@@ -52,6 +72,13 @@ Once the venv is created this way,
 regardless of the current shell's `path`.
 
 ## Keep multiple Python version venvs available for a single project
+
+=== "mise"
+
+    ```console
+    % mise shell python@3.7.9
+    % envin --py current  # or: activate --py current
+    ```
 
 === "pyenv"
 

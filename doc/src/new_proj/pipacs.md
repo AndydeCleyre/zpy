@@ -56,7 +56,7 @@ pipacs [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
 
 !!! tip
 
-    When a zpy function internally calls `pip-compile`,
+    When a zpy function internally calls `pip-compile` or `uv pip compile`,
     it provides these flags by default:
     ```shell
     --no-header --annotation-style=line --strip-extras --allow-unsafe --resolver=backtracking

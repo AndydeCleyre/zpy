@@ -14,7 +14,7 @@ Manage Python Environments in Zsh, with pip-tools
 ``zpy`` is a set of Zsh functions
 wrapping
 pip-tools__
-and Python's venv module,
+and Python's venv module (or uv__),
 for the *simple* and *interactive* management of
 Python **virtual environments**,
 **dependency specifications**,
@@ -24,6 +24,8 @@ None of them should get in your way.
 All have **thorough tab completion**.
 
 __ https://github.com/jazzband/pip-tools
+
+__ https://github.com/astral-sh/uv
 
 They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 
@@ -54,7 +56,7 @@ Examples
 
   .. code:: console
 
-    % pipz install tldr jello rich-cli yt-dlp 'visidata @ git+https://github.com/saulpw/visidata@develop'
+    % pipz install uv tldr jello rich-cli yt-dlp 'visidata @ git+https://github.com/saulpw/visidata@develop'
 
 - Create a venv for the current folder (if necessary), activate it, and **sync** installed pkgs to match *all* ``requirements.txt`` lockfiles:
 
@@ -130,9 +132,11 @@ Guiding Ideas
 
   - need to be used exclusively
   - need to be used by everyone on the same project
-  - do what pyenv__/asdf-vm__ or flit__ do best (but do work with them if you choose)
+  - do what mise__/pyenv__/asdf-vm__ or flit__ do best (but do work with them if you choose)
   - *conflict* with anything else your team cares to do with your code;
     If they can be a friendlier neighbor to your workflows, file an issue__
+
+__ https://github.com/jdx/mise
 
 __ https://github.com/pyenv/pyenv
 

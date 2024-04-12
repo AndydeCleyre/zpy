@@ -2,6 +2,28 @@
 News
 ====
 
+0.3.3
+=====
+
+Changed
+-------
+
+- Use uv, if present, rather than pip or pip-tools (tip: `pipz install uv`)
+- Some documentation updates, mostly reflecting the new optional uv backend
+- Require some actions to have an activated venv first
+- When using rich as syntax highlighter,
+  never truncate lines, but wrap them
+- The minimum version of pip-tools is bumped to 7.1.0
+- Since Linux Mint shadows the ``highlight`` command,
+  demote it in the search order in ``.zpy_hlt``, for now.
+- Stop abbreviating diffs during pipz upgrade,
+  as it was breaking some highlighters (riff at least)
+
+Fixed
+-----
+
+- Don't complain if the installed version of highlight is too old to know TOML
+
 0.3.2
 =====
 
