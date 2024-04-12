@@ -2,6 +2,14 @@
 News
 ====
 
+0.3.4
+=====
+
+Fixed
+-----
+
+- Documentation/readthedocs fixes
+
 0.3.3
 =====
 
