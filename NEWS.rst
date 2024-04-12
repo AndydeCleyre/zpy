@@ -8,6 +8,9 @@ Unreleased
 Changed
 -------
 
+- Use uv, if present, rather than pip or pip-tools (tip: `pipz install uv`)
+- Some documentation updates, mostly reflecting the new optional uv backend
+- Require some actions to have an activated venv first
 - When using rich as syntax highlighter,
   never truncate lines, but wrap them
 - The minimum version of pip-tools is bumped to 7.1.0

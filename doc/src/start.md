@@ -5,7 +5,7 @@ Aside from Zsh and Python, the only dependency you're likely to *need* is
 For more details and recommended package manager commands, see [Dependencies](deps.md).
 
 To install `zpy` itself, you only need to source the file `zpy.plugin.zsh`
-in your Zsh startup (`~/.zshrc`).
+in your Zsh startup (`~/.zshrc`, or sometimes `~/.config/zsh/.zshrc`).
 When using a plugin manager, you'll likely need to feed it the
 "`GitHub User`/`Repo Name`" format, which is "`andydecleyre/zpy`".
 For more details and recommended plugin manager commands, see [Installation](install.md).
@@ -19,6 +19,15 @@ For now, let's just source it in the current session:
 
 The user-facing functions are all available as subcommands to `zpy`.
 Try typing `zpy`, then a space, then tab.
+
+!!! tip
+
+    Everything zpy does will generally be much faster if uv is installed.
+    You can now install it with zpy's `pipz` command:
+
+    ```console
+    % pipz install uv
+    ```
 
 !!! info
 

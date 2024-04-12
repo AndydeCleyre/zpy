@@ -126,3 +126,8 @@ or install it with a plugin manager:
     % print zpm load andydecleyre/zpy >>~/.zshrc
     % zpm clean
     ```
+
+!!! tip
+
+    Don't use a plugin manager but want to try one now?
+    I suggest [zcomet](https://github.com/agkozak/zcomet).

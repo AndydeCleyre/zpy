@@ -4,7 +4,8 @@
 
 `zpy` is a set of Zsh functions,
 mostly wrapping
-[pip-tools](https://github.com/jazzband/pip-tools/),
+[pip-tools](https://github.com/jazzband/pip-tools/) *or*
+[uv](https://github.com/astral-sh/uv/),
 for the simple and practical management of
 Python virtual environments,
 dependency specifications,
@@ -15,7 +16,8 @@ You may find it a suitable alternative to
 [pipenv](https://pipenv.pypa.io/en/latest/),
 [pipx](https://pypa.github.io/pipx/),
 or unaided
-[pip-tools](https://github.com/jazzband/pip-tools/).
+[pip-tools](https://github.com/jazzband/pip-tools/) or
+[uv](https://github.com/astral-sh/uv/).
 
 There's a focus on use of good old `requirements.txt` files,
 and extensive tab completion assistance.
@@ -67,6 +69,12 @@ The model of `requirements.in` `->` `requirements.txt` is strong.
 I appreciate its ability to support a variety of practices, without a fight.
 There's always more work to do be done there,
 so please don't be shy to squash some bugs!
+
+### uv is also good!
+
+While in some ways less flexible than pip-tools,
+uv is *fast*, sensible, features clear and concise output,
+and is a practical replacement for both pip-tools and Python's `venv` module.
 
 ### Zsh is fantastic!
 

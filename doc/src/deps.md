@@ -1,49 +1,45 @@
 # Dependencies
 
 The primary requirements are Zsh, Python, and [`fzf`](https://github.com/junegunn/fzf),
-with optional additions for more colorful output and alternative json parsers.
+with optional additions for more colorful output, alternative json parsers, and faster performance.
 
 ## Suggested Dependencies by Platform
 
 === "Alpine"
 
     ```console
-    $ sudo apk add fzf highlight pcre2-tools python3 zsh
+    $ sudo apk add fzf pcre2-tools python3 zsh
     ```
 
 === "Arch"
 
     ```console
-    $ sudo pacman -S --needed fzf highlight python zsh
+    $ sudo pacman -S --needed fzf python zsh
     ```
 
 === "Debian/Ubuntu"
 
     ```console
-    $ sudo apt --no-install-recommends install bat fzf python3{,-venv} wget zsh
+    $ sudo apt --no-install-recommends install fzf python3{,-venv} wget zsh
     ```
 
 === "Fedora"
 
     ```console
-    $ sudo dnf --setopt=install_weak_deps=False install diffutils fzf highlight python3 zsh
+    $ sudo dnf --setopt=install_weak_deps=False install diffutils fzf python3 zsh
     ```
 
 === "MacOS"
 
     ```console
-    $ brew install fzf highlight pcre2 python zsh
+    $ brew install fzf pcre2 python zsh
     ```
 
 === "OpenSUSE"
 
     ```console
-    $ sudo zypper in curl diffutils fzf highlight python3 zsh
+    $ sudo zypper in curl diffutils fzf python3 zsh
     ```
-
-!!! note
-
-    Either `highlight` or `bat` are included in each of these commands, but are strictly optional.
 
 ## All Dependencies
 
@@ -55,6 +51,8 @@ with optional additions for more colorful output and alternative json parsers.
 
 === "The optional ones"
 
+    - [uv](https://github.com/astral-sh/uv/)
+      -- for faster performance, leaner venvs, and more operational feedback
     - [highlight](https://repology.org/project/highlight/versions)
       *or* [bat](https://repology.org/project/bat/versions)
       *or* [rich-cli](https://github.com/Textualize/rich-cli)
@@ -69,6 +67,14 @@ with optional additions for more colorful output and alternative json parsers.
       -- for theoretically more reliable parsing
     - [zsh-defer](https://github.com/romkatv/zsh-defer)
       -- for caching help content to eliminate a small delay in the first help message
+
+    !!! tip
+
+        Some of these can be installed after installing zpy, with zpy's `pipz` command:
+
+        ```console
+        % pipz install uv rich-cli jello
+        ```
 
 === "The ones you already have anyway, probably"
 
