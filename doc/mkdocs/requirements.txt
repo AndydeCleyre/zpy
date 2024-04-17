@@ -21,7 +21,7 @@ pymdown-extensions==10.7.1  # via mkdocs-material
 python-dateutil==2.9.0.post0  # via ghp-import
 pyyaml==6.0.1             # via mkdocs, pymdown-extensions, pyyaml-env-tag
 pyyaml-env-tag==0.1       # via mkdocs
-regex==2023.12.25         # via mkdocs-material
+regex==2024.4.16          # via mkdocs-material
 requests==2.31.0          # via mkdocs-material
 six==1.16.0               # via python-dateutil
 urllib3==2.2.1            # via requests
