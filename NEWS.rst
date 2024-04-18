@@ -2,6 +2,18 @@
 News
 ====
 
+Unreleased
+==========
+
+CHANGED
+-------
+
+- Stop passing --resolver=backtracking
+  -- It's been pip-tools' default for while already,
+  and it's irrelevant to uv
+- Update container build scripts to use newer base images,
+  and install uv
+
 0.3.4
 =====
 
