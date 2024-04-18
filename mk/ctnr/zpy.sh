@@ -21,7 +21,7 @@ gitroot="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 ctnr_run () {  # [-u] <cmd> [<cmd-arg>...]
   _u=root
   if [ "$1" = -u ]; then _u=$user; shift; fi
-  buildah run --user $_u "$ctnr" "$@"
+  buildah run --net=host --user $_u "$ctnr" "$@"
 }
 
 ctnr_append () {  # [-u] <dest-path>
@@ -43,8 +43,8 @@ case $distro in
     alias ctnr_pkg_add="ctnr_pkg install"
   ;;
   alpine)
-    pkgs="$pkgs pcre2-tools"               # minimal
-    pkgs="$pkgs gcc python3-dev musl-dev"  # numpy, pandas, etc.
+    pkgs="$pkgs pcre2-tools"                             # minimal
+    pkgs="$pkgs gcc python3-dev musl-dev linux-headers"  # numpy, pandas, taskipy, etc.
     fat="$fat /var/cache/apk/*"
     alias ctnr_pkg="ctnr_run apk -q --no-progress"
     alias ctnr_pkg_upgrade="ctnr_pkg upgrade"
@@ -107,6 +107,8 @@ else
 fi
 printf 'zpy_branch: %s\n' "$zpy_branch"
 printf 'zpy_version: %s\n' "$zpy_version"
+
+ctnr_run -u zsh -ic 'pipz install --cmd uv uv'
 
 # Install standalone vpy script, for simpler shebangs
 ctnr_run -u mkdir -p /home/${user}/.local/bin
