@@ -107,7 +107,7 @@ Basic usage of ``envin`` and ``pipacs``:
 
 Basic usage of ``pipz``:
 
-.. image:: https://gist.github.com/AndydeCleyre/de117a9aec8360413b8547e1a5ab3484/raw/c58e242b36b6ca721ffae89463554e09b79f7a9c/pipz.svg?sanitize=true
+.. image:: https://gist.githubusercontent.com/AndydeCleyre/de117a9aec8360413b8547e1a5ab3484/raw/c58e242b36b6ca721ffae89463554e09b79f7a9c/pipz.svg?sanitize=true
    :alt: Animated pipz demo
    :width: 100%
 
