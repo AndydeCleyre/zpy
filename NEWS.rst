@@ -2,10 +2,10 @@
 News
 ====
 
-Unreleased
-==========
+0.3.5
+=====
 
-CHANGED
+Changed
 -------
 
 - Stop passing --resolver=backtracking
@@ -15,6 +15,11 @@ CHANGED
     - use newer base images
     - install uv and rich-cli
     - don't bother installing highlight and corresponding alias
+
+Fixed
+-----
+
+- Fix pipz animation link in readme
 
 0.3.4
 =====
