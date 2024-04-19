@@ -2,6 +2,25 @@
 News
 ====
 
+0.3.5
+=====
+
+Changed
+-------
+
+- Stop passing --resolver=backtracking
+  -- It's been pip-tools' default for while already,
+  and it's irrelevant to uv
+- Update container build scripts:
+    - use newer base images
+    - install uv and rich-cli
+    - don't bother installing highlight and corresponding alias
+
+Fixed
+-----
+
+- Fix pipz animation link in readme
+
 0.3.4
 =====
 

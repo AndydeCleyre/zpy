@@ -505,7 +505,6 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         --annotation-style=line
         --strip-extras
         --allow-unsafe
-        --resolver=backtracking
     )
     # After updating minimum pip-tools to support each of these, add them:
     # --write-relative-to-output

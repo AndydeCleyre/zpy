@@ -21,7 +21,7 @@ gitroot="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 ctnr_run () {  # [-u] <cmd> [<cmd-arg>...]
   _u=root
   if [ "$1" = -u ]; then _u=$user; shift; fi
-  buildah run --user $_u "$ctnr" "$@"
+  buildah run --net=host --user $_u "$ctnr" "$@"
 }
 
 ctnr_append () {  # [-u] <dest-path>
@@ -30,8 +30,8 @@ ctnr_append () {  # [-u] <dest-path>
   ctnr_run $_u sh -c "cat >>$1"
 }
 
-pkgs='fzf python3'            # minimal, common
-pkgs="$pkgs highlight micro"  # recommended, common
+pkgs='fzf python3'  # minimal, common
+pkgs="$pkgs micro"  # recommended, common
 fat="/home/${user}/.zcomet/repos/*/*/.git /usr/lib*/python3.*/__pycache__"
 case $distro in
   fedora)
@@ -43,8 +43,8 @@ case $distro in
     alias ctnr_pkg_add="ctnr_pkg install"
   ;;
   alpine)
-    pkgs="$pkgs pcre2-tools"               # minimal
-    pkgs="$pkgs gcc python3-dev musl-dev"  # numpy, pandas, etc.
+    pkgs="$pkgs pcre2-tools"                             # minimal
+    pkgs="$pkgs gcc python3-dev musl-dev linux-headers"  # numpy, pandas, taskipy, etc.
     fat="$fat /var/cache/apk/*"
     alias ctnr_pkg="ctnr_run apk -q --no-progress"
     alias ctnr_pkg_upgrade="ctnr_pkg upgrade"
@@ -78,7 +78,6 @@ ctnr_pkg_add $pkgs
 # Set variables
 <<EOF ctnr_append -u /home/${user}/.zshenv
 export EDITOR='micro'
-export HIGHLIGHT_OPTIONS='-O truecolor -s ekvoli -t 4 --force --stdout'
 export LESS='ij.3JRWX'
 EOF
 
@@ -108,6 +107,8 @@ fi
 printf 'zpy_branch: %s\n' "$zpy_branch"
 printf 'zpy_version: %s\n' "$zpy_version"
 
+ctnr_run -u zsh -ic 'pipz install --cmd uv uv; pipz install --cmd rich rich-cli'
+
 # Install standalone vpy script, for simpler shebangs
 ctnr_run -u mkdir -p /home/${user}/.local/bin
 ctnr_run -u zsh -ic 'zpy mkbin vpy ~/.local/bin/vpy'
@@ -115,7 +116,6 @@ ctnr_run -u zsh -ic 'zpy mkbin vpy ~/.local/bin/vpy'
 # Set aliases
 <<EOF ctnr_append -u /home/${user}/.zshrc
 alias e="\$EDITOR"
-alias h="highlight"
 mkcd () { mkdir \$1 && cd \$1 }
 
 EOF

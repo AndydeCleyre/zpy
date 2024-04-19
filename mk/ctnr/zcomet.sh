@@ -10,7 +10,7 @@ user=dev
 ctnr_run () {  # [-u] <cmd> [<cmd-arg>...]
   _u=root
   if [ "$1" = -u ]; then _u=$user; shift; fi
-  buildah run --user $_u "$ctnr" "$@"
+  buildah run --net=host --user $_u "$ctnr" "$@"
 }
 
 ctnr_append () {  # [-u] <dest-path>
@@ -23,7 +23,7 @@ pkgs=zsh  # ca-certificates git less sudo wget
 fat="/home/${user}/.zcomet/repos/*/*/.git"
 case $distro in
   fedora)
-    basetag=${2:-36}
+    basetag=${2:-39}
     pkgs="$pkgs git-core"
     fat="$fat /var/cache/* /var/log/* /usr/lib*/python3.*/__pycache__"
     alias ctnr_pkg="ctnr_run dnf -yq --setopt=install_weak_deps=False"
@@ -32,7 +32,7 @@ case $distro in
     alias ctnr_mkuser="ctnr_run useradd -m -s /bin/zsh"
   ;;
   alpine)
-    basetag=${2:-3.15}
+    basetag=${2:-3.19}
     pkgs="$pkgs git sudo"
     fat="$fat /var/cache/apk/*"
     alias ctnr_pkg="ctnr_run apk -q --no-progress"
