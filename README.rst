@@ -153,8 +153,8 @@ Try it in isolation with docker or podman with one of these commands:
 
 .. code:: console
 
-  $ docker run --net=host -it --rm quay.io/andykluger/zpy-ubuntu:master
-  $ podman run --net=host -it --rm quay.io/andykluger/zpy-ubuntu:master
+  $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
+  $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
 
 Replace "ubuntu" with "alpine" or "fedora" if you prefer.
 

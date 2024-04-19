@@ -11,8 +11,10 @@ CHANGED
 - Stop passing --resolver=backtracking
   -- It's been pip-tools' default for while already,
   and it's irrelevant to uv
-- Update container build scripts to use newer base images,
-  and install uv
+- Update container build scripts:
+    - use newer base images
+    - install uv and rich-cli
+    - don't bother installing highlight and corresponding alias
 
 0.3.4
 =====
