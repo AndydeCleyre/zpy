@@ -2,6 +2,19 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- Restore ``highlight`` to top detected syntax highlighter,
+  after confirming Linux Mint renamed their ``highlight`` to ``highlight-mint``
+- Re-add ``highlight`` to the demo images
+- Double ``ZPY_PROCS``, considering how zargs batches processes, and how fast ``uv`` is
+- Don't show ``requirements.txt`` diffs when using ``uv``,
+  which presents a good diff view of its own
+
 0.3.5
 =====
 
