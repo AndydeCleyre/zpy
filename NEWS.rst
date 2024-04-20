@@ -8,6 +8,10 @@ Unreleased
 Changed
 -------
 
+- Use uv completion rather than pip or pip-compile completion
+  when uv is installed, affecting:
+  ``pipc``, ``pipcs``, ``pipacs``, ``pipac``, and ``pipi``
+- Document installation of uv completion
 - Restore ``highlight`` to top detected syntax highlighter,
   after confirming Linux Mint renamed their ``highlight`` to ``highlight-mint``
 - Re-add ``highlight`` to the demo images

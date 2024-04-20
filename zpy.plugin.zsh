@@ -2427,8 +2427,13 @@ _.zpy_ui_pipc () {
     local i=$words[(i)--]
     if (( CURRENT > $i )) {
         shift i words
-        words=(pip-compile $words)
-        (( CURRENT-=i, CURRENT+=1 ))
+        if (( $+commands[uv] )) {
+            words=(uv pip compile $words)
+            (( CURRENT-=i, CURRENT+=3 ))
+        } else {
+            words=(pip-compile $words)
+            (( CURRENT-=i, CURRENT+=1 ))
+        }
         _normal -P
         return
     }
@@ -2455,8 +2460,13 @@ _.zpy_ui_pipcs () {
     local i=$words[(i)--]
     if (( CURRENT > $i )) {
         shift i words
-        words=(pip-compile $words)
-        (( CURRENT-=i, CURRENT+=1 ))
+        if (( $+commands[uv] )) {
+            words=(uv pip compile $words)
+            (( CURRENT-=i, CURRENT+=3 ))
+        } else {
+            words=(pip-compile $words)
+            (( CURRENT-=i, CURRENT+=1 ))
+        }
         _normal -P
         return
     }
@@ -2497,8 +2507,13 @@ _.zpy_ui_pipi () {
         "(--help)--no-upgrade[Don't upgrade already-installed packages]" \
         "(-)*:::Option or Package Spec:->opt_or_pkgspec"
     if [[ $state == opt_or_pkgspec ]] {
-        words=(pip install $words)
-        (( CURRENT+=2 ))
+        if (( $+commands[uv] )) {
+            words=(uv pip install $words)
+            (( CURRENT+=3 ))
+        } else {
+            words=(pip install $words)
+            (( CURRENT+=2 ))
+        }
         _normal
         _zpy_pypi_pkg --or-local
         # TODO: Still quite sloppy... though so is upstream pip completion
@@ -2572,8 +2587,13 @@ _.zpy_ui_reqshow () {
             local i=$words[(i)--]
             if (( CURRENT > $i )) {
                 shift i words
-                words=(pip-compile $words)
-                (( CURRENT-=i, CURRENT+=1 ))
+                if (( $+commands[uv] )) {
+                    words=(uv pip compile $words)
+                    (( CURRENT-=i, CURRENT+=3 ))
+                } else {
+                    words=(pip-compile $words)
+                    (( CURRENT-=i, CURRENT+=1 ))
+                }
                 _normal -P
                 return
             }
