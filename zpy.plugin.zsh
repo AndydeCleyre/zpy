@@ -591,7 +591,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     failures=($faildir/*(N:t))
     zf_rm -rf $faildir
 
-    .zpy_diffsnapshot $snapshotdir
+    # Skip if using uv to show changes
+    if ! (( $+commands[uv] ))  .zpy_diffsnapshot $snapshotdir
 
     REPLY=${snapshotdir:a}
 
