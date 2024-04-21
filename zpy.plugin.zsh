@@ -2427,14 +2427,12 @@ _.zpy_ui_pipc () {
     local i=$words[(i)--]
     if (( CURRENT > $i )) {
         shift i words
-        if (( $+commands[uv] )) {
-            words=(uv pip compile $words)
-            (( CURRENT-=i, CURRENT+=3 ))
-        } else {
-            words=(pip-compile $words)
-            (( CURRENT-=i, CURRENT+=1 ))
-        }
-        _normal -P
+        (( CURRENT-=i ))
+
+        local fake_prefix_cmd=(pip-compile)
+        if (( $+commands[uv] ))  fake_prefix_cmd=(uv pip compile)
+        _zpy_fake_prefix_cmd $fake_prefix_cmd
+
         return
     }
     local reply
@@ -2460,14 +2458,12 @@ _.zpy_ui_pipcs () {
     local i=$words[(i)--]
     if (( CURRENT > $i )) {
         shift i words
-        if (( $+commands[uv] )) {
-            words=(uv pip compile $words)
-            (( CURRENT-=i, CURRENT+=3 ))
-        } else {
-            words=(pip-compile $words)
-            (( CURRENT-=i, CURRENT+=1 ))
-        }
-        _normal -P
+        (( CURRENT-=i ))
+
+        local fake_prefix_cmd=(pip-compile)
+        if (( $+commands[uv] ))  fake_prefix_cmd=(uv pip compile)
+        _zpy_fake_prefix_cmd $fake_prefix_cmd
+
         return
     }
     local reply
@@ -2499,6 +2495,12 @@ _.zpy_ui_pipcheckold () {
         '(-)*: :_zpy_projects'
 }
 
+_zpy_fake_prefix_cmd () {  # cmd [<cmd-arg>...]
+    words=($@ $words)
+    (( CURRENT+=$#@ ))
+    _normal -P
+}
+
 _.zpy_ui_pipi () {
     _zpy_helpmsg ${0[10,-1]}
     local context state state_descr line opt_args
@@ -2507,17 +2509,14 @@ _.zpy_ui_pipi () {
         "(--help)--no-upgrade[Don't upgrade already-installed packages]" \
         "(-)*:::Option or Package Spec:->opt_or_pkgspec"
     if [[ $state == opt_or_pkgspec ]] {
-        if (( $+commands[uv] )) {
-            words=(uv pip install $words)
-            (( CURRENT+=3 ))
-        } else {
-            words=(pip install $words)
-            (( CURRENT+=2 ))
-        }
-        _normal
-        _zpy_pypi_pkg --or-local
+        local fake_prefix_cmd=(pip install)
+        if (( $+commands[uv] ))  fake_prefix_cmd=(uv $fake_prefix_cmd)
+
+        _zpy_fake_prefix_cmd $fake_prefix_cmd
         # TODO: Still quite sloppy... though so is upstream pip completion
         # TODO: Consider filtering out some pip completions
+
+        _zpy_pypi_pkg --or-local
     }
 }
 
@@ -2587,14 +2586,12 @@ _.zpy_ui_reqshow () {
             local i=$words[(i)--]
             if (( CURRENT > $i )) {
                 shift i words
-                if (( $+commands[uv] )) {
-                    words=(uv pip compile $words)
-                    (( CURRENT-=i, CURRENT+=3 ))
-                } else {
-                    words=(pip-compile $words)
-                    (( CURRENT-=i, CURRENT+=1 ))
-                }
-                _normal -P
+                (( CURRENT-=i ))
+
+                local fake_prefix_cmd=(pip-compile)
+                if (( $+commands[uv] ))  fake_prefix_cmd=(uv pip compile)
+                _zpy_fake_prefix_cmd $fake_prefix_cmd
+
                 return
             }
             local -U catgs=(dev doc ops test *-requirements.{in,txt}(N))
