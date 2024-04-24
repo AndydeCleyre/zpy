@@ -5,13 +5,13 @@ zpy
 Manage Python Environments in Zsh, with uv or pip-tools
 -------------------------------------------------------
 
-|logo|
-
 |ghpages| |reqs-ci| |container-ci|
 
 |container-alpine| |container-fedora| |container-ubuntu|
 
 |repo| |docsite| |contact|
+
+|logo|
 
 ``zpy`` is a set of Zsh functions
 wrapping
