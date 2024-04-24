@@ -18,6 +18,8 @@ Changed
 - Double ``ZPY_PROCS``, considering how zargs batches processes, and how fast ``uv`` is
 - Don't show ``requirements.txt`` diffs when using ``uv``,
   which presents a good diff view of its own
+- Remove some irrelevant flags when using uv,
+  avoiding some warnings
 
 0.3.5
 =====

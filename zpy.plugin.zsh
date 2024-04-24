@@ -475,6 +475,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     }
     local outswitch
     for outswitch ( -o --output-file ) {
+        # TODO: handle --output-file=path form as well
         if (( ${@[(I)$outswitch]} )) {
             reqstxt=${@[$@[(i)$outswitch]+1]}
             break
@@ -510,12 +511,14 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     # After updating minimum pip-tools to support each of these, add them:
     # --write-relative-to-output
     # --read-relative-to-input
+    pipcompile_args=($pipcompile_args $@)
 
     local badrets
     if (( $+commands[uv] )) {
-        uv pip compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1
+        pipcompile_args=(${pipcompile_args:#--(allow-unsafe|strip-extras)})
+        uv pip compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $reqsin 2>&1
     } else {
-        pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1 \
+        pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $reqsin 2>&1 \
         | .zpy_hlt ini
     }
     badrets=(${pipestatus:#0})
