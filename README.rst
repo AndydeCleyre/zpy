@@ -7,7 +7,7 @@ Manage Python Environments in Zsh, with uv or pip-tools
 
 .. image:: https://github.com/AndydeCleyre/zpy/blob/assets/zpy-logo.png?raw=true
    :alt: zpy logo
-   :width: 50%
+   :width: 10%
 
 |ghpages| |reqs-ci| |container-ci|
 
