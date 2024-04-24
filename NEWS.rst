@@ -11,6 +11,7 @@ Changed
 - Use uv completion rather than pip or pip-compile completion
   when uv is installed, affecting:
   ``pipc``, ``pipcs``, ``pipacs``, ``pipac``, and ``pipi``
+  -- currently a bit limited by astral-sh/uv#3249
 - Document installation of uv completion
 - Restore ``highlight`` to top detected syntax highlighter,
   after confirming Linux Mint renamed their ``highlight`` to ``highlight-mint``
