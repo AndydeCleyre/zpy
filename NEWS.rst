@@ -19,6 +19,7 @@ Changed
 - Double ``ZPY_PROCS``, considering how zargs batches processes, and how fast ``uv`` is
 - Remove some irrelevant flags when using uv,
   avoiding some warnings
+- Bump Fedora demo container to 40
 
 0.3.5
 =====
