@@ -74,7 +74,7 @@ or install it with a plugin manager:
 
 === "Antigen"
 
-    Put `antigen bundle andydecleyre/zpy` in your ``~/.zshrc``, before `antigen apply`.
+    Put `antigen bundle andydecleyre/zpy` in your `~/.zshrc`, before `antigen apply`.
 
 === "Prezto"
 

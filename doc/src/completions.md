@@ -16,7 +16,7 @@ Completion will work for those if you install their own completion definitions.
 
 If using `uv`, neither `pip` nor `pip-compile` will be relevant.
 
-``uv`` completion can be installed with something like the following,
+`uv` completion can be installed with something like the following,
 depending on your `$fpath`:
 
 ```console
