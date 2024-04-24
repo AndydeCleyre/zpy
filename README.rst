@@ -101,13 +101,13 @@ They are also available as subcommands to the "supercommand" ``zpy``;
 
 Basic usage of ``envin`` and ``pipacs``:
 
-.. image:: https://gist.githubusercontent.com/AndydeCleyre/306d250c59a754b9a3399251b4ca0c65/raw/0ae1d1a9e8f5b72dbf78aba4a5ef138909932851/envin_pipacs.svg?sanitize=true
+.. image:: https://github.com/AndydeCleyre/zpy/blob/assets/envin_pipacs.gif?raw=true
    :alt: Animated envin and pipacs demo
    :width: 100%
 
 Basic usage of ``pipz``:
 
-.. image:: https://gist.githubusercontent.com/AndydeCleyre/de117a9aec8360413b8547e1a5ab3484/raw/c58e242b36b6ca721ffae89463554e09b79f7a9c/pipz.svg?sanitize=true
+.. image:: https://github.com/AndydeCleyre/zpy/blob/assets/pipz.gif?raw=true
    :alt: Animated pipz demo
    :width: 100%
 
