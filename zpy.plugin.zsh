@@ -2511,10 +2511,13 @@ _.zpy_ui_pipi () {
         "(--help)--no-upgrade[Don't upgrade already-installed packages]" \
         "(-)*:::Option or Package Spec:->opt_or_pkgspec"
     if [[ $state == opt_or_pkgspec ]] {
-        local fake_prefix_cmd=(pip install)
-        if (( $+commands[uv] ))  fake_prefix_cmd=(uv $fake_prefix_cmd)
-
-        _zpy_fake_prefix_cmd $fake_prefix_cmd
+        words=(pip install $words)
+        (( CURRENT+=2 ))
+        if (( $+commands[uv] )) {
+            words=(uv $words)
+            (( CURRENT+=1 ))
+        }
+        _normal -P
         # TODO: Still quite sloppy... though so is upstream pip completion
         # TODO: Consider filtering out some pip completions
 
