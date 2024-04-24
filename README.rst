@@ -5,6 +5,10 @@ zpy
 Manage Python Environments in Zsh, with uv or pip-tools
 -------------------------------------------------------
 
+.. image:: https://github.com/AndydeCleyre/zpy/blob/assets/zpy-logo.png?raw=true
+   :alt: zpy logo
+   :width: 50%
+
 |ghpages| |reqs-ci| |container-ci|
 
 |container-alpine| |container-fedora| |container-ubuntu|
