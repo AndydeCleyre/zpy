@@ -23,6 +23,7 @@ There's a focus on use of good old `requirements.txt` files,
 and extensive tab completion assistance.
 
 Read below for some rationale,
+check [the readme](https://github.com/andydecleyre/zpy) for some quick-start examples,
 or just [get started](start.md) with the short guide.
 
 ## Why?

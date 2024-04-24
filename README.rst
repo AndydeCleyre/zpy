@@ -111,6 +111,18 @@ Basic usage of ``pipz``:
    :alt: Animated pipz demo
    :width: 100%
 
+Try it in a Container
+---------------------
+
+Try it in isolation with docker or podman with one of these commands:
+
+.. code:: console
+
+  $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
+  $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
+
+Replace "ubuntu" with "alpine" or "fedora" if you prefer.
+
 Guiding Ideas
 -------------
 
@@ -145,18 +157,6 @@ __ https://asdf-vm.com
 __ https://flit.readthedocs.io/en/latest/
 
 __ https://github.com/AndydeCleyre/zpy/issues
-
-Try it in a Container
----------------------
-
-Try it in isolation with docker or podman with one of these commands:
-
-.. code:: console
-
-  $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
-  $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
-
-Replace "ubuntu" with "alpine" or "fedora" if you prefer.
 
 .. |repo| image:: https://img.shields.io/github/size/andydecleyre/zpy/zpy.plugin.zsh?logo=github&label=Code&color=blueviolet
    :alt: Plugin file size in bytes
