@@ -14,12 +14,13 @@ Changed
   -- currently a bit limited by astral-sh/uv#3249
 - Document installation of uv completion
 - Restore ``highlight`` to top detected syntax highlighter,
-  after confirming Linux Mint renamed their ``highlight`` to ``highlight-mint``
-- Re-add ``highlight`` to the demo images
+  since confirming Linux Mint renamed their ``highlight`` to ``highlight-mint``
+- Re-add ``highlight`` to the demo container images
 - Double ``ZPY_PROCS``, considering how zargs batches processes, and how fast ``uv`` is
 - Remove some irrelevant flags when using uv,
   avoiding some warnings
 - Bump Fedora demo container to 40
+- Spruce up README, though GitHub rendering is partially broken -- https://github.com/github/markup/issues/1798
 
 0.3.5
 =====
