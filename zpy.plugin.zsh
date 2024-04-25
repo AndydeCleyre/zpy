@@ -4,11 +4,12 @@ zmodload zsh/pcre 2>/dev/null
 
 ZPY_SRC=${0:P}
 ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
+(( ZPY_PROCS*=2 ))
 
 ## User may want to override these:
 : ${ZPY_VENVS_HOME:=${XDG_DATA_HOME:-~/.local/share}/venvs}
 ## Each project is associated with: $ZPY_VENVS_HOME/<hash of proj-dir>/<venv-name>
-## <venv-name> is one or more of: venv, venv2, venv-pypy, venv-<pyver>
+## <venv-name> is one or more of: venv, venv-pypy, venv-<pyver>
 ## $(venvs_path <proj-dir>) evals to $ZPY_VENVS_HOME/<hash of proj-dir>
 : ${ZPY_PIPZ_PROJECTS:=${XDG_DATA_HOME:-~/.local/share}/python}
 : ${ZPY_PIPZ_BINS:=${${XDG_DATA_HOME:-~/.local/share}:P:h}/bin}
@@ -81,16 +82,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         }
     }
 
-    if (( $+commands[bat] )) {  # recommended themes: ansi, zenburn
-        BAT_THEME=${BAT_THEME:-ansi} \
-        bat --color always --paging never -p -l $1
-    } elif (( $+commands[batcat] )) {
-        BAT_THEME=${BAT_THEME:-ansi} \
-        batcat --color always --paging never -p -l $1
-    } elif (( $+commands[rich] )) {
-        local content=$(<&0)
-        if [[ $content ]]  rich --force-terminal --guides --max-width $(( COLUMNS-4 )) --lexer $1 - <<<$content
-    } elif (( $+commands[highlight] )) {
+    if (( $+commands[highlight] )) {
         # recommended themes: aiseered, blacknblue, bluegreen, ekvoli, navy
 
         # highlight has two issues with newlines:
@@ -122,6 +114,15 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
             HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-"-s $themes[RANDOM % $#themes + 1]"} \
             highlight -O truecolor --stdout --force -S $1 <<<$content
         }
+    } elif (( $+commands[bat] )) {  # recommended themes: ansi, zenburn
+        BAT_THEME=${BAT_THEME:-ansi} \
+        bat --color always --paging never -p -l $1
+    } elif (( $+commands[batcat] )) {
+        BAT_THEME=${BAT_THEME:-ansi} \
+        batcat --color always --paging never -p -l $1
+    } elif (( $+commands[rich] )) {
+        local content=$(<&0)
+        if [[ $content ]]  rich --force-terminal --guides --max-width $(( COLUMNS-4 )) --lexer $1 - <<<$content
     } else {
         >&1
     }
@@ -474,6 +475,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     }
     local outswitch
     for outswitch ( -o --output-file ) {
+        # TODO: handle --output-file=path form as well
         if (( ${@[(I)$outswitch]} )) {
             reqstxt=${@[$@[(i)$outswitch]+1]}
             break
@@ -509,12 +511,14 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     # After updating minimum pip-tools to support each of these, add them:
     # --write-relative-to-output
     # --read-relative-to-input
+    pipcompile_args=($pipcompile_args $@)
 
     local badrets
     if (( $+commands[uv] )) {
-        uv pip compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1
+        pipcompile_args=(${pipcompile_args:#--(allow-unsafe|strip-extras)})
+        uv pip compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $reqsin 2>&1
     } else {
-        pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin 2>&1 \
+        pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $reqsin 2>&1 \
         | .zpy_hlt ini
     }
     badrets=(${pipestatus:#0})
@@ -2425,9 +2429,12 @@ _.zpy_ui_pipc () {
     local i=$words[(i)--]
     if (( CURRENT > $i )) {
         shift i words
-        words=(pip-compile $words)
-        (( CURRENT-=i, CURRENT+=1 ))
-        _normal -P
+        (( CURRENT-=i ))
+
+        local fake_prefix_cmd=(pip-compile)
+        if (( $+commands[uv] ))  fake_prefix_cmd=(uv pip compile)
+        _zpy_fake_prefix_cmd $fake_prefix_cmd
+
         return
     }
     local reply
@@ -2453,9 +2460,12 @@ _.zpy_ui_pipcs () {
     local i=$words[(i)--]
     if (( CURRENT > $i )) {
         shift i words
-        words=(pip-compile $words)
-        (( CURRENT-=i, CURRENT+=1 ))
-        _normal -P
+        (( CURRENT-=i ))
+
+        local fake_prefix_cmd=(pip-compile)
+        if (( $+commands[uv] ))  fake_prefix_cmd=(uv pip compile)
+        _zpy_fake_prefix_cmd $fake_prefix_cmd
+
         return
     }
     local reply
@@ -2487,6 +2497,12 @@ _.zpy_ui_pipcheckold () {
         '(-)*: :_zpy_projects'
 }
 
+_zpy_fake_prefix_cmd () {  # cmd [<cmd-arg>...]
+    words=($@ $words)
+    (( CURRENT+=$#@ ))
+    _normal -P
+}
+
 _.zpy_ui_pipi () {
     _zpy_helpmsg ${0[10,-1]}
     local context state state_descr line opt_args
@@ -2497,10 +2513,15 @@ _.zpy_ui_pipi () {
     if [[ $state == opt_or_pkgspec ]] {
         words=(pip install $words)
         (( CURRENT+=2 ))
-        _normal
-        _zpy_pypi_pkg --or-local
+        if (( $+commands[uv] )) {
+            words=(uv $words)
+            (( CURRENT+=1 ))
+        }
+        _normal -P
         # TODO: Still quite sloppy... though so is upstream pip completion
         # TODO: Consider filtering out some pip completions
+
+        _zpy_pypi_pkg --or-local
     }
 }
 
@@ -2570,9 +2591,12 @@ _.zpy_ui_reqshow () {
             local i=$words[(i)--]
             if (( CURRENT > $i )) {
                 shift i words
-                words=(pip-compile $words)
-                (( CURRENT-=i, CURRENT+=1 ))
-                _normal -P
+                (( CURRENT-=i ))
+
+                local fake_prefix_cmd=(pip-compile)
+                if (( $+commands[uv] ))  fake_prefix_cmd=(uv pip compile)
+                _zpy_fake_prefix_cmd $fake_prefix_cmd
+
                 return
             }
             local -U catgs=(dev doc ops test *-requirements.{in,txt}(N))

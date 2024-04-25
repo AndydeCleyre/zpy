@@ -11,6 +11,8 @@ Manage Python Environments in Zsh, with uv or pip-tools
 
 |repo| |docsite| |contact|
 
+|logo|
+
 ``zpy`` is a set of Zsh functions
 wrapping
 pip-tools__
@@ -31,9 +33,7 @@ They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 
 .. contents::
 
-.. image:: https://user-images.githubusercontent.com/1787385/172661113-7a2c6670-e716-491e-8db4-c005fef8455b.png
-   :alt: zpy supercommand completions
-   :width: 100%
+|zpy-completions|
 
 Getting It
 ----------
@@ -101,15 +101,23 @@ They are also available as subcommands to the "supercommand" ``zpy``;
 
 Basic usage of ``envin`` and ``pipacs``:
 
-.. image:: https://gist.githubusercontent.com/AndydeCleyre/306d250c59a754b9a3399251b4ca0c65/raw/0ae1d1a9e8f5b72dbf78aba4a5ef138909932851/envin_pipacs.svg?sanitize=true
-   :alt: Animated envin and pipacs demo
-   :width: 100%
+|envin-pipacs-gif|
 
 Basic usage of ``pipz``:
 
-.. image:: https://gist.githubusercontent.com/AndydeCleyre/de117a9aec8360413b8547e1a5ab3484/raw/c58e242b36b6ca721ffae89463554e09b79f7a9c/pipz.svg?sanitize=true
-   :alt: Animated pipz demo
-   :width: 100%
+|pipz-gif|
+
+Try it in a Container
+---------------------
+
+Try it in isolation with docker or podman with one of these commands:
+
+.. code:: console
+
+  $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
+  $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
+
+Replace "ubuntu" with "alpine" or "fedora" if you prefer.
 
 Guiding Ideas
 -------------
@@ -146,18 +154,6 @@ __ https://flit.readthedocs.io/en/latest/
 
 __ https://github.com/AndydeCleyre/zpy/issues
 
-Try it in a Container
----------------------
-
-Try it in isolation with docker or podman with one of these commands:
-
-.. code:: console
-
-  $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
-  $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
-
-Replace "ubuntu" with "alpine" or "fedora" if you prefer.
-
 .. |repo| image:: https://img.shields.io/github/size/andydecleyre/zpy/zpy.plugin.zsh?logo=github&label=Code&color=blueviolet
    :alt: Plugin file size in bytes
    :target: https://github.com/andydecleyre/zpy
@@ -193,3 +189,19 @@ Replace "ubuntu" with "alpine" or "fedora" if you prefer.
 .. |ghpages| image:: https://github.com/AndydeCleyre/zpy/actions/workflows/gh-pages.yml/badge.svg?branch=master
    :alt: Build GitHub Pages
    :target: https://andydecleyre.github.io/zpy/
+
+.. |logo| image:: https://github.com/AndydeCleyre/zpy/blob/assets/zpy-logo.png?raw=true
+   :alt: zpy logo
+   :width: 160px
+
+.. |zpy-completions| image:: https://user-images.githubusercontent.com/1787385/172661113-7a2c6670-e716-491e-8db4-c005fef8455b.png
+   :alt: zpy supercommand completions
+   :width: 800px
+
+.. |envin-pipacs-gif| image:: https://github.com/AndydeCleyre/zpy/blob/assets/envin_pipacs.gif?raw=true
+   :alt: Animated envin and pipacs demo
+   :width: 800px
+
+.. |pipz-gif| image:: https://github.com/AndydeCleyre/zpy/blob/assets/pipz.gif?raw=true
+   :alt: Animated pipz demo
+   :width: 800px

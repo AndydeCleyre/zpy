@@ -30,8 +30,8 @@ ctnr_append () {  # [-u] <dest-path>
   ctnr_run $_u sh -c "cat >>$1"
 }
 
-pkgs='fzf python3'  # minimal, common
-pkgs="$pkgs micro"  # recommended, common
+pkgs='fzf python3'            # minimal, common
+pkgs="$pkgs highlight micro"  # recommended, common
 fat="/home/${user}/.zcomet/repos/*/*/.git /usr/lib*/python3.*/__pycache__"
 case $distro in
   fedora)
@@ -78,6 +78,7 @@ ctnr_pkg_add $pkgs
 # Set variables
 <<EOF ctnr_append -u /home/${user}/.zshenv
 export EDITOR='micro'
+export HIGHLIGHT_OPTIONS='-O truecolor -s ekvoli -t 4 --force --stdout'
 export LESS='ij.3JRWX'
 EOF
 
@@ -116,6 +117,7 @@ ctnr_run -u zsh -ic 'zpy mkbin vpy ~/.local/bin/vpy'
 # Set aliases
 <<EOF ctnr_append -u /home/${user}/.zshrc
 alias e="\$EDITOR"
+alias h="highlight"
 mkcd () { mkdir \$1 && cd \$1 }
 
 EOF
