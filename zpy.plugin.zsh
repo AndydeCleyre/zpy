@@ -2609,8 +2609,7 @@ _.zpy_ui_reqshow () {
             }
             local -U catgs=(dev doc ops test *-requirements.{in,txt}(N))
             catgs=(${catgs%%-*})
-            local context state state_descr line opt_args
-            local ret=1
+            local context state state_descr line opt_args ret=1
             _arguments \
                 '(- * :)--help[Show usage information]' \
                 "(--help)-c[Use <category>-requirements.in]:Category:($catgs)" \
