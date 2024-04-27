@@ -12,6 +12,7 @@ Changed
 - Reduce double-warnings about non-activated venvs
 - Make all completion function return codes accurate,
   complying with the shell's internal expectations
+- Don't append lines which are already present (pipa, pipac, pipacs)
 
 0.3.6
 =====
