@@ -318,11 +318,11 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
       "${${PWD:P}/%${PWD:P:t}/%B${PWD:P:t}%b}"
 }
 
-.zpy_require_venv () {
+.zpy_warn_venv () {  # [-q]
     emulate -L zsh
 
     if ! [[ $VIRTUAL_ENV ]] {
-        .zpy_please_activate venv
+        if ! [[ $1 == -q ]]  .zpy_please_activate venv
         return 1
     }
 }
@@ -331,7 +331,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 .zpy_ui_pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
     emulate -L zsh
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
-    .zpy_require_venv
+    .zpy_warn_venv || return
 
     local upgrade=-U
     if [[ $1 == --no-upgrade ]] { unset upgrade; shift }
@@ -411,7 +411,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     emulate -L zsh
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     rehash
-    .zpy_require_venv
+    .zpy_warn_venv || return
     if (( ! $+commands[uv] )) && (( ! $+commands[pip-sync] )) {
         .zpy_please_activate "uv or pip-sync"
         return 1
@@ -454,7 +454,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         if [[ $1 == --snapshotdir ]] { snapshotdir=${2:a}; shift 2 }
     }
 
-    if { ! .zpy_require_venv } || (( ! $+commands[uv] && ! $+commands[pip-compile] )) {
+    if { ! .zpy_warn_venv -q } || (( ! $+commands[uv] && ! $+commands[pip-compile] )) {
         .zpy_please_activate "uv or pip-compile"
         if [[ $faildir ]]  print -n >>$faildir/${PWD:t}
         return 1
