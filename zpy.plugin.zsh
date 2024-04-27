@@ -134,7 +134,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     emulate -L zsh
     # <output> like: '$1$4$5$7'
 
-    local backrefs=() pattern=$2 body="$(<$3)"
+    local backrefs=() pattern=$2 body=${mapfile[$3]}
     backrefs=(${(s:$:)1})
 
     local result_parts=() result_template
@@ -1030,7 +1030,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
             .zpy_whichvpy $venv_name $1 || return
             shebang="#!${REPLY}"
         }
-        lines=("${(@f)$(<$1)}")
+        lines=("${(@f)mapfile[$1]}")
         if [[ $lines[1] != $shebang ]] {
             print -rl -- "${shebang}" "${(@)lines}" >$1
         }
@@ -1478,14 +1478,14 @@ pyproject.write_text(tomlkit.dumps(toml_data))
 
 .zpy_insertjson () {  # <jsonfile> <value> <keycrumb>...
     # Does not currently handle spaces within any keycrumb (or need to)
-    emulate -L zsh
+    emulate -L zsh -o extendedglob
     rehash
 
     local jsonfile=$1; shift
     local value=$1; shift
 
     zf_mkdir -p ${jsonfile:h}
-    if [[ ! -r $jsonfile ]] || [[ ! $(<$jsonfile) ]] {
+    if [[ ! -r $jsonfile ]] || [[ ! ${mapfile[$jsonfile]##[[:space:]]#} ]] {
         >$jsonfile <<<'{}'
     }
 
@@ -1636,7 +1636,7 @@ jsonfile.write_text(dumps(data, indent=4))
 }
 
 .zpy_diffsnapshot () {  # <snapshot-dir>
-    emulate -L zsh
+    emulate -L zsh -o extendedglob
     [[ -d $1 ]] || return
 
     # Original text file contents have been copied into the snapshot dir,
@@ -1647,7 +1647,7 @@ jsonfile.write_text(dumps(data, indent=4))
 
     local origtxt newtxt diffout label
     for origtxt newtxt ( ${origtxts:^newtxts} ) {
-        if [[ ! $(<$origtxt) ]]  continue
+        if [[ ! ${mapfile[$origtxt]##[[:space:]]#} ]]  continue
 
         label=${newtxt:a:h:h:t}/${newtxt:a:h:t}${${newtxt:a:h:t}:+/}${newtxt:t}
         diffout=$(diff -wu -L $label $origtxt -L $label $newtxt)
@@ -2296,7 +2296,7 @@ jsonfile.write_text(dumps(data, indent=4))
         return 1
     }
 
-    print -rl -- '#!/bin/zsh' "$(<$ZPY_SRC)" ".zpy_ui_${1} \$@" >$dest
+    print -rl -- '#!/bin/zsh' "${mapfile[$ZPY_SRC]}" ".zpy_ui_${1} \$@" >$dest
     zf_chmod 0755 $dest
 }
 
@@ -2937,7 +2937,7 @@ tfile.write_text('\n'.join(r['project'] for r in data['rows']))
             "
         }
     }
-    reply=(${(f)"$(<$txt)"})
+    reply=(${(f)mapfile[$txt]})
 }
 
 .zpy_expose_funcs
