@@ -1,6 +1,7 @@
 autoload -Uz zargs
 zmodload -mF zsh/files 'b:zf_(chmod|ln|mkdir|rm)'
 zmodload zsh/pcre 2>/dev/null
+zmodload zsh/mapfile
 
 ZPY_SRC=${0:P}
 ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
@@ -694,7 +695,14 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     .zpy_log action appending $reqsin
 
-    print -rl -- $@ >>$reqsin
+    local lines=(${(f)mapfile[$reqsin]})
+    for 1 {
+        if (( lines[(I)$1] )) {
+            .zpy_log action 'skipping existing entry' $1
+        } else {
+            print -rl -- $1 >>$reqsin
+        }
+    }
 
     .zpy_hlt ini <$reqsin
 }
