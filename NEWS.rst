@@ -2,6 +2,17 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- Strictly require activated venvs for some operations
+- Reduce double-warnings about non-activated venvs
+- Make all completion function return codes accurate,
+  complying with the shell's internal expectations
+
 0.3.6
 =====
 
