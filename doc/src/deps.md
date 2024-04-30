@@ -86,6 +86,7 @@ with optional additions for more colorful output, alternative json parsers, and 
       or macOS
     - `diff` -- provided by
       [diffutils](https://repology.org/project/diffutils/versions),
+      [uutils/diffutils](https://github.com/uutils/diffutils),
       [busybox](https://repology.org/project/busybox/versions),
       BSD,
       or macOS
