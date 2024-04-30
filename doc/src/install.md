@@ -131,3 +131,10 @@ or install it with a plugin manager:
 
     Don't use a plugin manager but want to try one now?
     I suggest [zcomet](https://github.com/agkozak/zcomet).
+
+After restarting your shell,
+it is recommended to install [uv](https://github.com/astral-sh/uv/):
+
+```console
+% pipz install uv
+```
