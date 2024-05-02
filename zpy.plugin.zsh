@@ -2024,7 +2024,7 @@ jsonfile.write_text(dumps(data, indent=4))
         # TODO: track failures from .zpy_pipzlinkbins?
 
         (( ${path[(I)$ZPY_PIPZ_BINS]} )) \
-        || .zpy_log tip Suggestion 'add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B${${ZDOTDIR/#~\//~/}:-~}/.zshrc%b'
+        || .zpy_log tip Suggestion 'add %Bpath=('${ZPY_PIPZ_BINS/#~\//\~/}' $path)%b to %B'${${ZDOTDIR/#~\//\~/}:-\~}'/.zshrc%b'
 
         if [[ $failures ]] {
             .zpy_log error "FAILED to (${0[9,-1]}) install" $failures
@@ -2094,7 +2094,7 @@ jsonfile.write_text(dumps(data, indent=4))
             "apps exposed %B@%b ${ZPY_PIPZ_BINS/#~\//~/}"
 
         (( ${path[(I)$ZPY_PIPZ_BINS]} )) \
-        || .zpy_log tip Suggestion 'add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B${${ZDOTDIR/#~\//~/}:-~}/.zshrc%b'
+        || .zpy_log tip Suggestion 'add %Bpath=('${ZPY_PIPZ_BINS/#~\//\~/}' $path)%b to %B'${${ZDOTDIR/#~\//\~/}:-\~}'/.zshrc%b'
 
         print
         print -rC 4 -- ${ZPY_PIPZ_PROJECTS}/*(/N:t)
