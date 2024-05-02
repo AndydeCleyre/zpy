@@ -414,7 +414,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     rehash
     .zpy_warn_venv || return
     if (( ! $+commands[uv] )) && (( ! $+commands[pip-sync] )) {
-        .zpy_please_activate "uv or pip-sync"
+        .zpy_log error 'FAILED to find' 'uv or pip-sync'
+        .zpy_log tip Suggestion 'pipz install uv'
         return 1
     }
 
@@ -608,30 +609,40 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
 # TODO: move highest level funcs to top
 
+# .zpy_log tip <title> <subject> [<line>]...
 # .zpy_log error <title> <subject> [<line>]...
 # .zpy_log action [--proj <folder>] <action> <output> [<input>...]
-.zpy_log () {  # error|action <arg>...
+.zpy_log () {  # tip|error|action <arg>...
     emulate -L zsh
 
     case $1 {
-    error)
-        shift
-        local title="==> $1:"; shift
-        local subject=${1/#~\//\~/}; shift
-        local lines=('  '${^@/#~\//\~/})
-        if ! [[ -v NO_COLOR ]] {
-            title="%F{red}$title %F{yellow}$subject"
-            lines[-1]="${lines[-1]}%f"
-        } else {
-            title="$title $subject"
-        }
-        print -lrPu2 -- $title $lines
-    ;;
     action)
         shift
         .zpy_print_action $@
+        return
+    ;;
+    tip)
+        shift
+        local title_color=green
+        local subject_color=blue
+    ;;
+    error)
+        shift
+        local title_color=red
+        local subject_color=yellow
     ;;
     }
+
+    local title="==> $1:"; shift
+    local subject=${1/#~\//\~/}; shift
+    local lines=('  '${^@/#~\//\~/})
+    if ! [[ -v NO_COLOR ]] {
+        title="%F{$title_color}$title %F{$subject_color}$subject"
+        lines[-1]="${lines[-1]}%f"
+    } else {
+        title="$title $subject"
+    }
+    print -lrPu2 -- $title $lines
 }
 
 # Compile, then sync.
@@ -2013,7 +2024,7 @@ jsonfile.write_text(dumps(data, indent=4))
         # TODO: track failures from .zpy_pipzlinkbins?
 
         (( ${path[(I)$ZPY_PIPZ_BINS]} )) \
-        || print -rP "suggestion%B:%b add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B${ZDOTDIR:-~}/.zshrc%b"
+        || .zpy_log tip Suggestion 'add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B${${ZDOTDIR/#~\//~/}:-~}/.zshrc%b'
 
         if [[ $failures ]] {
             .zpy_log error "FAILED to (${0[9,-1]}) install" $failures
@@ -2083,7 +2094,7 @@ jsonfile.write_text(dumps(data, indent=4))
             "apps exposed %B@%b ${ZPY_PIPZ_BINS/#~\//~/}"
 
         (( ${path[(I)$ZPY_PIPZ_BINS]} )) \
-        || print -rP "suggestion%B:%b add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B${ZDOTDIR:-~}/.zshrc%b"
+        || .zpy_log tip Suggestion 'add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B${${ZDOTDIR/#~\//~/}:-~}/.zshrc%b'
 
         print
         print -rC 4 -- ${ZPY_PIPZ_PROJECTS}/*(/N:t)
