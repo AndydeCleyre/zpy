@@ -1,6 +1,7 @@
 autoload -Uz zargs
 zmodload -mF zsh/files 'b:zf_(chmod|ln|mkdir|rm)'
 zmodload zsh/pcre 2>/dev/null
+zmodload zsh/mapfile
 
 ZPY_SRC=${0:P}
 ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
@@ -133,7 +134,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     emulate -L zsh
     # <output> like: '$1$4$5$7'
 
-    local backrefs=() pattern=$2 body="$(<$3)"
+    local backrefs=() pattern=$2 body=${mapfile[$3]}
     backrefs=(${(s:$:)1})
 
     local result_parts=() result_template
@@ -314,15 +315,15 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     emulate -L zsh
 
     .zpy_log error 'FAILED to find' "$1" \
-      "You probably want to activate a venv with 'activate' (or 'a8'), first." \
       "${${PWD:P}/%${PWD:P:t}/%B${PWD:P:t}%b}"
+    .zpy_log tip Suggestion "Activate a venv with 'activate' (or 'a8'), first."
 }
 
-.zpy_require_venv () {
+.zpy_warn_venv () {  # [-q]
     emulate -L zsh
 
     if ! [[ $VIRTUAL_ENV ]] {
-        .zpy_please_activate venv
+        if ! [[ $1 == -q ]]  .zpy_please_activate venv
         return 1
     }
 }
@@ -331,7 +332,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 .zpy_ui_pipi () {  # [--no-upgrade] [<pip install arg>...] <pkgspec>...
     emulate -L zsh
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
-    .zpy_require_venv
+    .zpy_warn_venv || return
 
     local upgrade=-U
     if [[ $1 == --no-upgrade ]] { unset upgrade; shift }
@@ -411,9 +412,10 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     emulate -L zsh
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     rehash
-    .zpy_require_venv
+    .zpy_warn_venv || return
     if (( ! $+commands[uv] )) && (( ! $+commands[pip-sync] )) {
-        .zpy_please_activate "uv or pip-sync"
+        .zpy_log error 'FAILED to find' 'uv or pip-sync'
+        .zpy_log tip Suggestion 'pipz install uv'
         return 1
     }
 
@@ -454,7 +456,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         if [[ $1 == --snapshotdir ]] { snapshotdir=${2:a}; shift 2 }
     }
 
-    if { ! .zpy_require_venv } || (( ! $+commands[uv] && ! $+commands[pip-compile] )) {
+    if { ! .zpy_warn_venv -q } || (( ! $+commands[uv] && ! $+commands[pip-compile] )) {
         .zpy_please_activate "uv or pip-compile"
         if [[ $faildir ]]  print -n >>$faildir/${PWD:t}
         return 1
@@ -607,30 +609,40 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
 # TODO: move highest level funcs to top
 
+# .zpy_log tip <title> <subject> [<line>]...
 # .zpy_log error <title> <subject> [<line>]...
 # .zpy_log action [--proj <folder>] <action> <output> [<input>...]
-.zpy_log () {  # error|action <arg>...
+.zpy_log () {  # tip|error|action <arg>...
     emulate -L zsh
 
     case $1 {
-    error)
-        shift
-        local title="==> $1:"; shift
-        local subject=${1/#~\//\~/}; shift
-        local lines=('  '${^@/#~\//\~/})
-        if ! [[ -v NO_COLOR ]] {
-            title="%F{red}$title %F{yellow}$subject"
-            lines[-1]="${lines[-1]}%f"
-        } else {
-            title="$title $subject"
-        }
-        print -lrPu2 -- $title $lines
-    ;;
     action)
         shift
         .zpy_print_action $@
+        return
+    ;;
+    tip)
+        shift
+        local title_color=green
+        local subject_color=blue
+    ;;
+    error)
+        shift
+        local title_color=red
+        local subject_color=yellow
     ;;
     }
+
+    local title="==> $1:"; shift
+    local subject=${1/#~\//\~/}; shift
+    local lines=('  '${^@/#~\//\~/})
+    if ! [[ -v NO_COLOR ]] {
+        title="%F{$title_color}$title %F{$subject_color}$subject"
+        lines[-1]="${lines[-1]}%f"
+    } else {
+        title="$title $subject"
+    }
+    print -lrPu2 -- $title $lines
 }
 
 # Compile, then sync.
@@ -694,7 +706,14 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     .zpy_log action appending $reqsin
 
-    print -rl -- $@ >>$reqsin
+    local lines=(${(f)mapfile[$reqsin]})
+    for 1 {
+        if (( lines[(I)$1] )) {
+            .zpy_log action 'skipping existing entry' $1
+        } else {
+            print -rl -- $1 >>$reqsin
+        }
+    }
 
     .zpy_hlt ini <$reqsin
 }
@@ -1022,7 +1041,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
             .zpy_whichvpy $venv_name $1 || return
             shebang="#!${REPLY}"
         }
-        lines=("${(@f)$(<$1)}")
+        lines=("${(@f)mapfile[$1]}")
         if [[ $lines[1] != $shebang ]] {
             print -rl -- "${shebang}" "${(@)lines}" >$1
         }
@@ -1470,14 +1489,14 @@ pyproject.write_text(tomlkit.dumps(toml_data))
 
 .zpy_insertjson () {  # <jsonfile> <value> <keycrumb>...
     # Does not currently handle spaces within any keycrumb (or need to)
-    emulate -L zsh
+    emulate -L zsh -o extendedglob
     rehash
 
     local jsonfile=$1; shift
     local value=$1; shift
 
     zf_mkdir -p ${jsonfile:h}
-    if [[ ! -r $jsonfile ]] || [[ ! $(<$jsonfile) ]] {
+    if [[ ! -r $jsonfile ]] || [[ ! ${mapfile[$jsonfile]##[[:space:]]#} ]] {
         >$jsonfile <<<'{}'
     }
 
@@ -1628,7 +1647,7 @@ jsonfile.write_text(dumps(data, indent=4))
 }
 
 .zpy_diffsnapshot () {  # <snapshot-dir>
-    emulate -L zsh
+    emulate -L zsh -o extendedglob
     [[ -d $1 ]] || return
 
     # Original text file contents have been copied into the snapshot dir,
@@ -1639,7 +1658,7 @@ jsonfile.write_text(dumps(data, indent=4))
 
     local origtxt newtxt diffout label
     for origtxt newtxt ( ${origtxts:^newtxts} ) {
-        if [[ ! $(<$origtxt) ]]  continue
+        if [[ ! ${mapfile[$origtxt]##[[:space:]]#} ]]  continue
 
         label=${newtxt:a:h:h:t}/${newtxt:a:h:t}${${newtxt:a:h:t}:+/}${newtxt:t}
         diffout=$(diff -wu -L $label $origtxt -L $label $newtxt)
@@ -2005,7 +2024,7 @@ jsonfile.write_text(dumps(data, indent=4))
         # TODO: track failures from .zpy_pipzlinkbins?
 
         (( ${path[(I)$ZPY_PIPZ_BINS]} )) \
-        || print -rP "suggestion%B:%b add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B~/.zshrc%b"
+        || .zpy_log tip Suggestion 'add %Bpath=('${ZPY_PIPZ_BINS/#~\//\~/}' $path)%b to %B'${${ZDOTDIR/#~\//\~/}:-\~}'/.zshrc%b'
 
         if [[ $failures ]] {
             .zpy_log error "FAILED to (${0[9,-1]}) install" $failures
@@ -2075,7 +2094,7 @@ jsonfile.write_text(dumps(data, indent=4))
             "apps exposed %B@%b ${ZPY_PIPZ_BINS/#~\//~/}"
 
         (( ${path[(I)$ZPY_PIPZ_BINS]} )) \
-        || print -rP "suggestion%B:%b add %Bpath=(${ZPY_PIPZ_BINS/#~\//~/} \$path)%b to %B~/.zshrc%b"
+        || .zpy_log tip Suggestion 'add %Bpath=('${ZPY_PIPZ_BINS/#~\//\~/}' $path)%b to %B'${${ZDOTDIR/#~\//\~/}:-\~}'/.zshrc%b'
 
         print
         print -rC 4 -- ${ZPY_PIPZ_PROJECTS}/*(/N:t)
@@ -2288,7 +2307,7 @@ jsonfile.write_text(dumps(data, indent=4))
         return 1
     }
 
-    print -rl -- '#!/bin/zsh' "$(<$ZPY_SRC)" ".zpy_ui_${1} \$@" >$dest
+    print -rl -- '#!/bin/zsh' "${mapfile[$ZPY_SRC]}" ".zpy_ui_${1} \$@" >$dest
     zf_chmod 0755 $dest
 }
 
@@ -2357,8 +2376,8 @@ _zpy_helpmsg () {  # <zpy-function>
     local msg=() REPLY
     .zpy_help $1
     msg=(${(f)REPLY})
-    msg=(${msg//#(#b)([^#]*)/%B$match[1]%b})
-    if ! [[ -v NO_COLOR ]]  msg=(${msg//#(#b)(\#*)/%F{blue}$match[1]%f})
+    msg=(${msg//#(#b)([^#]*)/%B$match[1]%b})                              # bold comments
+    if ! [[ -v NO_COLOR ]]  msg=(${msg//#(#b)(\#*)/%F{blue}$match[1]%f})  # blue comments
     _message -r ${(F)msg}
 }
 
@@ -2394,24 +2413,28 @@ _.zpy_ui_a8 () { _.zpy_ui_activate $@ }
 
 _.zpy_ui_envin () {
     _zpy_helpmsg ${0[10,-1]}
-    local context state state_descr line opt_args
+    local context state state_descr line opt_args ret=1
     _arguments \
         '(- *)--help[Show usage information]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
-        '(-)*: :->reqstxts'
+        '(-)*: :->reqstxts' && ret=0
     if [[ $state == reqstxts ]] {
-        local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
+        local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})  # escape specials with backslash
         _arguments \
-            '(-)*:requirements.txt:_files -F blocklist -g "*.txt"'
+            '(-)*:requirements.txt:_files -F blocklist -g "*.txt"' && ret=0
     }
+    return ret
 }
 
 _zpy_pypi_pkg () {
-    local reply
+    local reply ret=1
     .zpy_pypi_pkgs
     _arguments \
-        "*:PyPI Package:($reply)"
-    if (( ${@[(I)--or-local]} ))  _files
+        "*:PyPI Package:($reply)" && ret=0
+    if (( ${@[(I)--or-local]} )) {
+        _files && ret=0
+    }
+    return ret
 }
 
 _.zpy_ui_pipa () {
@@ -2440,19 +2463,20 @@ _.zpy_ui_pipc () {
     local reply
     .zpy_pypi_pkgs
     local pkgs=($reply)
-    local context state state_descr line opt_args
+    local context state state_descr line opt_args ret=1
     _arguments \
         '(- *)--help[Show usage information]' \
         '(--help)-h[Include hashes in compiled requirements.txt]' \
         '(--help -u)-U[Upgrade all dependencies]' \
         "(--help -U)-u[Upgrade specific dependencies]:Package Names (comma-separated):_values -s , 'Package Names (comma-separated)' $pkgs" \
-        '(-)*: :->reqsins'
+        '(-)*: :->reqsins' && ret=0
     if [[ $state == reqsins ]] {
         local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
         _arguments \
             '*:requirements.in:_files -F blocklist -g "*.in"' \
-            '(*)--[pip-compile Arguments]:pip-compile Argument: '
+            '(*)--[pip-compile Arguments]:pip-compile Argument: ' && ret=0
     }
+    return ret
 }
 
 _.zpy_ui_pipcs () {
@@ -2471,20 +2495,21 @@ _.zpy_ui_pipcs () {
     local reply
     .zpy_pypi_pkgs
     local pkgs=($reply)
-    local context state state_descr line opt_args
+    local context state state_descr line opt_args ret=1
     _arguments \
         '(- *)--help[Show usage information]' \
         '(--help)-h[Include hashes in compiled requirements.txt]' \
         '(--help -u)-U[Upgrade all dependencies]' \
         "(--help -U)-u[Upgrade specific dependencies]:Package Names (comma-separated):_values -s , 'Package Names (comma-separated)' $pkgs" \
         "(--help)--only-sync-if-changed[Don't bother syncing if the lockfile didn't change]" \
-        '(-)*: :->reqsins'
+        '(-)*: :->reqsins' && ret=0
     if [[ $state == reqsins ]] {
         local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
         _arguments \
             '*:requirements.in:_files -F blocklist -g "*.in"' \
-            '(*)--[pip-compile Arguments]:pip-compile Argument: '
+            '(*)--[pip-compile Arguments]:pip-compile Argument: ' && ret=0
     }
+    return ret
 }
 
 _.zpy_ui_pipcheckold () {
@@ -2505,11 +2530,11 @@ _zpy_fake_prefix_cmd () {  # cmd [<cmd-arg>...]
 
 _.zpy_ui_pipi () {
     _zpy_helpmsg ${0[10,-1]}
-    local context state state_descr line opt_args
+    local context state state_descr line opt_args ret=1
     _arguments \
         '(- *)--help[Show usage information]' \
         "(--help)--no-upgrade[Don't upgrade already-installed packages]" \
-        "(-)*:::Option or Package Spec:->opt_or_pkgspec"
+        "(-)*:::Option or Package Spec:->opt_or_pkgspec" && ret=0
     if [[ $state == opt_or_pkgspec ]] {
         words=(pip install $words)
         (( CURRENT+=2 ))
@@ -2517,25 +2542,27 @@ _.zpy_ui_pipi () {
             words=(uv $words)
             (( CURRENT+=1 ))
         }
-        _normal -P
+        _normal -P && ret=0
         # TODO: Still quite sloppy... though so is upstream pip completion
         # TODO: Consider filtering out some pip completions
 
-        _zpy_pypi_pkg --or-local
+        _zpy_pypi_pkg --or-local && ret=0
     }
+    return ret
 }
 
 _.zpy_ui_pips () {
     _zpy_helpmsg ${0[10,-1]}
-    local context state state_descr line opt_args
+    local context state state_descr line opt_args ret=1
     _arguments \
         '(- *)--help[Show usage information]' \
-        '(--help)*: :->reqstxts'
+        '(--help)*: :->reqstxts' && ret=0
     if [[ $state == reqstxts ]] {
         local blocklist=(${line//(#m)[\[\]()\\*?#<>~\^\|]/\\$MATCH})
         _arguments \
-            '(--help)*:requirements.txt:_files -F blocklist -g "*.txt"'
+            '(--help)*:requirements.txt:_files -F blocklist -g "*.txt"' && ret=0
     }
+    return ret
 }
 
 _.zpy_ui_pipup () {
@@ -2601,18 +2628,19 @@ _.zpy_ui_reqshow () {
             }
             local -U catgs=(dev doc ops test *-requirements.{in,txt}(N))
             catgs=(${catgs%%-*})
-            local context state state_descr line opt_args
+            local context state state_descr line opt_args ret=1
             _arguments \
                 '(- * :)--help[Show usage information]' \
                 "(--help)-c[Use <category>-requirements.in]:Category:($catgs)" \
                 '(--help)-h[Include hashes in compiled requirements.txt]' \
                 "(--help -c -h)1:Package Spec:_zpy_pypi_pkg --or-local" \
-                '(--help -c -h)*:Package Spec:->pkgspecs'
+                '(--help -c -h)*:Package Spec:->pkgspecs' && ret=0
             if [[ $state == pkgspecs ]] {
                 _arguments \
                     '*:Package Spec:_zpy_pypi_pkg --or-local' \
-                    '(*)--[pip-compile Arguments]:pip-compile Argument: '
+                    '(*)--[pip-compile Arguments]:pip-compile Argument: ' && ret=0
             }
+            return ret
         }
     }
 }
@@ -2628,20 +2656,21 @@ _.zpy_ui_venvs_path () {
 _.zpy_ui_vlauncher () {
     # TODO: Project completions are too lenient (again?)!
     _zpy_helpmsg ${0[10,-1]}
-    local context state state_descr line opt_args
+    local context state state_descr line opt_args ret=1
     _arguments \
         '(- * :)--help[Show usage information]' \
         '(--help)--link-only[Only create a symlink to <venv>/bin/<cmd>]' \
         '(--help)--py[Use another interpreter and named venv]:Other Python:(pypy current)' \
         "(-)1:Project:_zpy_projects" \
         '(-)2: :->cmd' \
-        '(-)3:Destination:_path_files -/'
+        '(-)3:Destination:_path_files -/' && ret=0
     if [[ $state == cmd ]] {
         local REPLY projdir=${(Q)line[1]/#\~/~}
         .zpy_venvs_path $projdir
         _arguments \
-            "*:Command:_path_files -g '$REPLY/venv/bin/*(x:t)'"
+            "*:Command:_path_files -g '$REPLY/venv/bin/*(x:t)'" && ret=0
     }
+    return ret
 }
 
 _.zpy_ui_vpy () {
@@ -2676,7 +2705,7 @@ _.zpy_ui_vrun () {
     # TODO: Project completions are too lenient (again?)!
     setopt localtraps
     _zpy_helpmsg ${0[10,-1]}
-    local context state state_descr line opt_args
+    local context state state_descr line opt_args ret=1
     integer NORMARG
     _arguments -n \
         '(- * :)--help[Show usage information]' \
@@ -2684,7 +2713,7 @@ _.zpy_ui_vrun () {
         '(--help)--cd[Run the command from within the project folder]' \
         "(--help)--activate[Activate the venv (usually unnecessary for venv-installed scripts, and slower)]" \
         '(-)1:Project:_zpy_projects' \
-        '(-)*::: :->cmd'
+        '(-)*::: :->cmd' && ret=0
     local vname=venv
     if (( words[(I)--py] )) && (( words[(i)--py] < NORMARG )) {
         local reply
@@ -2711,12 +2740,13 @@ _.zpy_ui_vrun () {
             # _path_files -X Command -g "${venv}/bin/*(Nx:t)"
 
             # Currently settling for this:
-            _path_files -g "${venv}/bin/*(Nx:t)"
+            _path_files -g "${venv}/bin/*(Nx:t)" && ret=0
             # Can I refactor to call _arguments once and still cover this?
             # Can I / should I use a dummy _arguments call to capture the style args, then pass them manually?
         }
-        _normal -P
+        _normal -P && ret=0
     }
+    return ret
 }
 
 _.zpy_ui_help () {
@@ -2738,16 +2768,17 @@ _.zpy_ui_zpy () {
     local -A rEpLy
     ${0[2,-1]} subcommands
     for cmd desc ( ${(kv)rEpLy} )  cmds+=("${cmd}:${desc}")
-    local context state state_descr line opt_args
+    local context state state_descr line opt_args ret=1
     _arguments \
         '(1 *)--help[Show usage information]' \
         '(--help)1:Function:(($cmds))' \
-        '(--help)*:: :->sub_arg'
+        '(--help)*:: :->sub_arg' && ret=0
     if [[ $state != sub_arg ]] {
         _zpy_helpmsg ${0[10,-1]}
     } else {
-        _.zpy_ui_${line[1]}
+        _.zpy_ui_${line[1]} && ret=0
     }
+    return ret
 }
 
 _.zpy_ui_pipz () {
@@ -2757,11 +2788,11 @@ _.zpy_ui_pipz () {
     ${0[2,-1]} subcommands
     for cmd desc ( ${(kv)rEpLy} )  cmds+=("${cmd}:${desc}")
     integer NORMARG
-    local context state state_descr line opt_args
+    local context state state_descr line opt_args ret=1
     _arguments \
         '(1 *)--help[Show usage information]' \
         '(--help)1:Operation:(($cmds))' \
-        '(--help)*:: :->sub_arg'
+        '(--help)*:: :->sub_arg' && ret=0
     if [[ $state != sub_arg ]] {
         _zpy_helpmsg ${0[10,-1]}
     } else {
@@ -2772,7 +2803,7 @@ _.zpy_ui_pipz () {
                 '(* -)--help[Show usage information]' \
                 '(--help)--cmd[Specify commands to add to your path, rather than interactively choosing]:Command (comma-separated): ' \
                 '(--help)--activate[Ensure command launchers explicitly activate the venv (usually unnecessary)]' \
-                '(-)*:Package Spec:_zpy_pypi_pkg --or-local'
+                '(-)*:Package Spec:_zpy_pypi_pkg --or-local' && ret=0
         ;;
         reinstall)
             local blocklist=(${(Q)words[2,-1]})
@@ -2790,7 +2821,7 @@ _.zpy_ui_pipz () {
                 '(--help)--cmd[Specify commands to add to your path, rather than interactively choosing]:Command (comma-separated): ' \
                 '(--help)--activate[Ensure command launchers explicitly activate the venv (usually unnecessary)]' \
                 '(--help *)--all[Reinstall all installed apps]' \
-                "(-)*:Installed Package Name:($pkgs)"
+                "(-)*:Installed Package Name:($pkgs)" && ret=0
         ;;
         inject)
             _arguments \
@@ -2798,7 +2829,7 @@ _.zpy_ui_pipz () {
                 '(--help)--cmd[Specify commands to add to your path, rather than interactively choosing]:Command (comma-separated): ' \
                 '(--help)--activate[Ensure command launchers explicitly activate the venv (usually unnecessary)]' \
                 "(-)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
-                '(-)*:Extra Package Spec:_zpy_pypi_pkg --or-local'
+                '(-)*:Extra Package Spec:_zpy_pypi_pkg --or-local' && ret=0
         ;;
         uninstall)
             local blocklist=(${(Q)words[2,-1]})
@@ -2807,7 +2838,7 @@ _.zpy_ui_pipz () {
             _arguments \
                 '(* -)--help[Show usage information]' \
                 '(--help *)--all[Uninstall all installed apps]' \
-                "(-)*:Installed Package Name:($pkgs)"
+                "(-)*:Installed Package Name:($pkgs)" && ret=0
         ;;
         upgrade)
             local blocklist=(${(Q)words[2,-1]})
@@ -2816,7 +2847,7 @@ _.zpy_ui_pipz () {
             _arguments \
                 '(* -)--help[Show usage information]' \
                 '(--help *)--all[Upgrade all installed apps]' \
-                "(-)*:Installed Package Name:($pkgs)"
+                "(-)*:Installed Package Name:($pkgs)" && ret=0
         ;;
         list)
             local blocklist=(${(Q)words[2,-1]})
@@ -2825,7 +2856,7 @@ _.zpy_ui_pipz () {
             _arguments \
                 '(* -)--help[Show usage information]' \
                 '(--help *)--all[List all installed apps]' \
-                "(-)*:Installed Package Name:($pkgs)"
+                "(-)*:Installed Package Name:($pkgs)" && ret=0
         ;;
         runpkg)
             local pkgname REPLY pkgcmd
@@ -2838,11 +2869,11 @@ _.zpy_ui_pipz () {
                 '(* :)--help[Show usage information]' \
                 '(--help)1:Package Spec:_zpy_pypi_pkg --or-local' \
                 "(--help)2:Command:($pkgname)" \
-                '(--help)*:::Command Argument:->cmdarg'
+                '(--help)*:::Command Argument:->cmdarg' && ret=0
             if [[ $state == cmdarg ]] {
                 words=($pkgcmd $words)
                 (( CURRENT+=1 ))
-                _normal -P
+                _normal -P && ret=0
             }
         ;;
         runpip)
@@ -2850,18 +2881,18 @@ _.zpy_ui_pipz () {
                 '(* - :)--help[Show usage information]' \
                 '(--help)--cd[Run pip from within the project folder]' \
                 "(-)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
-                '(-)*::: :->pip_arg'
+                '(-)*::: :->pip_arg' && ret=0
             if [[ $state == pip_arg ]] {
                 words=(pip $words)
                 (( CURRENT+=1 ))
-                _normal -P
+                _normal -P && ret=0
             }
         ;;
         cd)
             _arguments \
                 '(* :)--help[Show usage information]' \
                 "(--help)1:Installed Package Name:($ZPY_PIPZ_PROJECTS/*(/N:t))" \
-                '(--help)*::: :->cmd'
+                '(--help)*::: :->cmd' && ret=0
             if [[ $state == cmd ]] {
                 local REPLY pkgname
                 .zpy_pkgspec2name ${line[1]} || return
@@ -2869,11 +2900,12 @@ _.zpy_ui_pipz () {
 
                 trap "cd ${(q-)PWD}" EXIT INT QUIT
                 cd $ZPY_PIPZ_PROJECTS/${(Q)pkgname}
-                _normal -P
+                _normal -P && ret=0
             }
         ;;
         }
     }
+    return ret
 }
 
 ## TODO: more [-- pip-{compile,sync}-arg...]? (pips pipup 'pipz inject' 'pipz install')
@@ -2916,7 +2948,7 @@ tfile.write_text('\n'.join(r['project'] for r in data['rows']))
             "
         }
     }
-    reply=(${(f)"$(<$txt)"})
+    reply=(${(f)mapfile[$txt]})
 }
 
 .zpy_expose_funcs
