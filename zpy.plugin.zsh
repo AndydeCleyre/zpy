@@ -315,8 +315,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     emulate -L zsh
 
     .zpy_log error 'FAILED to find' "$1" \
-      "You probably want to activate a venv with 'activate' (or 'a8'), first." \
       "${${PWD:P}/%${PWD:P:t}/%B${PWD:P:t}%b}"
+    .zpy_log tip Suggestion "Activate a venv with 'activate' (or 'a8'), first."
 }
 
 .zpy_warn_venv () {  # [-q]
