@@ -14,6 +14,7 @@ Changed
   complying with the shell's internal expectations
 - Don't append lines which are already present (pipa, pipac, pipacs)
 - Use zsh/mapfile to avoid six more subshells
+- Make some docs and logging clearer
 
 0.3.6
 =====
