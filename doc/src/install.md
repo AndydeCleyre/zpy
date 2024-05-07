@@ -136,5 +136,6 @@ After restarting your shell,
 it is recommended to install [uv](https://github.com/astral-sh/uv/):
 
 ```console
+% exec zsh
 % pipz install uv
 ```
