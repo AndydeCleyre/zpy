@@ -2,6 +2,14 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- Add alternative documentation parsing backend: ugrep
+
 0.3.7
 =====
 

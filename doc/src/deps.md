@@ -98,5 +98,6 @@ with optional additions for more colorful output, alternative json parsers, and 
     - a pcre tool -- provided by
       pcregrep/pcre-tools,
       pcre2grep/pcre2-tools,
-      [ripgrep](https://repology.org/project/ripgrep/versions),
+      [ripgrep (>=14.0.0)](https://repology.org/project/ripgrep/versions),
+      [ugrep](https://repology.org/project/ugrep/versions),
       or Zsh with pcre enabled

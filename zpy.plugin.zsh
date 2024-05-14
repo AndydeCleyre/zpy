@@ -1,6 +1,6 @@
 autoload -Uz zargs
 zmodload -mF zsh/files 'b:zf_(chmod|ln|mkdir|rm)'
-zmodload zsh/pcre 2>/dev/null
+zmodload zsh/pcre 2>/dev/null || true
 zmodload zsh/mapfile
 
 ZPY_SRC=${0:P}
@@ -129,7 +129,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     }
 }
 
-## fallback basic pcregrep-like func for our needs; not preferred to pcre2grep or ripgrep
+## fallback basic pcregrep-like func for our needs; not preferred to pcre2grep or ugrep,
+## but maybe preferred ripgrep, which had a relevant bug before its 14.0.0 release
 .zpy_zpcregrep () {  # <output> <pattern> <file>
     emulate -L zsh
     # <output> like: '$1$4$5$7'
@@ -176,7 +177,10 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     local cmd_doc=() subcmd_doc=()
     rehash
-    if (( $+commands[pcre2grep] )) {
+    if (( $+commands[ugrep] )) {
+        cmd_doc=(ugrep -P --format='%[predoc]#%[fname]#%[usage]#%~')
+        subcmd_doc=(ugrep -P --format='%[usage]#%[postdoc]#%~')
+    } elif (( $+commands[pcre2grep] )) {
         cmd_doc=(pcre2grep -M -O '$1$4$6')
         subcmd_doc=(pcre2grep -M -O '$1$2')
     } elif { zmodload -e zsh/pcre } {
@@ -192,7 +196,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         local lines=(
             'zpy documentation functions require one of'
             '- zsh built with --enable-pcre'
-            '- rg (ripgrep)'
+            '- rg (ripgrep >=14.0.0)'
+            '- ugrep'
             '- pcre2grep (pcre2/pcre2-tools)'
             '- pcregrep (pcre/pcre-tools)'
         )
