@@ -17,7 +17,7 @@ we'll use `pipacs` to:
 [venv] % pipacs beautifulsoup4
 ```
 
-![Animated demo: pipacs](https://gist.githubusercontent.com/AndydeCleyre/b422097e220806b31c4d1c80ed0ed6b5/raw/ee65dd02265b3e5e7b85996bc6dfd22175a3b78c/guide_pipacs.svg?sanitize=true)
+![Animated demo: pipacs](https://github.com/AndydeCleyre/zpy/blob/assets/guide_pipacs.gif?raw=true)
 
 Being such a popular package,
 we were able to tab-complete the name `beautifulsoup4`,
