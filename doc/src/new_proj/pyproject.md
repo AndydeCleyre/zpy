@@ -34,7 +34,7 @@ we can populate it with entries from our `requirements.in` files:
 [venv] % pypc
 ```
 
-![Animated demo: pypc](https://gist.github.com/AndydeCleyre/c8cad3380bd475706815969b07733a55/raw/5a4b327bf699819c96c8126de4ef60546c5cccea/pypc_demo.svg?sanitize=true)
+![Animated demo: pypc](https://github.com/AndydeCleyre/zpy/blob/assets/pypc.gif?raw=true)
 
 The dependencies have been injected according to
 [PEP 621](https://www.python.org/dev/peps/pep-0621/),
