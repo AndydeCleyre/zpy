@@ -193,15 +193,14 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         cmd_doc=(rg --no-config --color never -NU -r '$predoc$fname$usage')
         subcmd_doc=(rg --no-config --color never -NU -r '$usage$postdoc')
     } else {
-        local lines=(
-            'zpy documentation functions require one of'
-            '- zsh built with --enable-pcre'
-            '- rg (ripgrep >=14.0.0)'
-            '- ugrep'
-            '- pcre2grep (pcre2/pcre2-tools)'
+        .zpy_log error \
+            'zpy documentation functions require a search tool' 'Any one of:' \
+            '- zsh built with --enable-pcre' \
+            '- rg (ripgrep >=14.0.0)' \
+            '- ugrep' \
+            '- pcre2grep (pcre2/pcre2-tools)' \
             '- pcregrep (pcre/pcre-tools)'
-        )
-        .zpy_log error $lines
+        .zpy_log tip Suggestion "Install ugrep with your distro's package manager."
         return 1
     }
 
