@@ -9,6 +9,7 @@ Changed
 -------
 
 - Add alternative documentation parsing backend: ugrep
+- Docs: Refresh demo animations
 
 0.3.7
 =====
