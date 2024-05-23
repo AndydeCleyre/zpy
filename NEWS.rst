@@ -9,7 +9,7 @@ Changed
 -------
 
 - Add alternative documentation parsing backend: ugrep
-- Docs: Refresh demo animations
+- Small improvements to docs and error messages
 
 0.3.7
 =====
