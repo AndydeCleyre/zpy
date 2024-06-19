@@ -11,6 +11,7 @@ Changed
 - Add alternative documentation parsing backend: ugrep
 - Small improvements to docs and error messages
 - Updated Alpine demo container base image
+- Use localtraps option everywhere we TRAP
 
 0.3.7
 =====
