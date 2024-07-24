@@ -12,6 +12,7 @@ Changed
 - Small improvements to docs and error messages
 - Updated Alpine demo container base image
 - Use localtraps option everywhere we TRAP
+- Document zsh-autoenv and direnv zpy-friendly configuration
 
 0.3.7
 =====

@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
-site_name: 'zpy: Manage Python Environments in Zsh'
+site_name: "zpy: Manage Python Environments in Zsh"
 site_url: https://andydecleyre.github.io/zpy/
 repo_url: https://github.com/andydecleyre/zpy
 docs_dir: ../src
@@ -40,20 +40,21 @@ theme:
 nav:
   - index.md
   - Guide:
-    - start.md
-    - new_proj.md
-    - new_proj/activate.md
-    - new_proj/pipacs.md
-    - new_proj/pipac.md
-    - new_proj/pips_envin.md
-    - new_proj/upgrade.md
-    - new_proj/pyproject.md
-    - new_proj/run.md
-    - existing_projects.md
-    - pipz.md
-    - python_versions.md
+      - start.md
+      - new_proj.md
+      - new_proj/activate.md
+      - new_proj/pipacs.md
+      - new_proj/pipac.md
+      - new_proj/pips_envin.md
+      - new_proj/upgrade.md
+      - new_proj/pyproject.md
+      - new_proj/run.md
+      - existing_projects.md
+      - pipz.md
+      - python_versions.md
   - Details:
-    - help_all.md
-    - deps.md
-    - install.md
-    - completions.md
+      - help_all.md
+      - deps.md
+      - install.md
+      - completions.md
+      - direnv.md
