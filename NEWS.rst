@@ -2,8 +2,8 @@
 News
 ====
 
-Unreleased
-==========
+0.3.8
+=====
 
 Changed
 -------
