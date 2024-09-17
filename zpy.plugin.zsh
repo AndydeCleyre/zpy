@@ -432,7 +432,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
             # --read-relative-to-input
             pip-sync -q --pip-args --disable-pip-version-check $reqstxts
         } else {
-            uv pip sync -p python $reqstxts
+            uv pip sync -p python --allow-empty-requirements $reqstxts
         }
         ret=$?
 
