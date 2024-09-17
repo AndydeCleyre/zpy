@@ -2,6 +2,19 @@
 News
 ====
 
+0.3.8
+=====
+
+Changed
+-------
+
+- Add alternative documentation parsing backend: ugrep
+- Small improvements to docs and error messages
+- Updated Alpine demo container base image
+- Use localtraps option everywhere we TRAP
+- Document zsh-autoenv and direnv zpy-friendly configuration
+- Increase uniformity of behavior between uv pip sync and pip-sync
+
 0.3.7
 =====
 

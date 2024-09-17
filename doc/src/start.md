@@ -1,5 +1,11 @@
 # Get started
 
+!!! tip
+
+    You can flip through these docs with `n` and `p`, or `.` and `,`.
+
+## Install locally
+
 Aside from Zsh and Python, the only dependency you're likely to *need* is
 [`fzf`](https://github.com/junegunn/fzf).
 For more details and recommended package manager commands, see [Dependencies](deps.md).
@@ -17,9 +23,6 @@ For now, let's just source it in the current session:
 % . ~/.zpy/zpy.plugin.zsh
 ```
 
-The user-facing functions are all available as subcommands to `zpy`.
-Try typing `zpy`, then a space, then tab.
-
 !!! tip
 
     Everything zpy does will generally be much faster if uv is installed.
@@ -29,26 +32,52 @@ Try typing `zpy`, then a space, then tab.
     % pipz install uv
     ```
 
-!!! info
+## Try it in a container, instead
 
-    By default, each function is *also* available directly, as a "top-level" command[^1].
-    This can be prevented by explicitly specifying a list of functions to expose,
-    *before* sourcing the plugin.
-    This example will expose only the `pipz` and `zpy` functions
-    (the rest remaining available as subcommands):
+Using either podman or docker, launch a temporary container based on Ubuntu, Alpine, or Fedora:
+
+=== "Ubuntu"
 
     ```console
-    % zstyle ':zpy:*' exposed-funcs pipz zpy
+    $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
+    $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
     ```
 
+=== "Alpine"
+
+    ```console
+    $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-alpine:master
+    $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-alpine:master
+    ```
+
+=== "Fedora"
+
+    ```console
+    $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-fedora:master
+    $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-fedora:master
+    ```
+
+## Functions or Subcommands
+
+The user-facing functions are all available as subcommands to `zpy`.
+Try typing `zpy`, then a space, then tab.
+
+By default, each function is *also* available directly, as a "top-level" command[^1].
+This can be **prevented** by explicitly specifying a list of functions to expose,
+*before* sourcing the plugin.
+This example will expose only the `pipz` and `zpy` functions
+(the rest remaining available as subcommands):
+
+```console
+% zstyle ':zpy:*' exposed-funcs pipz zpy
+```
+
 [^1]: Well, except for `zpy mkbin` and `zpy help`.
+
+## Moving on
 
 From here, you may want to:
 
 - continue to the [next page](new_proj.md), for an idea of how these tools can help manage a project
 - jump to the [full reference](help_all.md)
 - jump to [`pipz`](pipz.md), a [pipx](https://pypa.github.io/pipx/) alternative
-
-!!! tip
-
-    You can flip through these docs with `n` and `p`, or `.` and `,`.

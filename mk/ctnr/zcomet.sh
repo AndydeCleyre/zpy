@@ -32,7 +32,7 @@ case $distro in
     alias ctnr_mkuser="ctnr_run useradd -m -s /bin/zsh"
   ;;
   alpine)
-    basetag=${2:-3.19}
+    basetag=${2:-3.20}
     pkgs="$pkgs git sudo"
     fat="$fat /var/cache/apk/*"
     alias ctnr_pkg="ctnr_run apk -q --no-progress"

@@ -15,7 +15,7 @@ We can ensure we've got a proper environment and run it:
 [venv] % ./do_thing.py
 ```
 
-![Animated demo: envin, run script](https://gist.github.com/AndydeCleyre/27bfa0e10a1b42191f777530a500263e/raw/0554370718428b26755902f5c6b12375cabc2d59/envin_do_thing.svg?sanitize=true)
+![Animated demo: envin, run script](https://github.com/AndydeCleyre/zpy/blob/assets/envin_do_thing.gif?raw=true)
 
 But what if we don't want to manually activate its environment?
 

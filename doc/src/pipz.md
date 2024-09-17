@@ -34,11 +34,7 @@ The paths printed on the first three lines of output may be overridden with the 
 `ZPY_PIPZ_BINS`,
 respectively.
 
-![Animated demo: pipz install, list](https://gist.github.com/AndydeCleyre/5ad45d78336fc2cc4625b0dc6b450849/raw/777e77607786beb65b2d6e00fb27c507c5e7abfa/pipz_install_list.svg?sanitize=true)
-
-!!! note
-
-    The last frame is mangled in this animation, but not in real usage.
+![Animated demo: pipz install, list](https://github.com/AndydeCleyre/zpy/blob/assets/pipz_install_list.gif?raw=true)
 
 Example installing an app package from git:
 

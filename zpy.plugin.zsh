@@ -1,6 +1,6 @@
 autoload -Uz zargs
 zmodload -mF zsh/files 'b:zf_(chmod|ln|mkdir|rm)'
-zmodload zsh/pcre 2>/dev/null
+zmodload zsh/pcre 2>/dev/null || true
 zmodload zsh/mapfile
 
 ZPY_SRC=${0:P}
@@ -129,7 +129,8 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     }
 }
 
-## fallback basic pcregrep-like func for our needs; not preferred to pcre2grep or ripgrep
+## fallback basic pcregrep-like func for our needs; not preferred to pcre2grep or ugrep,
+## but maybe preferred ripgrep, which had a relevant bug before its 14.0.0 release
 .zpy_zpcregrep () {  # <output> <pattern> <file>
     emulate -L zsh
     # <output> like: '$1$4$5$7'
@@ -176,7 +177,10 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     local cmd_doc=() subcmd_doc=()
     rehash
-    if (( $+commands[pcre2grep] )) {
+    if (( $+commands[ugrep] )) {
+        cmd_doc=(ugrep -P --format='%[predoc]#%[fname]#%[usage]#%~')
+        subcmd_doc=(ugrep -P --format='%[usage]#%[postdoc]#%~')
+    } elif (( $+commands[pcre2grep] )) {
         cmd_doc=(pcre2grep -M -O '$1$4$6')
         subcmd_doc=(pcre2grep -M -O '$1$2')
     } elif { zmodload -e zsh/pcre } {
@@ -189,14 +193,14 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         cmd_doc=(rg --no-config --color never -NU -r '$predoc$fname$usage')
         subcmd_doc=(rg --no-config --color never -NU -r '$usage$postdoc')
     } else {
-        local lines=(
-            'zpy documentation functions require one of'
-            '- zsh built with --enable-pcre'
-            '- rg (ripgrep)'
-            '- pcre2grep (pcre2/pcre2-tools)'
+        .zpy_log error \
+            'zpy documentation functions require a search tool' 'Any one of:' \
+            '- zsh built with --enable-pcre' \
+            '- rg (ripgrep >=14.0.0)' \
+            '- ugrep' \
+            '- pcre2grep (pcre2/pcre2-tools)' \
             '- pcregrep (pcre/pcre-tools)'
-        )
-        .zpy_log error $lines
+        .zpy_log tip Suggestion "Install ugrep with your distro's package manager."
         return 1
     }
 
@@ -428,7 +432,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
             # --read-relative-to-input
             pip-sync -q --pip-args --disable-pip-version-check $reqstxts
         } else {
-            uv pip sync -p python $reqstxts
+            uv pip sync -p python --allow-empty-requirements $reqstxts
         }
         ret=$?
 
@@ -912,7 +916,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 # Pass -i to interactively choose the project.
 # Pass --py to use another interpreter and named venv.
 .zpy_ui_activate () {  # [--py pypy|current] [-i|<proj-dir>]
-    emulate -L zsh
+    emulate -L zsh -o localtraps
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local envin_args=() venv_name=venv interactive
@@ -1967,7 +1971,7 @@ jsonfile.write_text(dumps(data, indent=4))
 
 # Package manager for venv-isolated scripts (pipx clone).
 .zpy_ui_pipz () {  # [install|uninstall|upgrade|list|inject|reinstall|cd|runpip|runpkg] [<subcmd-arg>...]
-    emulate -L zsh +o promptsubst -o globdots
+    emulate -L zsh +o promptsubst -o globdots -o localtraps
     [[ $ZPY_PIPZ_PROJECTS && $ZPY_PIPZ_BINS && $ZPY_VENVS_HOME && $ZPY_PROCS ]] || return
 
     local reply REPLY
