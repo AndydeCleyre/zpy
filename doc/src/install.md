@@ -60,6 +60,13 @@ or install it with a plugin manager:
     % print zinit light andydecleyre/zpy >>~/.zshrc
     ```
 
+=== "Zsh for Humans"
+
+    Add to `~/.zshrc`:
+
+    - `z4h install AndydeCleyre/zpy` (before `z4h init`)
+    - `z4h load AndydeCleyre/zpy` (after `z4h init`)
+
 === "antibody"
 
     ```console
