@@ -18,7 +18,7 @@ paginate==0.5.7           # via mkdocs-material
 pathspec==0.12.1          # via mkdocs
 platformdirs==4.3.6       # via mkdocs-get-deps
 pygments==2.18.0          # via mkdocs-material
-pymdown-extensions==10.10.2  # via mkdocs-material
+pymdown-extensions==10.11  # via mkdocs-material
 python-dateutil==2.9.0.post0  # via ghp-import
 pyyaml==6.0.2             # via mkdocs, mkdocs-get-deps, pymdown-extensions, pyyaml-env-tag
 pyyaml-env-tag==0.1       # via mkdocs
@@ -26,4 +26,4 @@ regex==2024.9.11          # via mkdocs-material
 requests==2.32.3          # via mkdocs-material
 six==1.16.0               # via python-dateutil
 urllib3==2.2.3            # via requests
-watchdog==5.0.2           # via mkdocs
+watchdog==5.0.3           # via mkdocs
