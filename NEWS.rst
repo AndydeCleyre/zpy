@@ -10,6 +10,7 @@ Changed
 
 - vpy and vpyshebang now resolve any symlinks in the script path
   before determining the projdir and venv path.
+- ``sk`` (skim) may now be used instead of ``fzf``
 
 0.3.8
 =====

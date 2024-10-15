@@ -271,11 +271,33 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     REPLY="${ZPY_VENVS_HOME}/${REPLY}"
 }
 
+.zpy_fzf_cmd () {
+    emulate -L zsh
+    unset REPLY
+
+    local fzf_cmd=fzf
+    if (( $+commands[fzf] )) {
+        REPLY=fzf
+    } elif (( $+commands[sk] )) {
+        REPLY=sk
+    } else {
+        .zpy_log error \
+            'zpy selection operations require a filter tool' 'Any one of:' \
+            '- fzf' \
+            '- sk (skim)'
+        .zpy_log tip Suggestion "Install fzf with your distro's package manager."
+        return 1
+    }
+}
+
 .zpy_chooseproj () {  # [--multi]
     emulate -L zsh
     [[ $ZPY_VENVS_HOME ]] || return
 
     # TODO: should this absorb .zpy_pipzchoosepkg?
+
+    .zpy_fzf_cmd || return
+    local fzf_cmd=$REPLY
 
     local multi fzf_args=(--reverse -0 --preview='<{}/*.in')
     if [[ $1 == --multi ]] {
@@ -291,7 +313,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     local projdirs=(${ZPY_VENVS_HOME}/*/project(@N-/:P))
     reply=(${(f)"$(
         print -rln -- $projdirs \
-        | fzf $fzf_args
+        | $fzf_cmd $fzf_args
     )"})
 
     [[ $reply ]] || return
@@ -1827,6 +1849,9 @@ jsonfile.write_text(dumps(data, indent=4))
     # TODO: fzf OR skim OR fzy OR peco
     [[ -r $ZPY_SRC ]] || return
 
+    .zpy_fzf_cmd || return
+    local fzf_cmd=$REPLY
+
     local fzf_args=() fzf_header fzf_prompt multi
     fzf_args=(--reverse -0)
     fzf_header='Packages:'
@@ -1856,7 +1881,7 @@ jsonfile.write_text(dumps(data, indent=4))
 
     local pkgs=($1/*(N/:t))
     reply=(${(f)"$(
-        print -rln -- $pkgs | fzf $fzf_args
+        print -rln -- $pkgs | $fzf_cmd $fzf_args
     )"})
 
     [[ $reply ]] || return
@@ -1919,7 +1944,7 @@ jsonfile.write_text(dumps(data, indent=4))
 
     zf_mkdir -p $bins_home
 
-    local pkgname projdir vpath bins bin src dest REPLY
+    local pkgname projdir vpath bins bin src dest REPLY fzf_cmd
     for 1 {
         .zpy_pkgspec2name $1 || return
         pkgname=$REPLY
@@ -1933,6 +1958,9 @@ jsonfile.write_text(dumps(data, indent=4))
         if [[ $bins_showlist ]] {
             bins=(${bins:*bins_showlist})
         } else {
+            .zpy_fzf_cmd || return
+            fzf_cmd=$REPLY
+
             bins=(${bins:|bins_hidelist})
             bins=(${bins:#([aA]ctivate(|.csh|.fish|.ps1|.bat|.nu|_this.py)|(deactivate|pydoc).bat|easy_install(|-<->*)|(pip|python|pypy)(|<->*)|*.so|__pycache__)})
             if [[ $pkgname != pip-tools ]]  bins=(${bins:#pip-(compile|sync)})
@@ -1941,7 +1969,7 @@ jsonfile.write_text(dumps(data, indent=4))
             if [[ $pkgname != build     ]]  bins=(${bins:#pyproject-build})
             bins=(${(f)"$(
                 print -rln $bins \
-                | fzf $fzf_args --header="$fzf_header $1 . . ." \
+                | $fzf_cmd $fzf_args --header="$fzf_header $1 . . ." \
                 --prompt='Which scripts should be added to the path? Choose one with <enter> or more with <tab>. '
             )"})
         }
