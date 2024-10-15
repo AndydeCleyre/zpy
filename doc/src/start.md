@@ -7,7 +7,7 @@
 ## Install locally
 
 Aside from Zsh and Python, the only dependency you're likely to *need* is
-[`fzf`](https://github.com/junegunn/fzf).
+[`fzf`](https://github.com/junegunn/fzf) *or* [`sk` (skim)](https://github.com/lotabout/skim).
 For more details and recommended package manager commands, see [Dependencies](deps.md).
 
 To install `zpy` itself, you only need to source the file `zpy.plugin.zsh`
