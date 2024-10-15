@@ -1003,7 +1003,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     unset REPLY
     [[ $2 && $1 ]] || return
 
-    .zpy_venvs_path ${2:a:h} || return
+    .zpy_venvs_path ${2:P:h} || return
     REPLY=$REPLY/$1/bin/python
 }
 
@@ -1112,7 +1112,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     if [[ ! $1 ]] { .zpy_ui_help ${0[9,-1]}; return 1 }
 
-    .zpy_ui_vrun $vrun_args ${1:a:h} python ${1:a} ${@[2,-1]}
+    .zpy_ui_vrun $vrun_args ${1:P:h} python ${1:a} ${@[2,-1]}
 }
 
 
