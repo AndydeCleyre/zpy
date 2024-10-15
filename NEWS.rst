@@ -2,6 +2,15 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- vpy and vpyshebang now resolve any symlinks in the script path
+  before determining the projdir and venv path.
+
 0.3.8
 =====
 
