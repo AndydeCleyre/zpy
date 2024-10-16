@@ -454,7 +454,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
             # --read-relative-to-input
             pip-sync -q --pip-args --disable-pip-version-check $reqstxts
         } else {
-            uv pip sync -p python --allow-empty-requirements $reqstxts
+            uv -q pip sync -p python --allow-empty-requirements $reqstxts
         }
         ret=$?
 
@@ -539,14 +539,14 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     # After updating minimum pip-tools to support each of these, add them:
     # --write-relative-to-output
     # --read-relative-to-input
-    pipcompile_args=($pipcompile_args $@)
+    pipcompile_args=(--cache-dir=$cachedir -o $reqstxt $pipcompile_args $@ $reqsin)
 
     local badrets
     if (( $+commands[uv] )) {
-        pipcompile_args=(${pipcompile_args:#--(allow-unsafe|strip-extras)})
-        uv pip compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $reqsin 2>&1
+        pipcompile_args=(-p python ${pipcompile_args:#--(allow-unsafe|strip-extras)})
+        uv pip compile $pipcompile_args 2>&1
     } else {
-        pip-compile --cache-dir=$cachedir -o $reqstxt $pipcompile_args $reqsin 2>&1 \
+        pip-compile $pipcompile_args 2>&1 \
         | .zpy_hlt ini
     }
     badrets=(${pipestatus:#0})
@@ -1227,7 +1227,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     [[ -d $1 ]] || return
     vrun_args+=($1)
 
-    if (( $+commands[uv] ))  .zpy_ui_vrun --activate $vrun_args uv pip install -p python pip
+    if (( $+commands[uv] ))  .zpy_ui_vrun --activate $vrun_args uv -q pip install -p python pip
     # TODO: adjust to work without pip, when uv is present
     # https://github.com/astral-sh/uv/issues/2150
 
@@ -1711,7 +1711,7 @@ jsonfile.write_text(dumps(data, indent=4))
 
     local piplist
     if (( $+commands[uv] )) {
-        piplist=(.zpy_ui_vrun --activate $pdir uv pip list)
+        piplist=(.zpy_ui_vrun --activate $pdir uv pip list -p python)
         # TODO: --pre?
     } else {
         piplist=(.zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre)
