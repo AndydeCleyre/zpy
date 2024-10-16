@@ -543,7 +543,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     local badrets
     if (( $+commands[uv] )) {
-        pipcompile_args=(-p python ${pipcompile_args:#--(allow-unsafe|strip-extras)})
+        pipcompile_args=(--python python ${pipcompile_args:#--(allow-unsafe|strip-extras)})
         uv pip compile $pipcompile_args 2>&1
     } else {
         pip-compile $pipcompile_args 2>&1 \
