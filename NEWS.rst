@@ -2,6 +2,15 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- More caching on the doc site (and no longer connect user to Google Fonts)
+- Increase uniformity between uv and pip-tools alternative backends
+
 0.3.9
 =====
 
