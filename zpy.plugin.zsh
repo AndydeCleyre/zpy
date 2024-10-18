@@ -1722,13 +1722,13 @@ jsonfile.write_text(dumps(data, indent=4))
         # Slower than the pure ZSH fallback below?
         local pattern=${${pdir:t}//-/[._-]}
         piplistline=($(
-            $piplist --format json \
+            $piplist --format json 2>/dev/null \
             | jq -r '.[] | select(.name|test("^'${pattern}'$"; "i")) | .name,.version'
         ))
     } elif (( $+commands[jello] )) {
         # Slower than the pure ZSH fallback below?
         piplistline=($(
-            $piplist --format json \
+            $piplist --format json 2>/dev/null \
             | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'"]'
         ))
     } elif (( $+commands[wheezy.template] )) {
@@ -1747,10 +1747,10 @@ jsonfile.write_text(dumps(data, indent=4))
         )
         piplistline=($(
             wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $($piplist --format json)}")
+            =(<<<"{\"_\": $($piplist --format json 2>/dev/null)}")
         ))
     } else {
-        local lines=(${(f)"$($piplist)"})
+        local lines=(${(f)"$($piplist 2>/dev/null)"})
         lines=($lines[3,-1])
 
         local pattern=${${pdir:t}//-/[._-]}
