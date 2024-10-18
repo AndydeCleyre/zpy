@@ -11,14 +11,15 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+plugins:
+  - privacy
 theme:
   name: material
   favicon: img/favicon.png
   icon:
     logo: material/ticket-percent
   font:
-    # text: Overpass
-    text: Jost
+    text: Lexend
     code: JetBrains Mono
   features:
     - navigation.instant

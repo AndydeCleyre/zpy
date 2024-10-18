@@ -2,6 +2,16 @@
 News
 ====
 
+0.3.10
+======
+
+Changed
+-------
+
+- More caching on the doc site (and no longer connect user to Google Fonts)
+- Increase uniformity between uv and pip-tools alternative backends
+- Silence some new noise from uv during ``pipz list``
+
 0.3.9
 =====
 
