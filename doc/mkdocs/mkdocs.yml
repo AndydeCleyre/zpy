@@ -20,7 +20,7 @@ theme:
     logo: material/ticket-percent
   font:
     text: Lexend
-    code: JetBrains Mono
+    code: LXGW WenKai Mono TC
   features:
     - navigation.instant
     - navigation.sections
