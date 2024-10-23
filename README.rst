@@ -45,9 +45,9 @@ The short version of installation:
 
 __ https://github.com/junegunn/fzf
 
-Check out zpy.rtfd.io__ for installation, explanation, and usage docs!
+Check out `the docs`__ for installation, explanation, and usage docs!
 
-__ https://zpy.rtfd.io
+__ https://andydecleyre.github.io/zpy/
 
 Examples
 --------
@@ -92,9 +92,9 @@ There are about 25 user-facing functions in total.
 For details,
 see the reference__ and the short guide__.
 
-__ https://zpy.readthedocs.io/en/latest/help_all/
+__ https://andydecleyre.github.io/zpy/help_all/
 
-__ https://zpy.readthedocs.io/en/latest/start/
+__ https://andydecleyre.github.io/zpy/start/
 
 They are also available as subcommands to the "supercommand" ``zpy``;
 ``envin`` is equivalent to ``zpy envin``, etc.
