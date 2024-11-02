@@ -15,8 +15,9 @@ Manage Python Environments in Zsh, with uv or pip-tools
 
 ``zpy`` is a set of Zsh functions
 wrapping
+or uv__, or
 pip-tools__
-and Python's venv module (or uv__),
+and Python's venv module,
 for the *simple* and *interactive* management of
 Python **virtual environments**,
 **dependency specifications**,
@@ -25,9 +26,9 @@ and **isolated Python app installations**.
 None of them should get in your way.
 All have **thorough tab completion**.
 
-__ https://github.com/jazzband/pip-tools
-
 __ https://github.com/astral-sh/uv
+
+__ https://github.com/jazzband/pip-tools
 
 They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 
