@@ -1259,16 +1259,18 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
             =(<<<"{\"_\": $(.zpy_ui_vrun $vrun_args $list_outdated --format json 2>/dev/null)}")
         ))
     } else {
-        # TODO: just implement inline Python fallback and remove this method, probably
-        local lines=(${(f)"$(.zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null)"})
-        lines=($lines[3,-1])
-        lines=(${lines:#(setuptools|six|pip|pip-tools) *})
 
-        local line line_cells
-        for line ( $lines ) {
-            line_cells=(${(z)line})
-            cells+=(${line_cells[1,3]})
-        }
+        cells=($(
+            .zpy_ui_vrun $vrun_args $list_outdated --format=json 2>/dev/null | python -c '
+import sys
+from json import load
+pkgs = load(sys.stdin)
+for pkg in pkgs:
+    if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"):
+        print(pkg["name"], pkg["version"], pkg["latest_version"], sep="\n")
+            '
+        ))
+
     }
     #    (package, version, latest)
     # -> (package, version, latest, proj-dir)
