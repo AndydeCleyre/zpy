@@ -2,6 +2,14 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- Use uv for pipcheckold instead of installing pip (requires uv >=0.5.0)
+
 0.3.10
 ======
 
