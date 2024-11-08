@@ -1227,43 +1227,40 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     [[ -d $1 ]] || return
     vrun_args+=($1)
 
-    if (( $+commands[uv] ))  .zpy_ui_vrun --activate $vrun_args uv -q pip install -p python pip
-    # TODO: adjust to work without pip, when uv is present
-    # https://github.com/astral-sh/uv/issues/2150
+    local list_outdated=(python -m pip --disable-pip-version-check list --outdated)
+    if (( $+commands[uv] ))  list_outdated=(uv pip list -p python --outdated)
 
     rehash
 
     local cells=()
     if (( $+commands[jq] )) {
         cells=($(
-            .zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json \
+            .zpy_ui_vrun $vrun_args $list_outdated --format json 2>/dev/null \
             | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
         ))
     } elif (( $+commands[jello] )) {
         cells=($(
-            .zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json \
+            .zpy_ui_vrun $vrun_args $list_outdated --format json 2>/dev/null \
             | jello -r '" ".join(" ".join((pkg["name"], pkg["version"], pkg["latest_version"])) for pkg in _ if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"))'
         ))
     } elif (( $+commands[wheezy.template] )) {
         local template=(
             '@require(_)'
-
             '@for pkg in _:'
-            '@if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"):'
-
-            '@pkg["name"]'
-            '@pkg["version"]'
-            '@pkg["latest_version"]'
-
-            '@end'
+                '@if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"):'
+                    '@pkg["name"]'
+                    '@pkg["version"]'
+                    '@pkg["latest_version"]'
+                '@end'
             '@end'
         )
         cells=($(
             wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $(.zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json)}")
+            =(<<<"{\"_\": $(.zpy_ui_vrun $vrun_args $list_outdated --format json 2>/dev/null)}")
         ))
     } else {
-        local lines=(${(f)"$(.zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o)"})
+        # TODO: just implement inline Python fallback and remove this method, probably
+        local lines=(${(f)"$(.zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null)"})
         lines=($lines[3,-1])
         lines=(${lines:#(setuptools|six|pip|pip-tools) *})
 
