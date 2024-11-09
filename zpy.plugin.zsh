@@ -1227,20 +1227,20 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     [[ -d $1 ]] || return
     vrun_args+=($1)
 
-    local list_outdated=(python -m pip --disable-pip-version-check list --outdated)
-    if (( $+commands[uv] ))  list_outdated=(uv pip list -p python --outdated)
+    local list_outdated=(python -m pip list --outdated --format=json)
+    if (( $+commands[uv] ))  list_outdated=(uv pip list -p python --outdated --format=json)
 
     rehash
 
     local cells=()
     if (( $+commands[jq] )) {
         cells=($(
-            .zpy_ui_vrun $vrun_args $list_outdated --format json 2>/dev/null \
+            .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null \
             | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
         ))
     } elif (( $+commands[jello] )) {
         cells=($(
-            .zpy_ui_vrun $vrun_args $list_outdated --format json 2>/dev/null \
+            .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null \
             | jello -r '" ".join(" ".join((pkg["name"], pkg["version"], pkg["latest_version"])) for pkg in _ if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"))'
         ))
     } elif (( $+commands[wheezy.template] )) {
@@ -1256,12 +1256,12 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         )
         cells=($(
             wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $(.zpy_ui_vrun $vrun_args $list_outdated --format json 2>/dev/null)}")
+            =(<<<"{\"_\": $(.zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null)}")
         ))
     } else {
 
         cells=($(
-            .zpy_ui_vrun $vrun_args $list_outdated --format=json 2>/dev/null | .zpy_ui_vrun $vrun_args python -c '
+            .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null | .zpy_ui_vrun $vrun_args python -c '
 import sys
 from json import load
 pkgs = load(sys.stdin)
@@ -1500,11 +1500,11 @@ pyproject.write_text(tomlkit.dumps(toml_data))
     REPLY=$spfile
 }
 
-# TODO: anywhere jq is tried, try all: jq, jello, dasel, wheezy.template
+# TODO: anywhere jq is tried, try all: jq, jello, dasel, wheezy.template, python
 # MAYBE: add yaml-path (again)? Check performance...
 # THEN: update deps.md
-# - .zpy_pipcheckoldcells (current: jq, jello, wheezy.template, zsh) (add dasel)
-# - .zpy_pipzlistrow (current: jq, jello, wheezy.template, zsh) (add dasel)
+# - .zpy_pipcheckoldcells (current: jq, jello, wheezy.template, python) (add dasel)
+# - .zpy_pipzlistrow (current: jq, jello, wheezy.template, python) (add dasel)
 # - .zpy_insertjson (current: jq, dasel, python)
 # - .zpy_pypi_pkgs (current: jq, dasel, jello, python)
 
