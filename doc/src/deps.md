@@ -77,7 +77,7 @@ with optional additions for more colorful output, alternative json parsers, and 
         Some of these can be installed after installing zpy, with zpy's `pipz` command:
 
         ```console
-        % pipz install uv rich-cli jello
+        % pipz install uv rich-cli wheezy.template
         ```
 
 === "The ones you already have anyway, probably"
