@@ -9,7 +9,7 @@ Changed
 -------
 
 - Use uv for pipcheckold instead of installing pip (requires uv >=0.5.0)
-- Replace Zsh-text-parsing fallback in pipcheckold with Python-json-parsing
+- Replace Zsh-text-parsing fallbacks with Python-json-parsing (slower but more reliable)
 
 0.3.10
 ======
