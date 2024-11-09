@@ -1261,7 +1261,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     } else {
 
         cells=($(
-            .zpy_ui_vrun $vrun_args $list_outdated --format=json 2>/dev/null | python -c '
+            .zpy_ui_vrun $vrun_args $list_outdated --format=json 2>/dev/null | .zpy_ui_vrun $vrun_args python -c '
 import sys
 from json import load
 pkgs = load(sys.stdin)
