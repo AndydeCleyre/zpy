@@ -1710,50 +1710,51 @@ jsonfile.write_text(dumps(data, indent=4))
 
     local piplist
     if (( $+commands[uv] )) {
-        piplist=(.zpy_ui_vrun --activate $pdir uv pip list -p python)
+        piplist=(.zpy_ui_vrun --activate $pdir uv pip list -p python --format=json)
         # TODO: --pre?
     } else {
-        piplist=(.zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre)
+        piplist=(.zpy_ui_vrun $pdir python -m pip list --pre --format=json)
     }
 
     local piplistline=()
     if (( $+commands[jq] )) {
-        # Slower than the pure ZSH fallback below?
         local pattern=${${pdir:t}//-/[._-]}
         piplistline=($(
-            $piplist --format json 2>/dev/null \
+            $piplist 2>/dev/null \
             | jq -r '.[] | select(.name|test("^'${pattern}'$"; "i")) | .name,.version'
         ))
     } elif (( $+commands[jello] )) {
-        # Slower than the pure ZSH fallback below?
         piplistline=($(
-            $piplist --format json 2>/dev/null \
+            $piplist 2>/dev/null \
             | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'"]'
         ))
     } elif (( $+commands[wheezy.template] )) {
-        # Slower than the pure ZSH fallback below?
         local template=(
             '@require(_)'
-
             '@for pkg in _:'
-            '@if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'":'
-
-            '@pkg["name"]'
-            '@pkg["version"]'
-
-            '@end'
+                '@if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'":'
+                    '@pkg["name"]'
+                    '@pkg["version"]'
+                '@end'
             '@end'
         )
         piplistline=($(
             wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $($piplist --format json 2>/dev/null)}")
+            =(<<<"{\"_\": $($piplist 2>/dev/null)}")
         ))
     } else {
-        local lines=(${(f)"$($piplist 2>/dev/null)"})
-        lines=($lines[3,-1])
 
-        local pattern=${${pdir:t}//-/[._-]}
-        piplistline=(${(zM)lines:#(#i)${~pattern} *})
+        piplistline=($(
+            $piplist 2>/dev/null | .zpy_ui_vrun $pdir python -c "
+import sys
+from json import load
+pkgs = load(sys.stdin)
+for pkg in pkgs:
+    if pkg['name'].lower().replace('_', '-').replace('.', '-') == '${pdir:t}':
+        print(pkg['name'], pkg['version'], sep='\n')
+            "
+        ))
+
     }
     # Preserve the table layout in case something goes surprising and we don't get a version cell:
     piplistline+=('????')
