@@ -11,6 +11,7 @@ Changed
 - Use uv for pipcheckold instead of installing pip (requires uv >=0.5.0)
 - Replace Zsh-text-parsing fallbacks with Python-json-parsing (slower but more reliable)
 - Remove jello for JSON handling, as it's slower than the Python fallbacks
+- Auto create a temporary venv for pypc's tomlkit needs
 
 0.3.10
 ======

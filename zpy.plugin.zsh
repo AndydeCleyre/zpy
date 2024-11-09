@@ -1395,23 +1395,18 @@ for pkg in pkgs:
 # Run either from the folder housing pyproject.toml, or one below.
 # To categorize, name files <category>-requirements.in.
 .zpy_ui_pypc () {  # [-y]
-    emulate -L zsh
+    emulate -L zsh -o errreturn
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local noconfirm
     if [[ $1 == -y ]]  noconfirm=1
 
-    # TODO: maybe do a sort of `pipz runpkg` thing here?
-
-    .zpy_ui_pipi --no-upgrade -q tomlkit
-    local ret=$?
-
-    if (( ret )) { .zpy_please_activate tomlkit; return ret }
-
     local pyproject=${${:-pyproject.toml}:a}
     if [[ ! -e $pyproject ]] && [[ -e ${pyproject:h:h}/pyproject.toml ]] {
         pyproject=${pyproject:h:h}/pyproject.toml
     }
+
+    # TODO: show diff THEN ask to replace
 
     if [[ ! $noconfirm ]] && [[ -e $pyproject ]] {
         if ! { read -q "?Overwrite ${pyproject}? [yN] " } {
@@ -1421,7 +1416,9 @@ for pkg in pkgs:
         print '\n'
     }
 
-    python -c "
+    local tmpproj=${TMPPREFIX}zpy_tomlkit
+    .zpy_ui_vrun --activate $tmpproj .zpy_ui_pipi --no-upgrade -q tomlkit
+    .zpy_ui_vrun $tmpproj python -c "
 from pathlib import Path
 from contextlib import suppress
 import os
@@ -1472,11 +1469,8 @@ for reqsin in reqsins:
         toml_data['project']['optional-dependencies'][extras_catg] = pyproject_reqs
 pyproject.write_text(tomlkit.dumps(toml_data))
     "
-    ret=$?
 
     .zpy_hlt toml <$pyproject
-
-    return ret
 }
 
 ## Get a new or existing Sublime Text project file for the working folder.
