@@ -64,8 +64,11 @@ with optional additions for more colorful output, alternative json parsers, and 
       *or* [colordiff](https://repology.org/project/colordiff/versions)
       -- for more pretty syntax highlighting
     - [jq](https://repology.org/project/jq/versions)
-      *or* [jello](https://pypi.org/project/jello/)
-      -- for theoretically more reliable parsing
+      *or* [wheezy.template](https://github.com/akornatskyy/wheezy.template)
+      -- for faster JSON parsing
+    - [jq](https://repology.org/project/jq/versions)
+      *or* [dasel](https://github.com/TomWright/dasel)
+      -- for faster JSON writing
     - [zsh-defer](https://github.com/romkatv/zsh-defer)
       -- for caching help content to eliminate a small delay in the first help message
 

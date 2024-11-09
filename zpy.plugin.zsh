@@ -130,7 +130,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 }
 
 ## fallback basic pcregrep-like func for our needs; not preferred to pcre2grep or ugrep,
-## but maybe preferred ripgrep, which had a relevant bug before its 14.0.0 release
+## but maybe preferred to ripgrep, which had a relevant bug before its 14.0.0 release
 .zpy_zpcregrep () {  # <output> <pattern> <file>
     emulate -L zsh
     # <output> like: '$1$4$5$7'
@@ -1238,11 +1238,6 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
             .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null \
             | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
         ))
-    } elif (( $+commands[jello] )) {
-        cells=($(
-            .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null \
-            | jello -r '" ".join(" ".join((pkg["name"], pkg["version"], pkg["latest_version"])) for pkg in _ if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"))'
-        ))
     } elif (( $+commands[wheezy.template] )) {
         local template=(
             '@require(_)'
@@ -1426,7 +1421,7 @@ for pkg in pkgs:
         print '\n'
     }
 
-    python3 -c "
+    python -c "
 from pathlib import Path
 from contextlib import suppress
 import os
@@ -1500,18 +1495,6 @@ pyproject.write_text(tomlkit.dumps(toml_data))
     REPLY=$spfile
 }
 
-# TODO: anywhere jq is tried, try all: jq, jello, dasel, wheezy.template, python
-# MAYBE: add yaml-path (again)? Check performance...
-# THEN: update deps.md
-# - .zpy_pipcheckoldcells (current: jq, jello, wheezy.template, python) (add dasel)
-# - .zpy_pipzlistrow (current: jq, jello, wheezy.template, python) (add dasel)
-# - .zpy_insertjson (current: jq, dasel, python)
-# - .zpy_pypi_pkgs (current: jq, dasel, jello, python)
-
-
-# TODO: tables printed, maybe try rich --csv
-# THEN: update deps.md
-
 .zpy_insertjson () {  # <jsonfile> <value> <keycrumb>...
     # Does not currently handle spaces within any keycrumb (or need to)
     emulate -L zsh -o extendedglob
@@ -1525,19 +1508,19 @@ pyproject.write_text(tomlkit.dumps(toml_data))
         >$jsonfile <<<'{}'
     }
 
-    if (( $+commands[jq] )) {
+    if (( $+commands[dasel] )) {
+        local keypath=".${(j:.:)@}"
+        local vartype=string
+        if [[ $value == (true|false) ]]  vartype=bool
+        dasel put -t $vartype -f $jsonfile -v $value $keypath
+    } elif (( $+commands[jq] )) {
         local keypath=".\"${(j:".":)@}\""
         if [[ $value != (true|false) ]]  value=${(qqq)value}
         print -r -- "$(
             jq --argjson val "$value" "${keypath}=\$val" "$jsonfile"
         )" >$jsonfile
-    } elif (( $+commands[dasel] )) {
-        local keypath=".${(j:.:)@}"
-        local vartype=string
-        if [[ $value == (true|false) ]]  vartype=bool
-        dasel put $vartype -f $jsonfile -p json $keypath $value
     } else {
-        python3 -c "
+        python -c "
 from collections import defaultdict
 from json import loads, dumps
 from pathlib import Path
@@ -1722,11 +1705,6 @@ jsonfile.write_text(dumps(data, indent=4))
         piplistline=($(
             $piplist 2>/dev/null \
             | jq -r '.[] | select(.name|test("^'${pattern}'$"; "i")) | .name,.version'
-        ))
-    } elif (( $+commands[jello] )) {
-        piplistline=($(
-            $piplist 2>/dev/null \
-            | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'"]'
         ))
     } elif (( $+commands[wheezy.template] )) {
         local template=(
@@ -2963,12 +2941,16 @@ _.zpy_ui_pipz () {
         }
         if (( $+commands[jq] )) {
             jq -r '.rows[].project' <$json >$txt
-        } elif (( $+commands[dasel] )) {
-            dasel --plain -m -f $json '.rows.[*].project' >$txt
-        } elif (( $+commands[jello] )) {
-            jello -lr '[p["project"] for p in _["rows"]]' <$json >$txt
+        } elif (( $+commands[wheezy.template] )) {
+            local template=(
+                '@require(rows)'
+                '@for row in rows:'
+                    '@row["project"]'
+                '@end'
+            )
+            wheezy.template =(<<<${(F)template}) $json >$txt
         } else {
-            python3 -c "
+            python -c "
 from pathlib import Path
 from json import loads
 
