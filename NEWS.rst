@@ -12,6 +12,7 @@ Changed
 - Replace Zsh-text-parsing fallbacks with Python-json-parsing (slower but more reliable)
 - Remove jello for JSON handling, as it's slower than the Python fallbacks
 - Auto create a temporary venv for pypc's tomlkit needs
+- Add diffr as optional diff-highlighter
 
 0.3.10
 ======
