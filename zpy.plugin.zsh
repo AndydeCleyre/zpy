@@ -70,7 +70,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     if [[ $1 == diff ]] {
         local diffhi args=()
-        for diffhi ( riff delta diff-so-fancy colordiff ) {
+        for diffhi ( riff diffr delta diff-so-fancy colordiff ) {
             if (( $+commands[$diffhi] )) {
                 if [[ $diffhi == riff ]]   args+=(--no-pager)
                 if [[ $diffhi == delta ]]  args+=(--paging never --color-only)

@@ -59,6 +59,7 @@ with optional additions for more colorful output, alternative json parsers, and 
       *or* [rich-cli](https://github.com/Textualize/rich-cli)
       -- for pretty syntax highlighting; rich-cli adds fancy tables
     - [riff](https://github.com/walles/riff)
+      *or* [diffr](https://github.com/mookid/diffr)
       *or* [delta](https://github.com/dandavison/delta)
       *or* [diff-so-fancy](https://github.com/so-fancy/diff-so-fancy)
       *or* [colordiff](https://repology.org/project/colordiff/versions)
