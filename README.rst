@@ -2,7 +2,7 @@
 zpy
 ===
 -------------------------------------------------------
-Manage Python Environments in Zsh, with uv or pip-tools
+Manage Python environments in Zsh, with uv or pip-tools
 -------------------------------------------------------
 
 |ghpages| |reqs-ci| |container-ci|
