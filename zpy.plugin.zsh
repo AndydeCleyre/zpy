@@ -1406,19 +1406,9 @@ for pkg in pkgs:
         pyproject=${pyproject:h:h}/pyproject.toml
     }
 
-    # TODO: show diff THEN ask to replace
-
-    if [[ ! $noconfirm ]] && [[ -e $pyproject ]] {
-        if ! { read -q "?Overwrite ${pyproject}? [yN] " } {
-            print '\n'
-            return
-        }
-        print '\n'
-    }
-
-    local tmpproj=${TMPPREFIX}zpy_tomlkit
-    .zpy_ui_vrun --activate $tmpproj .zpy_ui_pipi --no-upgrade -q tomlkit
-    .zpy_ui_vrun $tmpproj python -c "
+    local tomlkitproj=${TMPPREFIX}zpy_tomlkit newtoml=$(mktemp)
+    .zpy_ui_vrun --activate $tomlkitproj .zpy_ui_pipi --no-upgrade -q tomlkit
+    .zpy_ui_vrun $tomlkitproj python -c "
 from pathlib import Path
 from contextlib import suppress
 import os
@@ -1467,10 +1457,26 @@ for reqsin in reqsins:
     else:
         toml_data['project'].setdefault('optional-dependencies', {})
         toml_data['project']['optional-dependencies'][extras_catg] = pyproject_reqs
-pyproject.write_text(tomlkit.dumps(toml_data))
+Path('''${newtoml}''').write_text(tomlkit.dumps(toml_data))
     "
 
-    .zpy_hlt toml <$pyproject
+    local diffout
+    if { diffout=$(diff -u -L 'Old pyproject.toml' $pyproject -L 'New pyproject.toml' $newtoml) } {
+        print -ru2 "No change"
+    } else {
+        .zpy_hlt diff <<<$diffout
+
+        if [[ ! $noconfirm ]] && [[ -e $pyproject ]] && [[ -r $newtoml ]] {
+            if ! { read -q "?Overwrite ${pyproject}? [yN] " } {
+                print '\n'
+                return
+            }
+            print '\n'
+        }
+
+        <$newtoml >$pyproject
+    }
+    zf_rm $newtoml
 }
 
 ## Get a new or existing Sublime Text project file for the working folder.
