@@ -1855,7 +1855,7 @@ for pkg in pkgs:
 
     [[ $1 ]] || return
 
-    fzf_args+=(--preview="zsh -fc '. $ZPY_SRC; .zpy_hlt ini <$1/{}/*'")
+    fzf_args+=(--preview=". $ZPY_SRC; .zpy_hlt ini <$1/{}/*")
 
     local pkgs=($1/*(N/:t))
     reply=(${(f)"$(

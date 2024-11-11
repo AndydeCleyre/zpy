@@ -14,6 +14,7 @@ Changed
 - Auto create a temporary venv for pypc's tomlkit needs
 - Add diffr as optional diff-highlighter
 - Show pypc's pyproject.toml diff BEFORE asking to replace it
+- Remove useless double-zsh-invocation during fzf/skim preview
 
 0.3.10
 ======
