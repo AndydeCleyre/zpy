@@ -13,6 +13,7 @@ Changed
 - Remove jello for JSON handling, as it's slower than the Python fallbacks
 - Auto create a temporary venv for pypc's tomlkit needs
 - Add diffr as optional diff-highlighter
+- Show pypc's pyproject.toml diff BEFORE asking to replace it
 
 0.3.10
 ======
