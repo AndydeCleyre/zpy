@@ -1236,13 +1236,13 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     if (( $+commands[jq] )) {
         cells=($(
             .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null \
-            | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
+            | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools|wheel)$")|not) | .name,.version,.latest_version'
         ))
     } elif (( $+commands[wheezy.template] )) {
         local template=(
-            '@require(_)'
-            '@for pkg in _:'
-                '@if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"):'
+            '@require(__args__)'
+            '@for pkg in __args__[0]:'
+                '@if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools", "wheel"):'
                     '@pkg["name"]'
                     '@pkg["version"]'
                     '@pkg["latest_version"]'
@@ -1251,7 +1251,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         )
         cells=($(
             wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $(.zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null)}")
+            =(.zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null)
         ))
     } else {
 
@@ -1261,7 +1261,7 @@ import sys
 from json import load
 pkgs = load(sys.stdin)
 for pkg in pkgs:
-    if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"):
+    if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools", "wheel"):
         print(pkg["name"], pkg["version"], pkg["latest_version"], sep="\n")
             '
         ))
@@ -1708,8 +1708,8 @@ jsonfile.write_text(dumps(data, indent=4))
         ))
     } elif (( $+commands[wheezy.template] )) {
         local template=(
-            '@require(_)'
-            '@for pkg in _:'
+            '@require(__args__)'
+            '@for pkg in __args__[0]:'
                 '@if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'":'
                     '@pkg["name"]'
                     '@pkg["version"]'
@@ -1717,8 +1717,7 @@ jsonfile.write_text(dumps(data, indent=4))
             '@end'
         )
         piplistline=($(
-            wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $($piplist 2>/dev/null)}")
+            wheezy.template =(<<<${(F)template}) =($piplist 2>/dev/null)
         ))
     } else {
 
