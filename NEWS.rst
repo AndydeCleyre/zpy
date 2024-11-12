@@ -2,6 +2,14 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- Use reverse-list layout for fzf/skim instead of reverse
+
 0.3.11
 ======
 

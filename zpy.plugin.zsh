@@ -299,7 +299,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     .zpy_fzf_cmd || return
     local fzf_cmd=$REPLY
 
-    local multi fzf_args=(--reverse -0 --preview='<{}/*.in')
+    local multi fzf_args=(--layout=reverse-list -0 --preview='<{}/*.in')
     if [[ $1 == --multi ]] {
         unset reply
         fzf_args+=(-m)
@@ -1830,7 +1830,7 @@ for pkg in pkgs:
     local fzf_cmd=$REPLY
 
     local fzf_args=() fzf_header fzf_prompt multi
-    fzf_args=(--reverse -0)
+    fzf_args=(--layout=reverse-list -0)
     fzf_header='Packages:'
     fzf_prompt='Which package? '
     while [[ $1 == --(header|multi) ]] {
@@ -1908,7 +1908,7 @@ for pkg in pkgs:
     projects_home=$1; shift
     bins_home=$1;     shift
 
-    local bins_showlist=() bins_hidelist=() linkonly=1 fzf_args=(--reverse -m -0) fzf_header=Installing
+    local bins_showlist=() bins_hidelist=() linkonly=1 fzf_args=(--layout=reverse-list -m -0) fzf_header=Installing
     while [[ $1 == --(cmd|activate|no-cmd|auto1|header) ]] {
         if [[ $1 == --cmd      ]] { bins_showlist=(${(s:,:)2});  shift 2 }
         if [[ $1 == --no-cmd   ]] { bins_hidelist=(${(s:,:)2});  shift 2 }
