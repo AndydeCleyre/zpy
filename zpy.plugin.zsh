@@ -70,7 +70,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     if [[ $1 == diff ]] {
         local diffhi args=()
-        for diffhi ( riff delta diff-so-fancy colordiff ) {
+        for diffhi ( riff diffr delta diff-so-fancy colordiff ) {
             if (( $+commands[$diffhi] )) {
                 if [[ $diffhi == riff ]]   args+=(--no-pager)
                 if [[ $diffhi == delta ]]  args+=(--paging never --color-only)
@@ -130,7 +130,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 }
 
 ## fallback basic pcregrep-like func for our needs; not preferred to pcre2grep or ugrep,
-## but maybe preferred ripgrep, which had a relevant bug before its 14.0.0 release
+## but maybe preferred to ripgrep, which had a relevant bug before its 14.0.0 release
 .zpy_zpcregrep () {  # <output> <pattern> <file>
     emulate -L zsh
     # <output> like: '$1$4$5$7'
@@ -1227,51 +1227,45 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     [[ -d $1 ]] || return
     vrun_args+=($1)
 
-    if (( $+commands[uv] ))  .zpy_ui_vrun --activate $vrun_args uv -q pip install -p python pip
-    # TODO: adjust to work without pip, when uv is present
-    # https://github.com/astral-sh/uv/issues/2150
+    local list_outdated=(python -m pip list --outdated --format=json)
+    if (( $+commands[uv] ))  list_outdated=(uv pip list -p python --outdated --format=json)
 
     rehash
 
     local cells=()
     if (( $+commands[jq] )) {
         cells=($(
-            .zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json \
-            | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools)$")|not) | .name,.version,.latest_version'
-        ))
-    } elif (( $+commands[jello] )) {
-        cells=($(
-            .zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json \
-            | jello -r '" ".join(" ".join((pkg["name"], pkg["version"], pkg["latest_version"])) for pkg in _ if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"))'
+            .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null \
+            | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools|wheel)$")|not) | .name,.version,.latest_version'
         ))
     } elif (( $+commands[wheezy.template] )) {
         local template=(
-            '@require(_)'
-
-            '@for pkg in _:'
-            '@if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools"):'
-
-            '@pkg["name"]'
-            '@pkg["version"]'
-            '@pkg["latest_version"]'
-
-            '@end'
+            '@require(__args__)'
+            '@for pkg in __args__[0]:'
+                '@if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools", "wheel"):'
+                    '@pkg["name"]'
+                    '@pkg["version"]'
+                    '@pkg["latest_version"]'
+                '@end'
             '@end'
         )
         cells=($(
             wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $(.zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o --format json)}")
+            =(.zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null)
         ))
     } else {
-        local lines=(${(f)"$(.zpy_ui_vrun $vrun_args python -m pip --disable-pip-version-check list -o)"})
-        lines=($lines[3,-1])
-        lines=(${lines:#(setuptools|six|pip|pip-tools) *})
 
-        local line line_cells
-        for line ( $lines ) {
-            line_cells=(${(z)line})
-            cells+=(${line_cells[1,3]})
-        }
+        cells=($(
+            .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null | .zpy_ui_vrun $vrun_args python -c '
+import sys
+from json import load
+pkgs = load(sys.stdin)
+for pkg in pkgs:
+    if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools", "wheel"):
+        print(pkg["name"], pkg["version"], pkg["latest_version"], sep="\n")
+            '
+        ))
+
     }
     #    (package, version, latest)
     # -> (package, version, latest, proj-dir)
@@ -1401,33 +1395,20 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 # Run either from the folder housing pyproject.toml, or one below.
 # To categorize, name files <category>-requirements.in.
 .zpy_ui_pypc () {  # [-y]
-    emulate -L zsh
+    emulate -L zsh -o errreturn
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
 
     local noconfirm
     if [[ $1 == -y ]]  noconfirm=1
-
-    # TODO: maybe do a sort of `pipz runpkg` thing here?
-
-    .zpy_ui_pipi --no-upgrade -q tomlkit
-    local ret=$?
-
-    if (( ret )) { .zpy_please_activate tomlkit; return ret }
 
     local pyproject=${${:-pyproject.toml}:a}
     if [[ ! -e $pyproject ]] && [[ -e ${pyproject:h:h}/pyproject.toml ]] {
         pyproject=${pyproject:h:h}/pyproject.toml
     }
 
-    if [[ ! $noconfirm ]] && [[ -e $pyproject ]] {
-        if ! { read -q "?Overwrite ${pyproject}? [yN] " } {
-            print '\n'
-            return
-        }
-        print '\n'
-    }
-
-    python3 -c "
+    local tomlkitproj=${TMPPREFIX}zpy_tomlkit newtoml=$(mktemp)
+    .zpy_ui_vrun --activate $tomlkitproj .zpy_ui_pipi --no-upgrade -q tomlkit
+    .zpy_ui_vrun $tomlkitproj python -c "
 from pathlib import Path
 from contextlib import suppress
 import os
@@ -1476,13 +1457,26 @@ for reqsin in reqsins:
     else:
         toml_data['project'].setdefault('optional-dependencies', {})
         toml_data['project']['optional-dependencies'][extras_catg] = pyproject_reqs
-pyproject.write_text(tomlkit.dumps(toml_data))
+Path('''${newtoml}''').write_text(tomlkit.dumps(toml_data))
     "
-    ret=$?
 
-    .zpy_hlt toml <$pyproject
+    local diffout
+    if { diffout=$(diff -u -L 'Old pyproject.toml' $pyproject -L 'New pyproject.toml' $newtoml) } {
+        print -ru2 "No change"
+    } else {
+        .zpy_hlt diff <<<$diffout
 
-    return ret
+        if [[ ! $noconfirm ]] && [[ -e $pyproject ]] && [[ -r $newtoml ]] {
+            if ! { read -q "?Overwrite ${pyproject}? [yN] " } {
+                print '\n'
+                return
+            }
+            print '\n'
+        }
+
+        <$newtoml >$pyproject
+    }
+    zf_rm $newtoml
 }
 
 ## Get a new or existing Sublime Text project file for the working folder.
@@ -1501,18 +1495,6 @@ pyproject.write_text(tomlkit.dumps(toml_data))
     REPLY=$spfile
 }
 
-# TODO: anywhere jq is tried, try all: jq, jello, dasel, wheezy.template
-# MAYBE: add yaml-path (again)? Check performance...
-# THEN: update deps.md
-# - .zpy_pipcheckoldcells (current: jq, jello, wheezy.template, zsh) (add dasel)
-# - .zpy_pipzlistrow (current: jq, jello, wheezy.template, zsh) (add dasel)
-# - .zpy_insertjson (current: jq, dasel, python)
-# - .zpy_pypi_pkgs (current: jq, dasel, jello, python)
-
-
-# TODO: tables printed, maybe try rich --csv
-# THEN: update deps.md
-
 .zpy_insertjson () {  # <jsonfile> <value> <keycrumb>...
     # Does not currently handle spaces within any keycrumb (or need to)
     emulate -L zsh -o extendedglob
@@ -1526,19 +1508,19 @@ pyproject.write_text(tomlkit.dumps(toml_data))
         >$jsonfile <<<'{}'
     }
 
-    if (( $+commands[jq] )) {
+    if (( $+commands[dasel] )) {
+        local keypath=".${(j:.:)@}"
+        local vartype=string
+        if [[ $value == (true|false) ]]  vartype=bool
+        dasel put -t $vartype -f $jsonfile -v $value $keypath
+    } elif (( $+commands[jq] )) {
         local keypath=".\"${(j:".":)@}\""
         if [[ $value != (true|false) ]]  value=${(qqq)value}
         print -r -- "$(
             jq --argjson val "$value" "${keypath}=\$val" "$jsonfile"
         )" >$jsonfile
-    } elif (( $+commands[dasel] )) {
-        local keypath=".${(j:.:)@}"
-        local vartype=string
-        if [[ $value == (true|false) ]]  vartype=bool
-        dasel put $vartype -f $jsonfile -p json $keypath $value
     } else {
-        python3 -c "
+        python -c "
 from collections import defaultdict
 from json import loads, dumps
 from pathlib import Path
@@ -1711,50 +1693,45 @@ jsonfile.write_text(dumps(data, indent=4))
 
     local piplist
     if (( $+commands[uv] )) {
-        piplist=(.zpy_ui_vrun --activate $pdir uv pip list -p python)
+        piplist=(.zpy_ui_vrun --activate $pdir uv pip list -p python --format=json)
         # TODO: --pre?
     } else {
-        piplist=(.zpy_ui_vrun $pdir python -m pip --disable-pip-version-check list --pre)
+        piplist=(.zpy_ui_vrun $pdir python -m pip list --pre --format=json)
     }
 
     local piplistline=()
     if (( $+commands[jq] )) {
-        # Slower than the pure ZSH fallback below?
         local pattern=${${pdir:t}//-/[._-]}
         piplistline=($(
-            $piplist --format json 2>/dev/null \
+            $piplist 2>/dev/null \
             | jq -r '.[] | select(.name|test("^'${pattern}'$"; "i")) | .name,.version'
         ))
-    } elif (( $+commands[jello] )) {
-        # Slower than the pure ZSH fallback below?
-        piplistline=($(
-            $piplist --format json 2>/dev/null \
-            | jello -lr '[pkg["name"] + " " + pkg["version"] for pkg in _ if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'"]'
-        ))
     } elif (( $+commands[wheezy.template] )) {
-        # Slower than the pure ZSH fallback below?
         local template=(
-            '@require(_)'
-
-            '@for pkg in _:'
-            '@if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'":'
-
-            '@pkg["name"]'
-            '@pkg["version"]'
-
-            '@end'
+            '@require(__args__)'
+            '@for pkg in __args__[0]:'
+                '@if pkg["name"].lower().replace("_", "-").replace(".", "-") == "'${pdir:t}'":'
+                    '@pkg["name"]'
+                    '@pkg["version"]'
+                '@end'
             '@end'
         )
         piplistline=($(
-            wheezy.template =(<<<${(F)template}) \
-            =(<<<"{\"_\": $($piplist --format json 2>/dev/null)}")
+            wheezy.template =(<<<${(F)template}) =($piplist 2>/dev/null)
         ))
     } else {
-        local lines=(${(f)"$($piplist 2>/dev/null)"})
-        lines=($lines[3,-1])
 
-        local pattern=${${pdir:t}//-/[._-]}
-        piplistline=(${(zM)lines:#(#i)${~pattern} *})
+        piplistline=($(
+            $piplist 2>/dev/null | .zpy_ui_vrun $pdir python -c "
+import sys
+from json import load
+pkgs = load(sys.stdin)
+for pkg in pkgs:
+    if pkg['name'].lower().replace('_', '-').replace('.', '-') == '${pdir:t}':
+        print(pkg['name'], pkg['version'], sep='\n')
+            "
+        ))
+
     }
     # Preserve the table layout in case something goes surprising and we don't get a version cell:
     piplistline+=('????')
@@ -1877,7 +1854,7 @@ jsonfile.write_text(dumps(data, indent=4))
 
     [[ $1 ]] || return
 
-    fzf_args+=(--preview="zsh -fc '. $ZPY_SRC; .zpy_hlt ini <$1/{}/*'")
+    fzf_args+=(--preview=". $ZPY_SRC; .zpy_hlt ini <$1/{}/*")
 
     local pkgs=($1/*(N/:t))
     reply=(${(f)"$(
@@ -2963,12 +2940,16 @@ _.zpy_ui_pipz () {
         }
         if (( $+commands[jq] )) {
             jq -r '.rows[].project' <$json >$txt
-        } elif (( $+commands[dasel] )) {
-            dasel --plain -m -f $json '.rows.[*].project' >$txt
-        } elif (( $+commands[jello] )) {
-            jello -lr '[p["project"] for p in _["rows"]]' <$json >$txt
+        } elif (( $+commands[wheezy.template] )) {
+            local template=(
+                '@require(rows)'
+                '@for row in rows:'
+                    '@row["project"]'
+                '@end'
+            )
+            wheezy.template =(<<<${(F)template}) $json >$txt
         } else {
-            python3 -c "
+            python -c "
 from pathlib import Path
 from json import loads
 

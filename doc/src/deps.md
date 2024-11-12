@@ -59,13 +59,17 @@ with optional additions for more colorful output, alternative json parsers, and 
       *or* [rich-cli](https://github.com/Textualize/rich-cli)
       -- for pretty syntax highlighting; rich-cli adds fancy tables
     - [riff](https://github.com/walles/riff)
+      *or* [diffr](https://github.com/mookid/diffr)
       *or* [delta](https://github.com/dandavison/delta)
       *or* [diff-so-fancy](https://github.com/so-fancy/diff-so-fancy)
       *or* [colordiff](https://repology.org/project/colordiff/versions)
       -- for more pretty syntax highlighting
     - [jq](https://repology.org/project/jq/versions)
-      *or* [jello](https://pypi.org/project/jello/)
-      -- for theoretically more reliable parsing
+      *or* [wheezy.template](https://github.com/akornatskyy/wheezy.template)
+      -- for faster JSON parsing
+    - [jq](https://repology.org/project/jq/versions)
+      *or* [dasel](https://github.com/TomWright/dasel)
+      -- for faster JSON writing
     - [zsh-defer](https://github.com/romkatv/zsh-defer)
       -- for caching help content to eliminate a small delay in the first help message
 
@@ -74,7 +78,7 @@ with optional additions for more colorful output, alternative json parsers, and 
         Some of these can be installed after installing zpy, with zpy's `pipz` command:
 
         ```console
-        % pipz install uv rich-cli jello
+        % pipz install uv rich-cli wheezy.template
         ```
 
 === "The ones you already have anyway, probably"

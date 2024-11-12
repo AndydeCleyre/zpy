@@ -14,4 +14,8 @@ def zpy_help(*funcs, indentation=0, indent_first_line=False):
         first, rest = content.split("\n", 1)
     except ValueError:
         return content
-    return f"{first}\n{indent(rest, ' ' * indentation)}"
+    return (
+        f"{' ' * (indentation if indent_first_line else 0)}"
+        f"{first}\n"
+        f"{indent(rest, ' ' * indentation)}"
+    )

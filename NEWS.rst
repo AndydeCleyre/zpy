@@ -2,6 +2,23 @@
 News
 ====
 
+0.3.11
+======
+
+Changed
+-------
+
+- Use uv for pipcheckold instead of installing pip (requires uv >=0.5.0)
+- Replace Zsh-text-parsing fallbacks with Python-json-parsing (slower but more reliable)
+- Remove jello for JSON handling, as it's slower than the Python fallbacks
+- Auto create a temporary venv for pypc's tomlkit needs
+- Add diffr as optional diff-highlighter
+- Show pypc's pyproject.toml diff BEFORE asking to replace it
+- Remove useless double-zsh-invocation during fzf/skim preview
+- Exclude wheel from pipcheckold listings
+- Use new wheezy.template feature (``__args__``) to reduce shell-manipulation of JSON
+  - If using the wheezy.template JSON-reading backend, upgrade it (``pipz upgrade wheezy.template``)!
+
 0.3.10
 ======
 

@@ -12,6 +12,5 @@ fi
 pip install -qr requirements.txt
 
 for wz in *.wz; do
-  md="$(printf '%s\n' "$wz" | sed -E 's/\.wz$//')"
-  PYTHONPATH="$templates" wheezy.template "$wz" '{}' >"../src/${md}"
+  PYTHONPATH="$templates" wheezy.template "$wz" '{}' >"../src/${wz%.wz}"
 done

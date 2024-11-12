@@ -2,7 +2,7 @@
 zpy
 ===
 -------------------------------------------------------
-Manage Python Environments in Zsh, with uv or pip-tools
+Manage Python environments in Zsh, with uv or pip-tools
 -------------------------------------------------------
 
 |ghpages| |reqs-ci| |container-ci|
@@ -15,8 +15,9 @@ Manage Python Environments in Zsh, with uv or pip-tools
 
 ``zpy`` is a set of Zsh functions
 wrapping
+or uv__, or
 pip-tools__
-and Python's venv module (or uv__),
+and Python's venv module,
 for the *simple* and *interactive* management of
 Python **virtual environments**,
 **dependency specifications**,
@@ -25,9 +26,9 @@ and **isolated Python app installations**.
 None of them should get in your way.
 All have **thorough tab completion**.
 
-__ https://github.com/jazzband/pip-tools
-
 __ https://github.com/astral-sh/uv
+
+__ https://github.com/jazzband/pip-tools
 
 They can generally replace pipenv, poetry, pipx, pipsi, virtualenvwrapper, etc.
 
@@ -45,9 +46,9 @@ The short version of installation:
 
 __ https://github.com/junegunn/fzf
 
-Check out zpy.rtfd.io__ for installation, explanation, and usage docs!
+Check out `the docs`__ for installation, explanation, and usage docs!
 
-__ https://zpy.rtfd.io
+__ https://andydecleyre.github.io/zpy/
 
 Examples
 --------
@@ -92,9 +93,9 @@ There are about 25 user-facing functions in total.
 For details,
 see the reference__ and the short guide__.
 
-__ https://zpy.readthedocs.io/en/latest/help_all/
+__ https://andydecleyre.github.io/zpy/help_all/
 
-__ https://zpy.readthedocs.io/en/latest/start/
+__ https://andydecleyre.github.io/zpy/start/
 
 They are also available as subcommands to the "supercommand" ``zpy``;
 ``envin`` is equivalent to ``zpy envin``, etc.
