@@ -16,8 +16,8 @@ Changed
 - Show pypc's pyproject.toml diff BEFORE asking to replace it
 - Remove useless double-zsh-invocation during fzf/skim preview
 - Exclude wheel from pipcheckold listings
-- Use new wheezy.template feature (`__args__`) to reduce shell-manipulation of JSON
-  - If using the wheezy.template JSON-reading backend, upgrade it (`pipz upgrade wheezy.template`)!
+- Use new wheezy.template feature (``__args__``) to reduce shell-manipulation of JSON
+  - If using the wheezy.template JSON-reading backend, upgrade it (``pipz upgrade wheezy.template``)!
 
 0.3.10
 ======
