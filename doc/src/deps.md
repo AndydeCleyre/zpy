@@ -1,7 +1,7 @@
 # Dependencies
 
 The primary requirements are Zsh, Python, and
-[`fzf`](https://github.com/junegunn/fzf) *or* [`sk` (skim)](https://github.com/lotabout/skim),
+[`fzf`](https://github.com/junegunn/fzf) *or* [`sk` (skim)](https://github.com/skim-rs/skim),
 with optional additions for more colorful output, alternative json parsers, and faster performance.
 
 ## Suggested Dependencies by Platform
@@ -48,7 +48,7 @@ with optional additions for more colorful output, alternative json parsers, and 
 
     - [Zsh](https://repology.org/project/zsh/versions)
     - [Python](https://repology.org/project/python/versions)
-    - [`fzf`](https://github.com/junegunn/fzf) *or* [`sk` (skim)](https://github.com/lotabout/skim)
+    - [`fzf`](https://github.com/junegunn/fzf) *or* [`sk` (skim)](https://github.com/skim-rs/skim)
 
 === "The optional ones"
 
