@@ -9,6 +9,7 @@ Changed
 -------
 
 - Use reverse-list layout for fzf/skim instead of reverse
+- pypc: don't add '.' to any dependency list
 
 0.3.11
 ======
