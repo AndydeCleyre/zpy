@@ -55,6 +55,7 @@ with optional additions for more colorful output, alternative json parsers, and 
     - [uv](https://github.com/astral-sh/uv/)
       -- for faster performance, leaner venvs, and more operational feedback
     - [highlight](https://repology.org/project/highlight/versions)
+      *or* [gat](https://github.com/koki-develop/gat/)
       *or* [bat](https://repology.org/project/bat/versions)
       *or* [rich-cli](https://github.com/Textualize/rich-cli)
       -- for pretty syntax highlighting; rich-cli adds fancy tables

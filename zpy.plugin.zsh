@@ -108,13 +108,16 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         # the first of the next. This is true of at least highlight 3.58.
 
         # The method below bypasses both issues consistently
-        # across all known versions of highlight, and still outperforms bat:
+        # across all known versions of highlight, and still outperforms the rest:
         local content=$(<&0)
         if [[ $content ]] {
             local themes=(aiseered blacknblue bluegreen ekvoli navy)
             HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-"-s $themes[RANDOM % $#themes + 1]"} \
             highlight -O truecolor --stdout --force -S $1 <<<$content
         }
+    } elif (( $+commands[gat] )) {  # recommended themes: base16-snazzy, doom-one, gruvbox, onedark, vulcan
+        GAT_THEME=${GAT_THEME:-doom-one} \
+        gat --force-color -l $1
     } elif (( $+commands[bat] )) {  # recommended themes: ansi, zenburn
         BAT_THEME=${BAT_THEME:-ansi} \
         bat --color always --paging never -p -l $1
