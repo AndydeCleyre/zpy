@@ -1523,7 +1523,7 @@ Path('''${newtoml}''').write_text(tomlkit.dumps(toml_data))
             jq --argjson val "$value" "${keypath}=\$val" "$jsonfile"
         )" >$jsonfile
     } else {
-        python -c "
+        python3 -c "
 from collections import defaultdict
 from json import loads, dumps
 from pathlib import Path
@@ -2952,7 +2952,7 @@ _.zpy_ui_pipz () {
             )
             wheezy.template =(<<<${(F)template}) $json >$txt
         } else {
-            python -c "
+            python3 -c "
 from pathlib import Path
 from json import loads
 
