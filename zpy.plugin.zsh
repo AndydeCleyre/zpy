@@ -1235,17 +1235,19 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     rehash
 
+    local blocklist=(setuptools six pip pip-tools wheel)
+
     local cells=()
     if (( $+commands[jq] )) {
         cells=($(
             .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null \
-            | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools|wheel)$")|not) | .name,.version,.latest_version'
+            | jq -r '.[] | select(.name|test("^('${(j:|:)blocklist}')$")|not) | .name,.version,.latest_version'
         ))
     } elif (( $+commands[wheezy.template] )) {
         local template=(
             '@require(__args__)'
             '@for pkg in __args__[0]:'
-                '@if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools", "wheel"):'
+                '@if pkg["name"] not in ("'${(j:", ":)blocklist}'"):'
                     '@pkg["name"]'
                     '@pkg["version"]'
                     '@pkg["latest_version"]'
@@ -1264,7 +1266,7 @@ import sys
 from json import load
 pkgs = load(sys.stdin)
 for pkg in pkgs:
-    if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools", "wheel"):
+    if pkg["name"] not in ("'${(j:", ":)blocklist}'"):
         print(pkg["name"], pkg["version"], pkg["latest_version"], sep="\n")
             '
         ))
