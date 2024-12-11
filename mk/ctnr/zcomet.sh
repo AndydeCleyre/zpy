@@ -32,7 +32,7 @@ case $distro in
     alias ctnr_mkuser="ctnr_run useradd -m -s /bin/zsh"
   ;;
   alpine)
-    basetag=${2:-3.20}
+    basetag=${2:-3.21}
     pkgs="$pkgs git sudo"
     fat="$fat /var/cache/apk/*"
     alias ctnr_pkg="ctnr_run apk -q --no-progress"
@@ -87,6 +87,7 @@ ctnr_run -u git clone -q --depth 1 https://github.com/agkozak/zcomet /home/$user
 # Add settings and plugins to .zshrc:
 ctnr_run -u rm -f /home/$user/.zshrc
 <<EOF ctnr_append -u /home/$user/.zshrc
+typeset -U fpath=(~/.local/share/zsh/site-functions \$fpath)
 typeset -U path=(~/.local/bin \$path)
 precmd () { rehash }
 zstyle ':completion:*:*:*:*:*' menu select
