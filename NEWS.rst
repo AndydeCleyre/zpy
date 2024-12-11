@@ -12,6 +12,9 @@ Changed
 - pypc: don't add '.' to any dependency list
 - Add optional syntax highlighter backend: gat
 - Ensure to use ``python3`` instead of ``python`` for out-of-venv internal uses
+- Add mise auto-venv-activation instructions to docs
+- Update demo container base for Alpine
+- Install uv completion (which becomes part of zpy completion) in demo containers
 
 0.3.11
 ======
