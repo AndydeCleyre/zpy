@@ -47,11 +47,18 @@ please open an issue or discussion on GitHub.
     $ zpy mkbin venvs_path ~/.local/bin/
     ```
 
-    Now you can add the following to your project's `mise.toml`:
+    Now you can add the following to your project's `mise.local.toml`:
 
     ```toml
     [env._.python]
     venv = "{{exec(command='venvs_path')}}/venv"
+    ```
+
+    This can also be done with commands:
+
+    ```console
+    $ touch mise.local.toml
+    $ mise config set -f mise.local.toml env._.python.venv "{{exec(command='venvs_path')}}/venv"
     ```
 
 === "direnv"
