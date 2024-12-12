@@ -108,13 +108,16 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         # the first of the next. This is true of at least highlight 3.58.
 
         # The method below bypasses both issues consistently
-        # across all known versions of highlight, and still outperforms bat:
+        # across all known versions of highlight, and still outperforms the rest:
         local content=$(<&0)
         if [[ $content ]] {
             local themes=(aiseered blacknblue bluegreen ekvoli navy)
             HIGHLIGHT_OPTIONS=${HIGHLIGHT_OPTIONS:-"-s $themes[RANDOM % $#themes + 1]"} \
             highlight -O truecolor --stdout --force -S $1 <<<$content
         }
+    } elif (( $+commands[gat] )) {  # recommended themes: base16-snazzy, doom-one, gruvbox, onedark, vulcan
+        GAT_THEME=${GAT_THEME:-doom-one} \
+        gat --force-color -l $1
     } elif (( $+commands[bat] )) {  # recommended themes: ansi, zenburn
         BAT_THEME=${BAT_THEME:-ansi} \
         bat --color always --paging never -p -l $1
@@ -299,7 +302,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     .zpy_fzf_cmd || return
     local fzf_cmd=$REPLY
 
-    local multi fzf_args=(--reverse -0 --preview='<{}/*.in')
+    local multi fzf_args=(--layout=reverse-list -0 --preview='<{}/*.in')
     if [[ $1 == --multi ]] {
         unset reply
         fzf_args+=(-m)
@@ -1232,17 +1235,19 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     rehash
 
+    local blocklist=(setuptools six pip pip-tools wheel)
+
     local cells=()
     if (( $+commands[jq] )) {
         cells=($(
             .zpy_ui_vrun $vrun_args $list_outdated 2>/dev/null \
-            | jq -r '.[] | select(.name|test("^(setuptools|six|pip|pip-tools|wheel)$")|not) | .name,.version,.latest_version'
+            | jq -r '.[] | select(.name|test("^('${(j:|:)blocklist}')$")|not) | .name,.version,.latest_version'
         ))
     } elif (( $+commands[wheezy.template] )) {
         local template=(
             '@require(__args__)'
             '@for pkg in __args__[0]:'
-                '@if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools", "wheel"):'
+                '@if pkg["name"] not in ("'${(j:", ":)blocklist}'"):'
                     '@pkg["name"]'
                     '@pkg["version"]'
                     '@pkg["latest_version"]'
@@ -1261,7 +1266,7 @@ import sys
 from json import load
 pkgs = load(sys.stdin)
 for pkg in pkgs:
-    if pkg["name"] not in ("setuptools", "six", "pip", "pip-tools", "wheel"):
+    if pkg["name"] not in ("'${(j:", ":)blocklist}'"):
         print(pkg["name"], pkg["version"], pkg["latest_version"], sep="\n")
             '
         ))
@@ -1435,7 +1440,7 @@ def reqs_from_reqsin(reqsin):
             reqs.append(
                 re.search(r'^(-\S+\s+)*([^#]+)', line).group(2).rstrip()
             )
-    return sorted(set(r for r in reqs if r.strip()))
+    return sorted(set(r for r in reqs if r.strip() and r not in ('.',)))
 
 
 suffix = 'requirements.in'
@@ -1520,7 +1525,7 @@ Path('''${newtoml}''').write_text(tomlkit.dumps(toml_data))
             jq --argjson val "$value" "${keypath}=\$val" "$jsonfile"
         )" >$jsonfile
     } else {
-        python -c "
+        python3 -c "
 from collections import defaultdict
 from json import loads, dumps
 from pathlib import Path
@@ -1830,7 +1835,7 @@ for pkg in pkgs:
     local fzf_cmd=$REPLY
 
     local fzf_args=() fzf_header fzf_prompt multi
-    fzf_args=(--reverse -0)
+    fzf_args=(--layout=reverse-list -0)
     fzf_header='Packages:'
     fzf_prompt='Which package? '
     while [[ $1 == --(header|multi) ]] {
@@ -1908,7 +1913,7 @@ for pkg in pkgs:
     projects_home=$1; shift
     bins_home=$1;     shift
 
-    local bins_showlist=() bins_hidelist=() linkonly=1 fzf_args=(--reverse -m -0) fzf_header=Installing
+    local bins_showlist=() bins_hidelist=() linkonly=1 fzf_args=(--layout=reverse-list -m -0) fzf_header=Installing
     while [[ $1 == --(cmd|activate|no-cmd|auto1|header) ]] {
         if [[ $1 == --cmd      ]] { bins_showlist=(${(s:,:)2});  shift 2 }
         if [[ $1 == --no-cmd   ]] { bins_hidelist=(${(s:,:)2});  shift 2 }
@@ -2949,7 +2954,7 @@ _.zpy_ui_pipz () {
             )
             wheezy.template =(<<<${(F)template}) $json >$txt
         } else {
-            python -c "
+            python3 -c "
 from pathlib import Path
 from json import loads
 

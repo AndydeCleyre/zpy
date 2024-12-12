@@ -1,7 +1,7 @@
 # Dependencies
 
 The primary requirements are Zsh, Python, and
-[`fzf`](https://github.com/junegunn/fzf) *or* [`sk` (skim)](https://github.com/lotabout/skim),
+[`fzf`](https://github.com/junegunn/fzf) *or* [`sk` (skim)](https://github.com/skim-rs/skim),
 with optional additions for more colorful output, alternative json parsers, and faster performance.
 
 ## Suggested Dependencies by Platform
@@ -48,13 +48,14 @@ with optional additions for more colorful output, alternative json parsers, and 
 
     - [Zsh](https://repology.org/project/zsh/versions)
     - [Python](https://repology.org/project/python/versions)
-    - [`fzf`](https://github.com/junegunn/fzf) *or* [`sk` (skim)](https://github.com/lotabout/skim)
+    - [`fzf`](https://github.com/junegunn/fzf) *or* [`sk` (skim)](https://github.com/skim-rs/skim)
 
 === "The optional ones"
 
     - [uv](https://github.com/astral-sh/uv/)
       -- for faster performance, leaner venvs, and more operational feedback
     - [highlight](https://repology.org/project/highlight/versions)
+      *or* [gat](https://github.com/koki-develop/gat/)
       *or* [bat](https://repology.org/project/bat/versions)
       *or* [rich-cli](https://github.com/Textualize/rich-cli)
       -- for pretty syntax highlighting; rich-cli adds fancy tables

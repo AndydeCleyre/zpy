@@ -32,6 +32,35 @@ please open an issue or discussion on GitHub.
     This ensures the proper project folder is used,
     even if you're activating the script by entering a deeper subdirectory.
 
+=== "mise"
+
+    [mise](https://mise.jdx.dev/) supports
+    [automatic venv activation](https://mise.jdx.dev/lang/python.html#automatic-virtualenv-activation),
+    so we can configure the venv location to match zpy's.
+
+    Let's create a self-contained script for `venvs_path`,
+    so that we can easily call it from Bash.
+
+    Assuming `~/.local/bin` is in your `PATH`, run
+
+    ```console
+    $ zpy mkbin venvs_path ~/.local/bin/
+    ```
+
+    Now you can add the following to your project's `mise.local.toml`:
+
+    ```toml
+    [env._.python]
+    venv = "{{exec(command='venvs_path')}}/venv"
+    ```
+
+    This can also be done with commands:
+
+    ```console
+    $ touch mise.local.toml
+    $ mise config set -f mise.local.toml env._.python.venv "{{exec(command='venvs_path')}}/venv"
+    ```
+
 === "direnv"
 
     [direnv](https://github.com/direnv/direnv/)

@@ -108,10 +108,13 @@ fi
 printf 'zpy_branch: %s\n' "$zpy_branch"
 printf 'zpy_version: %s\n' "$zpy_version"
 
+# Install uv, rich-cli
 ctnr_run -u zsh -ic 'pipz install --cmd uv uv; pipz install --cmd rich rich-cli'
+ctnr_run -u mkdir -p /home/${user}/.local/share/zsh/site-functions
+# shellcheck disable=SC2088
+ctnr_run -u sh -c '~/.local/bin/uv generate-shell-completion zsh >~/.local/share/zsh/site-functions/_uv'
 
 # Install standalone vpy script, for simpler shebangs
-ctnr_run -u mkdir -p /home/${user}/.local/bin
 ctnr_run -u zsh -ic 'zpy mkbin vpy ~/.local/bin/vpy'
 
 # Set aliases
