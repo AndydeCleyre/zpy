@@ -1,5 +1,5 @@
 babel==2.16.0             # via mkdocs-material
-certifi==2024.8.30        # via requests
+certifi==2024.12.14       # via requests
 charset-normalizer==3.4.0  # via requests
 click==8.1.7              # via mkdocs
 colorama==0.4.6           # via mkdocs-material
