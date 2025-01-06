@@ -2,6 +2,14 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- Ensure Zsh is used for fzf/skim preview commands, even with ``SHELL`` unset (or set to something other than Zsh)
+
 0.3.12
 ======
 
