@@ -2,6 +2,14 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- Export SHELL parameter in containers, at least fixing fzf previews on Alpine
+
 0.3.12
 ======
 

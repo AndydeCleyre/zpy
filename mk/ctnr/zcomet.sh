@@ -91,6 +91,7 @@ typeset -U fpath=(~/.local/share/zsh/site-functions \$fpath)
 typeset -U path=(~/.local/bin \$path)
 precmd () { rehash }
 zstyle ':completion:*:*:*:*:*' menu select
+export SHELL==zsh
 
 # Plugins:
 . ~/.zcomet/bin/zcomet.zsh
