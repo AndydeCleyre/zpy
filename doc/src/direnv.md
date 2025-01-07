@@ -58,7 +58,7 @@ please open an issue or discussion on GitHub.
 
     ```console
     $ touch mise.local.toml
-    $ mise config set -f mise.local.toml env._.python.venv "{{exec(command='venvs_path')}}/venv"
+    $ mise cfg set -E local env._.python.venv "{{exec(command='venvs_path')}}/venv"
     ```
 
 === "direnv"
