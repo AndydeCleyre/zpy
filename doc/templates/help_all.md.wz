@@ -7,81 +7,99 @@
 
 ## Environment Activation
 
-=== "`envin`"
+/// tab | `envin`
 
-    ```shell
-    @zpy_help('envin', indentation=4)
-    ```
+```shell
+@zpy_help('envin')
+```
 
-=== "`activate`"
+///
 
-    @for func in ('activate', 'a8'):
-    ```shell
-    @zpy_help(func, indentation=4)
-    ```
+/// tab | `activate`
 
-    @end\
+@for func in ('activate', 'a8'):
+```shell
+@zpy_help(func)
+```
 
-=== "`deactivate`"
+@end\
 
-    @for func in ('envout', 'da8'):
-    ```shell
-    @zpy_help(func, indentation=4)
-    ```
+///
 
-    @end\
+/// tab | `deactivate`
+
+@for func in ('envout', 'da8'):
+```shell
+@zpy_help(func)
+```
+
+@end\
+
+///
 
 ## Add, Compile, Sync
 
-=== "Add[, Compile[, Sync]]"
+/// tab | Add[, Compile[, Sync]]
 
-    @for func in ('pipa', 'pipac', 'pipacs', 'pypc'):
-    ```shell
-    @zpy_help(func, indentation=4)
-    ```
+@for func in ('pipa', 'pipac', 'pipacs', 'pypc'):
+```shell
+@zpy_help(func)
+```
 
-    @end\
+@end\
 
-=== "Compile[, Sync]"
+///
 
-    @for func in ('pipc', 'pipcs', 'pipup'):
-    ```shell
-    @zpy_help(func, indentation=4)
-    ```
+/// tab | Compile[, Sync]
 
-    @end\
+@for func in ('pipc', 'pipcs', 'pipup'):
+```shell
+@zpy_help(func)
+```
 
-=== "Sync"
+@end\
 
-    ```shell
-    @zpy_help('pips', indentation=4)
-    ```
+///
+
+/// tab | Sync
+
+```shell
+@zpy_help('pips')
+```
+
+///
 
 ## Launch Helpers
 
 @for func in ('vpyshebang', 'vrun', 'vpy', 'vlauncher'):
-=== "`@func`"
+/// tab | `@func`
 
-    ```shell
-    @zpy_help(func, indentation=4)
-    ```
+```shell
+@zpy_help(func)
+```
+
+///
 
 @end\
 
-=== "`zpy mkbin`"
+/// tab | `zpy mkbin`
 
-    ```shell
-    @zpy_help('mkbin', indentation=4)
-    ```
+```shell
+@zpy_help('mkbin')
+```
+
+///
 
 ## Informational
 
 @for func in ('venvs_path', 'reqshow', 'pipcheckold', 'whichpyproj'):
-=== "`@func`"
+/// tab | `@func`
 
-    ```shell
-    @zpy_help(func, indentation=4)
-    ```
+```shell
+@zpy_help(func)
+```
+
+///
 
 @end\
 
@@ -92,33 +110,41 @@
 ```
 
 @for func in ('install', 'uninstall', 'upgrade', 'list', 'inject', 'reinstall', 'cd', 'runpip', 'runpkg'):
-=== "`@func`"
+/// tab | `@func`
 
-    ```shell
-    @zpy_help(f"pipz {func}", indentation=4)
-    ```
+```shell
+@zpy_help(f"pipz {func}")
+```
+
+///
 
 @end\
 
 ## Editor Configuration
 
-=== "Sublime Text"
+/// tab | Sublime Text
 
-    ```shell
-    @zpy_help('vpysublp', indentation=4)
-    ```
+```shell
+@zpy_help('vpysublp')
+```
 
-=== "VS Code"
+///
 
-    ```shell
-    @zpy_help('vpyvscode', indentation=4)
-    ```
+/// tab | VS Code
 
-=== "Pyright (LSP)"
+```shell
+@zpy_help('vpyvscode')
+```
 
-    ```shell
-    @zpy_help('vpypyright', indentation=4)
-    ```
+///
+
+/// tab | Pyright (LSP)
+
+```shell
+@zpy_help('vpypyright')
+```
+
+///
 
 ## Miscellany
 

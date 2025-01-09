@@ -1,8 +1,10 @@
 # Get started
 
-!!! tip
+/// tip
 
-    You can flip through these docs with `n` and `p`, or `.` and `,`.
+You can flip through these docs with `n` and `p`, or `.` and `,`.
+
+///
 
 ## Install locally
 
@@ -23,39 +25,47 @@ For now, let's just source it in the current session:
 % . ~/.zpy/zpy.plugin.zsh
 ```
 
-!!! tip
+/// tip
 
-    Everything zpy does will generally be much faster if uv is installed.
-    You can now install it with zpy's `pipz` command:
+Everything zpy does will generally be much faster if uv is installed.
+You can now install it with zpy's `pipz` command:
 
-    ```console
-    % pipz install uv
-    ```
+```console
+% pipz install uv
+```
+
+///
 
 ## Try it in a container, instead
 
 Using either podman or docker, launch a temporary container based on Ubuntu, Alpine, or Fedora:
 
-=== "Ubuntu"
+/// tab | Ubuntu
 
-    ```console
-    $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
-    $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
-    ```
+```console
+$ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
+$ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-ubuntu:master
+```
 
-=== "Alpine"
+///
 
-    ```console
-    $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-alpine:master
-    $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-alpine:master
-    ```
+/// tab | Alpine
 
-=== "Fedora"
+```console
+$ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-alpine:master
+$ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-alpine:master
+```
 
-    ```console
-    $ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-fedora:master
-    $ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-fedora:master
-    ```
+///
+
+/// tab | Fedora
+
+```console
+$ podman run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-fedora:master
+$ docker run --net=host -it --rm -e TERM=$TERM quay.io/andykluger/zpy-fedora:master
+```
+
+///
 
 ## Functions or Subcommands
 
