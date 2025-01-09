@@ -9,6 +9,10 @@ Changed
 -------
 
 - Ensure Zsh is used for fzf/skim preview commands, even with ``SHELL`` unset (or set to something other than Zsh)
+- Refresh docs:
+
+  - add mise hooks
+  - replace deprecated tabs and admonitions
 
 0.3.12
 ======
@@ -39,6 +43,7 @@ Changed
 - Remove useless double-zsh-invocation during fzf/skim preview
 - Exclude wheel from pipcheckold listings
 - Use new wheezy.template feature (``__args__``) to reduce shell-manipulation of JSON
+
   - If using the wheezy.template JSON-reading backend, upgrade it (``pipz upgrade wheezy.template``)!
 
 0.3.10
@@ -118,6 +123,7 @@ Changed
   -- It's been pip-tools' default for while already,
   and it's irrelevant to uv
 - Update container build scripts:
+
     - use newer base images
     - install uv and rich-cli
     - don't bother installing highlight and corresponding alias
