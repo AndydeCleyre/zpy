@@ -155,6 +155,22 @@ __ https://flit.readthedocs.io/en/latest/
 
 __ https://github.com/AndydeCleyre/zpy/issues
 
+Known Issues
+------------
+
+Functions ``pipacs``, ``pipac``, ``pipcs``, and ``pipc`` allow forwarding arguments directly
+to ``pip-compile``, or ``uv pip compile`` when ``uv`` is installed.
+
+There are currently two problems with this when ``uv`` is used:
+
+- Tab completion of those arguments, even when ``uv`` tab completions are installed, will fail.
+  If it bothers you, please add a 👍 on
+  [their existing issue](https://github.com/astral-sh/uv/issues/3249).
+- When the options passed are intended to override ones already passed internally,
+  the command will fail.
+  If this bothers you, please add a 👍 on
+  [their existing issue](https://github.com/astral-sh/uv/issues/3248).
+
 .. |repo| image:: https://img.shields.io/github/size/andydecleyre/zpy/zpy.plugin.zsh?logo=github&label=Code&color=blueviolet
    :alt: Plugin file size in bytes
    :target: https://github.com/andydecleyre/zpy
