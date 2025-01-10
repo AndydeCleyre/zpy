@@ -13,6 +13,8 @@ Changed
 
   - add mise hooks
   - replace deprecated tabs and admonitions
+  - use filename code block titles
+  - use newer pypc behavior for screenshot, replacing outdated gif
 
 0.3.12
 ======
