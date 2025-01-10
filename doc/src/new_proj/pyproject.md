@@ -23,6 +23,7 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "goodmod"
 authors = [{name = "andy", email = "andy@example.com"}]
+license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: MIT License"]
 dynamic = ["version", "description"]
 ```
@@ -34,7 +35,7 @@ we can populate it with entries from our `requirements.in` files:
 [venv] % pypc
 ```
 
-![Animated demo: pypc](https://github.com/AndydeCleyre/zpy/blob/assets/pypc.gif?raw=true)
+![Screenshot: pypc](https://raw.githubusercontent.com/AndydeCleyre/zpy/refs/heads/assets/pypc.png)
 
 The dependencies have been injected according to
 [PEP 621](https://www.python.org/dev/peps/pep-0621/),
