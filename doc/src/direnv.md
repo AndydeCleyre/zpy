@@ -19,12 +19,12 @@ so that we can easily call it from Bash.
 Assuming `~/.local/bin` is in your `PATH`, run
 
 ```console
-$ zpy mkbin venvs_path ~/.local/bin/
+% zpy mkbin venvs_path ~/.local/bin/
 ```
 
 Now you can add the following to your project's `mise.local.toml` (or `.mise.local.toml`):
 
-```toml
+```toml {title="mise.local.toml"}
 [env._.python]
 venv = "{{exec(command='venvs_path')}}/venv"
 ```
@@ -32,8 +32,8 @@ venv = "{{exec(command='venvs_path')}}/venv"
 This can also be done with commands:
 
 ```console
-$ touch mise.local.toml
-$ mise cfg set -E local env._.python.venv "{{exec(command='venvs_path')}}/venv"
+% touch mise.local.toml
+% mise cfg set -E local env._.python.venv "{{exec(command='venvs_path')}}/venv"
 ```
 
 ///
@@ -45,7 +45,7 @@ with the ability to call any zpy functions in your current shell.
 
 Within your project's `mise.local.toml` (or `.mise.local.toml`), add the following:
 
-```toml
+```toml {title="mise.local.toml"}
 [hooks.enter]
 shell = "zsh"
 script = "a8 {{config_root}}"                 # Only sync upon venv creation
@@ -67,15 +67,11 @@ making it the simplest tool to configure for this job.
 
 In any project folder, create the following two files:
 
-`.autoenv.zsh`:
-
-```zsh
+```zsh {title=".autoenv.zsh"}
 a8 ${0:h}
 ```
 
-`.autoenv_leave.zsh`:
-
-```zsh
+```zsh {title=".autoenv_leave.zsh"}
 if [[ $VIRTUAL_ENV ]]  envout
 ```
 
@@ -96,13 +92,13 @@ so that we can easily call them from Bash.
 Assuming `~/.local/bin` is in your `PATH`, run
 
 ```console
-$ zpy mkbin a8 ~/.local/bin/
-$ zpy mkbin venvs_path ~/.local/bin/
+% zpy mkbin a8 ~/.local/bin/
+% zpy mkbin venvs_path ~/.local/bin/
 ```
 
 Now define a Bash function within the file `~/.config/direnv/direnvrc`:
 
-```bash
+```bash {title="direnvrc"}
 layout_zpy () {
   a8
   export VIRTUAL_ENV="$(venvs_path)/venv"
@@ -111,9 +107,9 @@ layout_zpy () {
 }
 ```
 
-In any project folder, create `.envrc` containing:
+In any project folder, create an `.envrc` using the new layout:
 
-```bash
+```bash {title=".envrc"}
 layout zpy
 ```
 

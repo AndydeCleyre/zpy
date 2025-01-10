@@ -15,7 +15,7 @@ to generate a `pyproject.toml`:
 
 Our basic generated `pyproject.toml`, courtesy of `flit`:
 
-```toml
+```toml {title="pyproject.toml"}
 [build-system]
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"

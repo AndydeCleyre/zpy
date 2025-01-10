@@ -3,16 +3,16 @@
 If you've been using Zsh, you probably have completions already set up,
 either manually or with a framework.
 
-If not, at a minimum you'll want this in your `~/.zshrc`,
+If not, at a minimum you'll want this line in your `~/.zshrc`,
 somewhere before loading zpy:
 
-```shell
+```shell {title=".zshrc"}
 autoload -Uz compinit && compinit
 ```
 
 I'll also recommend:
 
-```shell
+```shell {title=".zshrc"}
 zstyle ':completion:*' menu select
 ```
 
