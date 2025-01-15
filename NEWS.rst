@@ -11,7 +11,7 @@ Changed
 - Ensure Zsh is used for fzf/skim preview commands, even with ``SHELL`` unset (or set to something other than Zsh)
 - Refresh docs:
 
-  - add mise hooks
+  - add mise hooks and combination methods
   - replace deprecated tabs and admonitions
   - use filename code block titles
   - use newer pypc behavior for screenshot, replacing outdated gif
