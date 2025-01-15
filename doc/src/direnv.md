@@ -48,14 +48,32 @@ Within your project's `mise.local.toml` (or `.mise.local.toml`), add the followi
 ```toml {title="mise.local.toml"}
 [hooks.enter]
 shell = "zsh"
-script = "a8 {{config_root}}"                 # Only sync upon venv creation
-# script = "cd {{config_root}}; envin; cd -"  # Sync every time
-# script = "cd {{config_root}}; envin local-requirements.txt; cd -"  # Sync to specific lockfile
+script = "a8 {{config_root}}"                            # Only sync upon venv creation
+# script = "cd {{config_root}}; envin; cd - >/dev/null"  # Sync every time
+# script = "cd {{config_root}}; envin local-requirements.txt; cd - >/dev/null"  # Sync to specific lockfile
 
 [hooks.leave]
 shell = "zsh"
 script = "envout"
 ```
+
+///
+
+/// tab | mise (combination)
+
+Yet another possibility is to use both mise's auto-activation *and* its hooks:
+
+```toml {title="mise.local.toml"}
+[env._.python]
+venv = "{{exec(command='venvs_path')}}/venv"
+
+[hooks.enter]
+shell = "zsh"
+script = "pips {{config_root}}/dev-requirements.txt"
+```
+
+In this example, mise's Python plugin takes care of activating and deactivating the environment,
+while the hook script calls `pips` to sync the environment to `dev-requirements.txt`.
 
 ///
 
