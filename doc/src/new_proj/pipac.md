@@ -38,9 +38,11 @@ pipac [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
 
 ---
 
-!!! tip "Tips"
+/// tip | Tips
 
-    - One input file can "include" another input or output file,
-      if one of its lines is `-r PATH/TO/REQSFILE`
-    - Similarly, the allowable versions of packages can be "constrained" with
-      `-c PATH/TO/REQUIREMENTS.TXT`
+- One input file can "include" another input or output file,
+  if one of its lines is `-r PATH/TO/REQSFILE`
+- Similarly, the allowable versions of packages can be "constrained" with
+  `-c PATH/TO/REQUIREMENTS.TXT`
+
+///

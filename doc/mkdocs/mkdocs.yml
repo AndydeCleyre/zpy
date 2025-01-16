@@ -6,11 +6,11 @@ repo_url: https://github.com/andydecleyre/zpy
 docs_dir: ../src
 # site_dir:
 markdown_extensions:
-  - admonition
   - footnotes
   - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
+  - pymdownx.blocks.admonition
+  - pymdownx.blocks.tab:
+      alternate_style: True
 plugins:
   - privacy
 theme:

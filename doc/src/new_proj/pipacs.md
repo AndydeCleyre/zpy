@@ -54,18 +54,20 @@ pipacs [-c <category>] [-h] <pkgspec>... [-- <pip-compile-arg>...]
 
 ---
 
-!!! tip
+/// tip
 
-    When a zpy function internally calls `pip-compile` or `uv pip compile`,
-    it provides these flags by default:
-    ```shell
-    --no-header --annotation-style=line --strip-extras --allow-unsafe
-    ```
-    You can *add* `pip-compile` flags in a particular instance using the double dash syntax, like:
-    ```console
-    % pipc -- --no-annotate --verbose
-    ```
-    You can also *replace* those default flags for the current shell (or in your `~/.zshrc`) using `zstyle`, like:
-    ```console
-    % zstyle ':zpy:*' pip-compile-args --header --annotation-style=split
-    ```
+When a zpy function internally calls `pip-compile` or `uv pip compile`,
+it provides these flags by default:
+```shell
+--no-header --annotation-style=line --strip-extras --allow-unsafe
+```
+You can *add* `pip-compile` flags in a particular instance using the double dash syntax, like:
+```console
+% pipc -- --no-annotate --verbose
+```
+You can also *replace* those default flags for the current shell (or in your `~/.zshrc`) using `zstyle`, like:
+```console
+% zstyle ':zpy:*' pip-compile-args --header --annotation-style=split
+```
+
+///

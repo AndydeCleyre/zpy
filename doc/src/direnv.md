@@ -7,87 +7,136 @@ Here's how to configure them to do so in a zpy-friendly way.
 If you notice room for improvement, or your favorite tool is missing,
 please open an issue or discussion on GitHub.
 
-=== "zsh-autoenv"
+/// tab | mise
 
-    [zsh-autoenv](https://github.com/Tarrasch/zsh-autoenv)
-    runs any Zsh code you want in your current shell,
-    making it the simplest tool to configure for this job.
+//// tab | built-in activation
 
-    In any project folder, create the following two files:
+[mise](https://mise.jdx.dev/) supports
+[automatic venv activation](https://mise.jdx.dev/lang/python.html#automatic-virtualenv-activation),
+so we can configure the venv location to match zpy's.
 
-    `.autoenv.zsh`:
+---
 
-    ```zsh
-    a8 ${0:h}
-    ```
+Let's create a self-contained script for `venvs_path`,
+so that we can easily call it from Bash.
 
-    `.autoenv_leave.zsh`:
+Assuming `~/.local/bin` is in your `PATH`, run
 
-    ```zsh
-    if [[ $VIRTUAL_ENV ]]  envout
-    ```
+```console
+% zpy mkbin venvs_path ~/.local/bin/
+```
 
-    The zero in `${0:h}` is the path of the `.autoenv.zsh` file,
-    and the `:h` expansion gets that path's parent.
-    This ensures the proper project folder is used,
-    even if you're activating the script by entering a deeper subdirectory.
+---
 
-=== "mise"
+Now you can add the following to your project's `mise.local.toml` (or `.mise.local.toml`):
 
-    [mise](https://mise.jdx.dev/) supports
-    [automatic venv activation](https://mise.jdx.dev/lang/python.html#automatic-virtualenv-activation),
-    so we can configure the venv location to match zpy's.
+```toml {title="mise.local.toml"}
+[env._.python]
+venv = "{{exec(command='venvs_path')}}/venv"
+```
 
-    Let's create a self-contained script for `venvs_path`,
-    so that we can easily call it from Bash.
+This can also be done with commands:
 
-    Assuming `~/.local/bin` is in your `PATH`, run
+```console
+% touch mise.local.toml
+% mise cfg set -E local env._.python.venv "{{exec(command='venvs_path')}}/venv"
+```
 
-    ```console
-    $ zpy mkbin venvs_path ~/.local/bin/
-    ```
+////
 
-    Now you can add the following to your project's `mise.local.toml`:
+//// tab | hooks
 
-    ```toml
-    [env._.python]
-    venv = "{{exec(command='venvs_path')}}/venv"
-    ```
+Alternatively you can use mise's hooks for more control,
+with the ability to call any zpy functions in your current shell.
 
-    This can also be done with commands:
+Within your project's `mise.local.toml` (or `.mise.local.toml`), add the following:
 
-    ```console
-    $ touch mise.local.toml
-    $ mise config set -f mise.local.toml env._.python.venv "{{exec(command='venvs_path')}}/venv"
-    ```
+```toml {title="mise.local.toml"}
+[hooks.enter]
+shell = "zsh"
+script = "a8 {{config_root}}"                            # Only sync upon venv creation
+# script = "cd {{config_root}}; envin; cd - >/dev/null"  # Sync every time
+# script = "cd {{config_root}}; envin local-requirements.txt; cd - >/dev/null"  # Sync to specific lockfile
 
-=== "direnv"
+[hooks.leave]
+shell = "zsh"
+script = "envout"
+```
 
-    [direnv](https://github.com/direnv/direnv/)
-    runs Bash (not Zsh) and exports variables.
-    We'll create a self-contained script for each of `a8` and `venvs_path`,
-    so that we can easily call them from Bash.
+////
 
-    Assuming `~/.local/bin` is in your `PATH`, run
+//// tab | activation + hooks combination (suggested)
 
-    ```console
-    $ zpy mkbin a8 ~/.local/bin/
-    $ zpy mkbin venvs_path ~/.local/bin/
-    ```
+Yet another possibility is to use both mise's auto-activation *and* its hooks:
 
-    Now define a Bash function within the file `~/.config/direnv/direnvrc`:
+```toml {title="mise.local.toml"}
+[env._.python]
+venv = "{{exec(command='venvs_path')}}/venv"
 
-    ```bash
-    layout_zpy () {
-      a8
-      export VIRTUAL_ENV="$(venvs_path)/venv"
-      PATH_add "$VIRTUAL_ENV/bin"
-      export VENV_ACTIVE=1
-    }
-    ```
+[hooks.enter]
+shell = "zsh"
+script = "pips {{config_root}}/dev-requirements.txt"
+```
 
-    In any project folder, create `.envrc`:
+In this example, mise's Python plugin takes care of activating and deactivating the environment,
+while the hook script calls `pips` to sync the environment to `dev-requirements.txt`.
 
-    ```bash
-    layout zpy
-    ```
+////
+
+///
+
+/// tab | zsh-autoenv
+
+[zsh-autoenv](https://github.com/Tarrasch/zsh-autoenv)
+sources any Zsh code you want in your current shell,
+making it the simplest tool to configure for this job.
+
+In any project folder, create the following two files:
+
+```zsh {title=".autoenv.zsh"}
+a8 ${0:h}
+```
+
+```zsh {title=".autoenv_leave.zsh"}
+if [[ $VIRTUAL_ENV ]]  envout
+```
+
+The zero in `${0:h}` is the path of the `.autoenv.zsh` file,
+and the `:h` expansion gets that path's parent.
+This ensures the proper project folder is used,
+even if you're activating the script by entering a deeper subdirectory.
+
+///
+
+/// tab | direnv
+
+[direnv](https://github.com/direnv/direnv/)
+runs Bash (not Zsh) and exports variables.
+We'll create a self-contained script for each of `a8` and `venvs_path`,
+so that we can easily call them from Bash.
+
+Assuming `~/.local/bin` is in your `PATH`, run
+
+```console
+% zpy mkbin a8 ~/.local/bin/
+% zpy mkbin venvs_path ~/.local/bin/
+```
+
+Now define a Bash function within the file `~/.config/direnv/direnvrc`:
+
+```bash {title="direnvrc"}
+layout_zpy () {
+  a8
+  export VIRTUAL_ENV="$(venvs_path)/venv"
+  PATH_add "$VIRTUAL_ENV/bin"
+  export VENV_ACTIVE=1
+}
+```
+
+In any project folder, create an `.envrc` using the new layout:
+
+```bash {title=".envrc"}
+layout zpy
+```
+
+///

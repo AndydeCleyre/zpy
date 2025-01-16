@@ -5,139 +5,179 @@ download `zpy.plugin.zsh` and source it in your `.zshrc`.
 
 You might use `git`, `wget`, or `curl`:
 
-=== "`git`"
+/// tab | `git`
 
-    ```console
-    % git clone https://github.com/andydecleyre/zpy ~/.zpy
-    % print ". ~/.zpy/zpy.plugin.zsh" >>~/.zshrc
-    ```
+```console
+% git clone https://github.com/andydecleyre/zpy ~/.zpy
+% print ". ~/.zpy/zpy.plugin.zsh" >>~/.zshrc
+```
 
-=== "`wget`"
+///
 
-    ```console
-    % wget -O ~/.zpy.plugin.zsh https://github.com/AndydeCleyre/zpy/raw/master/zpy.plugin.zsh
-    % print ". ~/.zpy.plugin.zsh" >>~/.zshrc
-    ```
+/// tab | `wget`
 
-=== "`curl`"
+```console
+% wget -O ~/.zpy.plugin.zsh https://github.com/AndydeCleyre/zpy/raw/master/zpy.plugin.zsh
+% print ". ~/.zpy.plugin.zsh" >>~/.zshrc
+```
 
-    ```console
-    % curl -Lo ~/.zpy.plugin.zsh https://github.com/AndydeCleyre/zpy/raw/master/zpy.plugin.zsh
-    % print ". ~/.zpy.plugin.zsh" >>~/.zshrc
-    ```
+///
+
+/// tab | `curl`
+
+```console
+% curl -Lo ~/.zpy.plugin.zsh https://github.com/AndydeCleyre/zpy/raw/master/zpy.plugin.zsh
+% print ". ~/.zpy.plugin.zsh" >>~/.zshrc
+```
+
+///
 
 or install it with a plugin manager:
 
-=== "Oh My Zsh"
+/// tab | Oh My Zsh
 
-    Add `zpy` to your `plugins` array in `~/.zshrc`, and
+Add `zpy` to your `plugins` array in `~/.zshrc`, and
 
-    ```console
-    % git clone https://github.com/andydecleyre/zpy $ZSH_CUSTOM/plugins/zpy
-    ```
+```console
+% git clone https://github.com/andydecleyre/zpy $ZSH_CUSTOM/plugins/zpy
+```
 
-=== "zcomet"
+///
 
-    Put `zcomet load andydecleyre/zpy` in `~/.zshrc` (between `. /path/to/zcomet.zsh` and `zcomet compinit`)
+/// tab | zcomet
 
-=== "Zim"
+Put `zcomet load andydecleyre/zpy` in `~/.zshrc` (between `. /path/to/zcomet.zsh` and `zcomet compinit`)
 
-    ```console
-    % print zmodule andydecleyre/zpy >>~/.zimrc
-    % zimfw install
-    ```
+///
 
-=== "yadm"
+/// tab | Zim
 
-    ```console
-    % yadm submodule add git@github.com:andydecleyre/zpy ~/.zpy
-    % print ". ~/.zpy/zpy.plugin.zsh" >>~/.zshrc
-    ```
+```console
+% print zmodule andydecleyre/zpy >>~/.zimrc
+% zimfw install
+```
 
-=== "Zinit"
+///
 
-    ```console
-    % print zinit light andydecleyre/zpy >>~/.zshrc
-    ```
+/// tab | yadm
 
-=== "Zsh for Humans"
+```console
+% yadm submodule add git@github.com:andydecleyre/zpy ~/.zpy
+% print ". ~/.zpy/zpy.plugin.zsh" >>~/.zshrc
+```
 
-    Add to `~/.zshrc`:
+///
 
-    - `z4h install AndydeCleyre/zpy` (before `z4h init`)
-    - `z4h load AndydeCleyre/zpy` (after `z4h init`)
+/// tab | Zinit
 
-=== "antibody"
+```console
+% print zinit light andydecleyre/zpy >>~/.zshrc
+```
 
-    ```console
-    % print antibody bundle andydecleyre/zpy >>~/.zshrc
-    ```
+///
 
-=== "antidote"
+/// tab | Zsh for Humans
 
-    ```console
-    % print andydecleyre/zpy >>~/.zsh_plugins.txt
-    ```
+Add to `~/.zshrc`:
 
-=== "Antigen"
+- `z4h install AndydeCleyre/zpy` (before `z4h init`)
+- `z4h load AndydeCleyre/zpy` (after `z4h init`)
 
-    Put `antigen bundle andydecleyre/zpy` in your `~/.zshrc`, before `antigen apply`.
+///
 
-=== "Prezto"
+/// tab | antibody
 
-    Add `zpy` to your pmodule list in `~/.zpreztorc`, and
+```console
+% print antibody bundle andydecleyre/zpy >>~/.zshrc
+```
 
-    ```console
-    % git clone https://github.com/andydecleyre/zpy $ZPREZTODIR/modules/zpy
-    ```
+///
 
-=== "Sheldon"
+/// tab | antidote
 
-    ```console
-    $ sheldon add zpy --github andydecleyre/zpy
-    ```
+```console
+% print andydecleyre/zpy >>~/.zsh_plugins.txt
+```
 
-=== "zgen"
+///
 
-    Put `zgen load andydecleyre/zpy` in the plugin section of your `~/.zshrc`, then
+/// tab | Antigen
 
-    ```console
-    % zgen reset
-    ```
+Put `antigen bundle andydecleyre/zpy` in your `~/.zshrc`, before `antigen apply`.
 
-=== "zgenom"
+///
 
-    Put `zgenom load andydecleyre/zpy` in the plugin section of your `~/.zshrc`, then
+/// tab | Prezto
 
-    ```console
-    % zgenom reset
-    ```
+Add `zpy` to your pmodule list in `~/.zpreztorc`, and
 
-=== "znap"
+```console
+% git clone https://github.com/andydecleyre/zpy $ZPREZTODIR/modules/zpy
+```
 
-    ```console
-    % print znap source andydecleyre/zpy >>~/.zshrc
-    ```
+///
 
-=== "zplug"
+/// tab | Sheldon
 
-    Put `zplug "andydecleyre/zpy"` in `~/.zshrc` (between `. ~/.zplug/init.zsh` and `zplug load`), then
+```console
+$ sheldon add zpy --github andydecleyre/zpy
+```
 
-    ```console
-    % zplug install; zplug load
-    ```
+///
 
-=== "zpm"
+/// tab | zgen
 
-    ```console
-    % print zpm load andydecleyre/zpy >>~/.zshrc
-    % zpm clean
-    ```
+Put `zgen load andydecleyre/zpy` in the plugin section of your `~/.zshrc`, then
 
-!!! tip
+```console
+% zgen reset
+```
 
-    Don't use a plugin manager but want to try one now?
-    I suggest [zcomet](https://github.com/agkozak/zcomet).
+///
+
+/// tab | zgenom
+
+Put `zgenom load andydecleyre/zpy` in the plugin section of your `~/.zshrc`, then
+
+```console
+% zgenom reset
+```
+
+///
+
+/// tab | znap
+
+```console
+% print znap source andydecleyre/zpy >>~/.zshrc
+```
+
+///
+
+/// tab | zplug
+
+Put `zplug "andydecleyre/zpy"` in `~/.zshrc` (between `. ~/.zplug/init.zsh` and `zplug load`), then
+
+```console
+% zplug install; zplug load
+```
+
+///
+
+/// tab | zpm
+
+```console
+% print zpm load andydecleyre/zpy >>~/.zshrc
+% zpm clean
+```
+
+///
+
+/// tip
+
+Don't use a plugin manager but want to try one now?
+I suggest [zcomet](https://github.com/agkozak/zcomet).
+
+///
 
 After restarting your shell,
 it is recommended to install [uv](https://github.com/astral-sh/uv/):

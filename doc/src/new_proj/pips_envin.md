@@ -47,9 +47,11 @@ So how do they differ?
 
 ### Dependency Groups
 
-!!! info "In other words"
+/// admonition | In other words
 
-    `<category>-requirements.txt`
+`<category>-requirements.txt`
+
+///
 
 - `activate`, when syncing at all, *always* syncs according to *all* `requirements.txt` files
 - `envin` syncs according to *all* `requirements.txt` files *by default*,

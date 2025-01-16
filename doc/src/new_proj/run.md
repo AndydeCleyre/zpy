@@ -51,9 +51,8 @@ For something similar and more flexible, see [`vrun` below](`run.md#vrun`).
 
 ```console
 % vpyshebang do_thing.py
-% cat do_thing.py
 ```
-```python
+```python {title="do_thing.py"}
 #!/home/andy/.local/share/venvs/3f6372258375d0a2f18efd20d84fc2b5/venv/bin/python
 #!/usr/bin/env python3
 import bs4
@@ -102,9 +101,8 @@ for running a command in a given project's activated venv:
 
 ```console
 % vlauncher ~/newproj 'which python' start.sh
-% cat start.sh
 ```
-```shell
+```shell {title="start.sh"}
 #!/bin/sh -e
 . /home/andy/.local/share/venvs/3f6372258375d0a2f18efd20d84fc2b5/venv/bin/activate
 exec which python $@
