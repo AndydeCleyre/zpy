@@ -7,11 +7,15 @@ Here's how to configure them to do so in a zpy-friendly way.
 If you notice room for improvement, or your favorite tool is missing,
 please open an issue or discussion on GitHub.
 
-/// tab | mise (built-in activation)
+/// tab | mise
+
+//// tab | built-in activation
 
 [mise](https://mise.jdx.dev/) supports
 [automatic venv activation](https://mise.jdx.dev/lang/python.html#automatic-virtualenv-activation),
 so we can configure the venv location to match zpy's.
+
+---
 
 Let's create a self-contained script for `venvs_path`,
 so that we can easily call it from Bash.
@@ -21,6 +25,8 @@ Assuming `~/.local/bin` is in your `PATH`, run
 ```console
 % zpy mkbin venvs_path ~/.local/bin/
 ```
+
+---
 
 Now you can add the following to your project's `mise.local.toml` (or `.mise.local.toml`):
 
@@ -36,9 +42,9 @@ This can also be done with commands:
 % mise cfg set -E local env._.python.venv "{{exec(command='venvs_path')}}/venv"
 ```
 
-///
+////
 
-/// tab | mise (hooks)
+//// tab | hooks
 
 Alternatively you can use mise's hooks for more control,
 with the ability to call any zpy functions in your current shell.
@@ -57,9 +63,9 @@ shell = "zsh"
 script = "envout"
 ```
 
-///
+////
 
-/// tab | mise (combination)
+//// tab | activation + hooks combination (suggested)
 
 Yet another possibility is to use both mise's auto-activation *and* its hooks:
 
@@ -74,6 +80,8 @@ script = "pips {{config_root}}/dev-requirements.txt"
 
 In this example, mise's Python plugin takes care of activating and deactivating the environment,
 while the hook script calls `pips` to sync the environment to `dev-requirements.txt`.
+
+////
 
 ///
 
