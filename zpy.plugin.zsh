@@ -2939,9 +2939,9 @@ _.zpy_ui_pipz () {
     zf_mkdir -p $folder
     if [[ $1 == --refresh ]] || [[ ! -r $txt ]] {
         if (( $+commands[wget] )) {
-            wget -qO $json https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json || return
+            wget -qO $json https://hugovk.github.io/top-pypi-packages/top-pypi-packages.min.json || return
         } else {
-            curl -s -o $json https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json || return
+            curl -s -o $json https://hugovk.github.io/top-pypi-packages/top-pypi-packages.min.json || return
         }
         if (( $+commands[jq] )) {
             jq -r '.rows[].project' <$json >$txt
