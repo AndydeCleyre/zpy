@@ -2,6 +2,14 @@
 News
 ====
 
+Unreleased
+==========
+
+Changed
+-------
+
+- Update URL for top list of PyPI packages (thanks @hugovk !)
+
 0.3.13
 ======
 
