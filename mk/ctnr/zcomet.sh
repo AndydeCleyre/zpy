@@ -23,7 +23,7 @@ pkgs=zsh  # ca-certificates git less sudo wget
 fat="/home/${user}/.zcomet/repos/*/*/.git"
 case $distro in
   fedora)
-    basetag=${2:-41}
+    basetag=${2:-42}
     pkgs="$pkgs git-core"
     fat="$fat /var/cache/* /var/log/* /usr/lib*/python3.*/__pycache__"
     alias ctnr_pkg="ctnr_run dnf -yq --setopt=install_weak_deps=False"
@@ -41,7 +41,7 @@ case $distro in
     alias ctnr_mkuser="ctnr_run adduser -D -s /bin/zsh"
   ;;
   ubuntu)
-    basetag=${2:-24.10}
+    basetag=${2:-25.04}
     pkgs="$pkgs ca-certificates less git sudo wget"
     fat="$fat /var/cache/* /var/lib/apt/lists/*"
     alias ctnr_pkg="ctnr_run apt -yqq --no-install-recommends"
