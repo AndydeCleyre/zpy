@@ -99,6 +99,7 @@ if [ "$zpy_branch" = --local ]; then
   printf '%s\n' '. ~/zpy.plugin.zsh' \
   | ctnr_append -u /home/${user}/.zshrc
 else
+  # keep an eye on: https://github.com/agkozak/zcomet/issues/24
   ctnr_run -u sed -Ei \
     "s:^(zcomet compinit( .*)?):zcomet load andydecleyre/zpy@${zpy_branch}\n\1:" \
     /home/${user}/.zshrc
