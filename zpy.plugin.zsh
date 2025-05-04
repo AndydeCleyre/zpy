@@ -17,7 +17,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 ## Installing an app via pipz puts requirements.{in,txt} in $ZPY_PIPZ_PROJECTS/<appname>
 ## and executables in $ZPY_PIPZ_BINS
 
-# Optional launcher for all zpy functions as subcommands
+# Optional launcher for all zpy functions as subcommands (try: zpy help)
 .zpy_ui_zpy () {  # <function> [<function-arg>...]
     emulate -L zsh
 
@@ -43,7 +43,7 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
         rEpLy=($subcmds)
         return
     ;;
-    --help)
+    --help|'')
         .zpy_ui_help ${0[9,-1]}
         return
     ;;
