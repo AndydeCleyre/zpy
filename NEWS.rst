@@ -9,6 +9,7 @@ Changed
 -------
 
 - Update URL for top list of PyPI packages (thanks @hugovk !)
+- pypc: Strip any leading white space from reqs
 
 0.3.13
 ======
