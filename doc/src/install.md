@@ -8,7 +8,7 @@ You might use `git`, `wget`, or `curl`:
 /// tab | `git`
 
 ```console
-% git clone https://github.com/andydecleyre/zpy ~/.zpy
+% git clone --single-branch https://github.com/andydecleyre/zpy ~/.zpy
 % print ". ~/.zpy/zpy.plugin.zsh" >>~/.zshrc
 ```
 
@@ -39,7 +39,7 @@ or install it with a plugin manager:
 Add `zpy` to your `plugins` array in `~/.zshrc`, and
 
 ```console
-% git clone https://github.com/andydecleyre/zpy $ZSH_CUSTOM/plugins/zpy
+% git clone --single-branch https://github.com/andydecleyre/zpy $ZSH_CUSTOM/plugins/zpy
 ```
 
 ///
@@ -53,7 +53,7 @@ Put `zcomet load andydecleyre/zpy` in `~/.zshrc` (between `. /path/to/zcomet.zsh
 /// tab | Zim
 
 ```console
-% print zmodule andydecleyre/zpy >>~/.zimrc
+% print zmodule andydecleyre/zpy --use degit >>~/.zimrc
 % zimfw install
 ```
 
@@ -62,7 +62,7 @@ Put `zcomet load andydecleyre/zpy` in `~/.zshrc` (between `. /path/to/zcomet.zsh
 /// tab | yadm
 
 ```console
-% yadm submodule add git@github.com:andydecleyre/zpy ~/.zpy
+% yadm submodule add https://github.com/andydecleyre/zpy ~/.zpy
 % print ". ~/.zpy/zpy.plugin.zsh" >>~/.zshrc
 ```
 
@@ -70,8 +70,18 @@ Put `zcomet load andydecleyre/zpy` in `~/.zshrc` (between `. /path/to/zcomet.zsh
 
 /// tab | Zinit
 
-```console
-% print zinit light andydecleyre/zpy >>~/.zshrc
+Add these lines to your `~/.zshrc` after loading `zinit`:
+
+```shell
+zinit ice depth=1
+zinit light andydecleyre/zpy
+```
+
+Ensure you have the following lines after loading plugins:
+
+```shell
+autoload -Uz compinit && compinit
+zinit cdreplay -q
 ```
 
 ///
@@ -80,8 +90,11 @@ Put `zcomet load andydecleyre/zpy` in `~/.zshrc` (between `. /path/to/zcomet.zsh
 
 Add to `~/.zshrc`:
 
-- `z4h install AndydeCleyre/zpy` (before `z4h init`)
-- `z4h load AndydeCleyre/zpy` (after `z4h init`)
+```shell
+z4h install AndydeCleyre/zpy  # before `z4h init`
+# ...
+z4h load AndydeCleyre/zpy  # after `z4h init`
+```
 
 ///
 
@@ -179,8 +192,10 @@ I suggest [zcomet](https://github.com/agkozak/zcomet).
 
 ///
 
-After restarting your shell,
-it is recommended to install [uv](https://github.com/astral-sh/uv/):
+The recommended backend is
+[uv](https://github.com/astral-sh/uv/).
+If you aren't using a distro package for that,
+you can install it with zpy itself:
 
 ```console
 % exec zsh
