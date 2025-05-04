@@ -1438,7 +1438,7 @@ def reqs_from_reqsin(reqsin):
             continue
         with suppress(AttributeError):
             reqs.append(
-                re.search(r'^(-\S+\s+)*([^#]+)', line).group(2).rstrip()
+                re.search(r'^(-\S+\s+)*([^#]+)', line).group(2).strip()
             )
     return sorted(set(r for r in reqs if r.strip() and r not in ('.',)))
 
