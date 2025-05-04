@@ -11,6 +11,7 @@ Changed
 - Update URL for top list of PyPI packages (thanks @hugovk !)
 - pypc: Strip any leading white space from reqs
 - zpy: print help when no args given
+- docs: installation: more --single-branch and shallow depth tips
 
 0.3.13
 ======
