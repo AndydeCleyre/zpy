@@ -12,7 +12,7 @@ markupsafe==3.0.2         # via jinja2, mkdocs
 mergedeep==1.3.4          # via mkdocs, mkdocs-get-deps
 mkdocs==1.6.1             # via -r requirements.in, mkdocs-material
 mkdocs-get-deps==0.2.0    # via mkdocs
-mkdocs-material==9.6.12   # via -r requirements.in
+mkdocs-material==9.6.13   # via -r requirements.in
 mkdocs-material-extensions==1.3.1  # via mkdocs-material
 packaging==25.0           # via mkdocs
 paginate==0.5.7           # via mkdocs-material
@@ -22,7 +22,7 @@ pygments==2.19.1          # via mkdocs-material
 pymdown-extensions==10.15  # via mkdocs-material
 python-dateutil==2.9.0.post0  # via ghp-import
 pyyaml==6.0.2             # via mkdocs, mkdocs-get-deps, pymdown-extensions, pyyaml-env-tag
-pyyaml-env-tag==0.1       # via mkdocs
+pyyaml-env-tag==1.0       # via mkdocs
 requests==2.32.3          # via mkdocs-material
 six==1.17.0               # via python-dateutil
 urllib3==2.4.0            # via requests
