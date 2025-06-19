@@ -7,7 +7,7 @@ colorama==0.4.6           # via mkdocs-material
 ghp-import==2.1.0         # via mkdocs
 idna==3.10                # via requests
 jinja2==3.1.6             # via mkdocs, mkdocs-material
-markdown==3.8             # via mkdocs, mkdocs-material, pymdown-extensions
+markdown==3.8.1           # via mkdocs, mkdocs-material, pymdown-extensions
 markupsafe==3.0.2         # via jinja2, mkdocs
 mergedeep==1.3.4          # via mkdocs, mkdocs-get-deps
 mkdocs==1.6.1             # via -r requirements.in, mkdocs-material
@@ -25,5 +25,5 @@ pyyaml==6.0.2             # via mkdocs, mkdocs-get-deps, pymdown-extensions, pyy
 pyyaml-env-tag==1.1       # via mkdocs
 requests==2.32.4          # via mkdocs-material
 six==1.17.0               # via python-dateutil
-urllib3==2.4.0            # via requests
+urllib3==2.5.0            # via requests
 watchdog==6.0.0           # via mkdocs
