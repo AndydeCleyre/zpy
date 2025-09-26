@@ -21,7 +21,7 @@ platformdirs==4.4.0       # via mkdocs-get-deps
 pygments==2.19.2          # via mkdocs-material
 pymdown-extensions==10.16.1  # via mkdocs-material
 python-dateutil==2.9.0.post0  # via ghp-import
-pyyaml==6.0.2             # via mkdocs, mkdocs-get-deps, pymdown-extensions, pyyaml-env-tag
+pyyaml==6.0.3             # via mkdocs, mkdocs-get-deps, pymdown-extensions, pyyaml-env-tag
 pyyaml-env-tag==1.1       # via mkdocs
 requests==2.32.5          # via mkdocs-material
 six==1.17.0               # via python-dateutil
