@@ -1,7 +1,7 @@
 # Full Reference
 
 ```shell
-# Optional launcher for all zpy functions as subcommands
+# Optional launcher for all zpy functions as subcommands (try: zpy help)
 zpy <function> [<function-arg>...]
 
 # Print description and arguments for all or specified functions.
@@ -16,7 +16,7 @@ zpy help [<zpy-function>...]
 # Activate the venv (creating if needed) for the current folder, and sync
 # its installed package set according to all found or specified requirements.txt files.
 # In other words: [create, ]activate, sync.
-# The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
+# The interpreter will be whatever 'python' refers to at time of venv creation, by default.
 # Pass --py to use another interpreter and named venv.
 envin [--py pypy|current] [<reqs-txt>...]
 ```

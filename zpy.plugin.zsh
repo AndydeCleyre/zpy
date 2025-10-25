@@ -916,15 +916,15 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 # Activate the venv (creating if needed) for the current folder, and sync
 # its installed package set according to all found or specified requirements.txt files.
 # In other words: [create, ]activate, sync.
-# The interpreter will be whatever 'python3' refers to at time of venv creation, by default.
+# The interpreter will be whatever 'python' refers to at time of venv creation, by default.
 # Pass --py to use another interpreter and named venv.
 .zpy_ui_envin () {  # [--py pypy|current] [<reqs-txt>...]
     emulate -L zsh
     if [[ $1 == --help ]] { .zpy_ui_help ${0[9,-1]}; return }
     rehash
 
-    local venv_name=venv venv_cmd=(python3 -m venv)
-    if (( $+commands[uv] ))  venv_cmd=(uv venv -q -p python3)
+    local venv_name=venv venv_cmd=(python -m venv)
+    if (( $+commands[uv] ))  venv_cmd=(uv venv -q -p python)
     if [[ $1 == --py ]] {
         local reply
         if ! { .zpy_argvenv $2 } { .zpy_ui_help ${0[9,-1]}; return 1 }
@@ -1525,7 +1525,7 @@ Path('''${newtoml}''').write_text(tomlkit.dumps(toml_data))
             jq --argjson val "$value" "${keypath}=\$val" "$jsonfile"
         )" >$jsonfile
     } else {
-        python3 -c "
+        python -c "
 from collections import defaultdict
 from json import loads, dumps
 from pathlib import Path
@@ -2265,9 +2265,9 @@ for pkg in pkgs:
         if ! [[ -d $venv ]] {
             rehash
             if (( $+commands[uv] )) {
-                uv venv -q -p python3 $venv
+                uv venv -q -p python $venv
             } else {
-                python3 -m venv $venv
+                python -m venv $venv
             }
         }
         zf_ln -sfn $projdir ${vpath}/project
@@ -2954,7 +2954,7 @@ _.zpy_ui_pipz () {
             )
             wheezy.template =(<<<${(F)template}) $json >$txt
         } else {
-            python3 -c "
+            python -c "
 from pathlib import Path
 from json import loads
 
