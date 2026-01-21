@@ -255,8 +255,9 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     unset REPLY
     [[ $1 ]] || return
     rehash
-
-    if (( $+commands[md5sum] )) {
+    if [[ "${1:P}" == "${ZPY_VENVS_HOME}"* ]] {
+        REPLY="${${1:P}##*/}"
+    } elif (( $+commands[md5sum] )) {
         REPLY="${$(md5sum =(<<<${1:P}))%% *}"
     } else {
         REPLY="$(md5 -qs ${1:P})"
@@ -845,7 +846,12 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
     local REPLY vpath venv
     .zpy_venvs_path || return
     vpath=$REPLY
-    venv=$vpath/$1; shift      # chomp <venv-name>
+
+    if [[ "${REPLY}" == "${ZPY_VENVS_HOME}"* ]] {
+        venv="$vpath/${1/#venv/venv-${${REPLY}##*/}}"; shift      # chomp <venv-name>
+    } else {
+        venv=$vpath/$1; shift      # chomp <venv-name>
+    }
 
     local reqstxts=()          # chomp [-- <reqs-txt>...]:
     local cmd_end=${@[(I)--]}
@@ -967,6 +973,11 @@ ZPY_PROCS=${${$(nproc 2>/dev/null):-$(sysctl -n hw.logicalcpu 2>/dev/null)}:-4}
 
     local venv
     .zpy_venvs_path $projdir || return
+
+    if [[ "${REPLY}" == "${ZPY_VENVS_HOME}"* ]] {
+        venv_name="${venv_name/#venv/venv-${${REPLY}##*/}}"
+    }
+
     venv=$REPLY/$venv_name
 
     local activator=$venv/bin/activate
