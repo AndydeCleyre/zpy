@@ -1466,7 +1466,7 @@ Path('''${newtoml}''').write_text(tomlkit.dumps(toml_data))
     "
 
     local diffout
-    if { diffout=$(diff -u -L 'Old pyproject.toml' $pyproject -L 'New pyproject.toml' $newtoml) } {
+    if { diffout=$(diff -U0 -L 'Old pyproject.toml' $pyproject -L 'New pyproject.toml' $newtoml) } {
         print -ru2 "No change"
     } else {
         .zpy_hlt diff <<<$diffout
@@ -1674,7 +1674,7 @@ jsonfile.write_text(dumps(data, indent=4))
         if [[ ! ${mapfile[$origtxt]##[[:space:]]#} ]]  continue
 
         label=${newtxt:a:h:h:t}/${newtxt:a:h:t}${${newtxt:a:h:t}:+/}${newtxt:t}
-        diffout=$(diff -wu -L $label $origtxt -L $label $newtxt)
+        diffout=$(diff -wU0 -L $label $origtxt -L $label $newtxt)
         if (( ? )) {
             .zpy_hlt diff <<<$diffout
         }
