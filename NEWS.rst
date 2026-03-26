@@ -2,6 +2,19 @@
 News
 ====
 
+Unreleased
+==========
+
+Fixed
+-----
+
+- pypc: preserve '#subdirectory=' markers
+
+Changed
+-------
+
+- Diff output is more minimal, omitting context lines
+
 0.3.15
 ======
 
@@ -10,7 +23,6 @@ Fixed
 
 - Due to a misunderstanding of uv's ``--python`` flag,
   a surprising and wrong Python interpreter could be used.
-
 
 0.3.14
 ======
