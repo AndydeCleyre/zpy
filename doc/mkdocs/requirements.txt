@@ -18,8 +18,8 @@ packaging==26.0           # via mkdocs
 paginate==0.5.7           # via mkdocs-material
 pathspec==1.0.4           # via mkdocs
 platformdirs==4.9.4       # via mkdocs-get-deps
-pygments==2.19.2          # via mkdocs-material
-pymdown-extensions==10.21  # via mkdocs-material
+pygments==2.20.0          # via mkdocs-material
+pymdown-extensions==10.21.2  # via mkdocs-material
 python-dateutil==2.9.0.post0  # via ghp-import
 pyyaml==6.0.3             # via mkdocs, mkdocs-get-deps, pymdown-extensions, pyyaml-env-tag
 pyyaml-env-tag==1.1       # via mkdocs
