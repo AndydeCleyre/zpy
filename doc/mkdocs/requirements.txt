@@ -2,7 +2,7 @@ babel==2.18.0             # via mkdocs-material
 backrefs==6.2             # via mkdocs-material
 certifi==2026.2.25        # via requests
 charset-normalizer==3.4.7  # via requests
-click==8.3.1              # via mkdocs
+click==8.3.2              # via mkdocs
 colorama==0.4.6           # via mkdocs-material
 ghp-import==2.1.0         # via mkdocs
 idna==3.11                # via requests
