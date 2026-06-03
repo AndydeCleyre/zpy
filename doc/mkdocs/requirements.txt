@@ -5,7 +5,7 @@ charset-normalizer==3.4.7  # via requests
 click==8.4.1              # via mkdocs
 colorama==0.4.6           # via mkdocs-material
 ghp-import==2.1.0         # via mkdocs
-idna==3.17                # via requests
+idna==3.18                # via requests
 jinja2==3.1.6             # via mkdocs, mkdocs-material
 markdown==3.10.2          # via mkdocs, mkdocs-material, pymdown-extensions
 markupsafe==3.0.3         # via jinja2, mkdocs
