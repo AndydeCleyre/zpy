@@ -1,2 +1,3 @@
-plumbum==1.10.0           # via -r requirements.in
+plumbum==2.0.0            # via -r requirements.in
+typing-extensions==4.15.0  # via plumbum
 wheezy-template==3.2.5    # via -r requirements.in
