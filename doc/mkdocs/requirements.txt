@@ -1,6 +1,6 @@
 babel==2.18.0             # via mkdocs-material
 backrefs==7.0             # via mkdocs-material
-certifi==2026.5.20        # via requests
+certifi==2026.6.17        # via requests
 charset-normalizer==3.4.7  # via requests
 click==8.4.1              # via mkdocs
 colorama==0.4.6           # via mkdocs-material
