@@ -1,5 +1,5 @@
 babel==2.18.0             # via mkdocs-material
-backrefs==8.0             # via mkdocs-material
+backrefs==8.1             # via mkdocs-material
 certifi==2026.7.22        # via requests
 charset-normalizer==3.5.2  # via requests
 click==8.5.0              # via mkdocs
@@ -19,7 +19,7 @@ paginate==0.5.7           # via mkdocs-material
 pathspec==1.1.1           # via mkdocs
 platformdirs==4.12.4      # via mkdocs-get-deps
 pygments==2.21.0          # via mkdocs-material
-pymdown-extensions==12.1  # via mkdocs-material
+pymdown-extensions==12.2  # via mkdocs-material
 python-dateutil==2.9.0.post0  # via ghp-import
 pyyaml==6.0.3             # via mkdocs, mkdocs-get-deps, pymdown-extensions, pyyaml-env-tag
 pyyaml-env-tag==1.1       # via mkdocs
